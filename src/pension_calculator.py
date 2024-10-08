@@ -143,6 +143,11 @@ def aplicar_ajuste_anticipacion_o_demora(tipo_jubilacion, meses_ajuste, porcenta
 
 # Función para calcular la pensión pública
 def calcular_pension_publica(salario_actual, annos_cotizados, meses_cotizados, df_annual_cpi, tipo_jubilacion, meses_ajuste, anno_jubilacion):
+    # Validación de años mínimos cotizados
+    if annos_cotizados < 15:
+        print("No tienes derecho a una pensión contributiva, ya que no has cotizado los 15 años mínimos requeridos.")
+        return 0.0
+
     bases_cotizacion = estimar_bases_cotizacion(salario_actual, annos_cotizados, meses_cotizados, df_annual_cpi)
     base_reguladora = calcular_base_reguladora(bases_cotizacion, anno_jubilacion)
     porcentaje_aplicado = aplicar_porcentaje_segun_annos_y_meses(annos_cotizados, meses_cotizados)
@@ -179,4 +184,5 @@ anno_jubilacion = datetime.date.today().year + (edad_jubilacion_deseada - edad_a
 
 # Calcular la pensión mensual
 pension_mensual = calcular_pension_publica(salario_actual, annos_cotizados, meses_cotizados, df_annual_cpi, tipo_jubilacion, meses_ajuste, anno_jubilacion)
-print(f"Pensión mensual estimada: {pension_mensual:.2f} €")
+if pension_mensual > 0:
+    print(f"Pensión mensual estimada: {pension_mensual:.2f} €")
