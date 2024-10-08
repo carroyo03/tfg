@@ -49,35 +49,41 @@ def estimar_tiempo_cotizado_simplificado():
     
     # Calcular años y meses cotizados
     delta = fecha_actual - fecha_inicio_trabajo
-    años_cotizados = delta.days // 365  # Convertir días a años
+    annos_cotizados = delta.days // 365  # Convertir días a años
     meses_cotizados = (delta.days % 365) // 30  # Convertir el resto de días en meses aproximadamente
 
-    return años_cotizados, meses_cotizados, fecha_nacimiento
+    return annos_cotizados, meses_cotizados, fecha_nacimiento
 
 # Función para calcular si es anticipación o demora en la jubilación
-def calcular_anos_anticipacion_o_demora(edad_actual, edad_jubilacion_deseada, edad_ordinaria=66):
+def calcular_annos_anticipacion_o_demora(edad_actual, edad_jubilacion_deseada, annos_cotizados):
+    # Edad ordinaria de jubilación según los años cotizados
+    if annos_cotizados >= 38.5:
+        edad_ordinaria = 65
+    else:
+        edad_ordinaria = 66.5
+    
     if edad_jubilacion_deseada < edad_ordinaria:
         # Caso de jubilación anticipada
-        return "anticipacion", edad_ordinaria - edad_jubilacion_deseada
+        return "anticipacion", int((edad_ordinaria - edad_jubilacion_deseada) * 12)
     elif edad_jubilacion_deseada > edad_ordinaria:
         # Caso de jubilación demorada
-        return "demora", edad_jubilacion_deseada - edad_ordinaria
+        return "demora", int((edad_jubilacion_deseada - edad_ordinaria) * 12)
     else:
         # Jubilación ordinaria
         return "ordinaria", 0
 
 # Función para estimar las bases de cotización ajustadas
-def estimar_bases_cotizacion(salario_actual, años_cotizados, meses_cotizados, df_annual_cpi):
+def estimar_bases_cotizacion(salario_actual, annos_cotizados, meses_cotizados, df_annual_cpi):
     bases_cotizacion = []
     ipc_ordenado = df_annual_cpi.sort_values(by='YEAR', ascending=True)
 
     # Definir un IPC promedio para los años anteriores a 1996
     ipc_promedio_pre_1996 = 2.5  # Asumimos un 2.5% de inflación anual antes de 1996
 
-    for i in range(años_cotizados):
-        año = datetime.date.today().year - i
-        if año >= 1996 and año in ipc_ordenado['YEAR'].values:
-            ipc_ajuste = 1 + (ipc_ordenado.loc[ipc_ordenado['YEAR'] == año, 'OBS_VALUE'].values[0] / 100)
+    for i in range(annos_cotizados):
+        anno = datetime.date.today().year - i
+        if anno >= 1996 and anno in ipc_ordenado['YEAR'].values:
+            ipc_ajuste = 1 + (ipc_ordenado.loc[ipc_ordenado['YEAR'] == anno, 'OBS_VALUE'].values[0] / 100)
         else:
             ipc_ajuste = 1 + (ipc_promedio_pre_1996 / 100)
         
@@ -87,28 +93,27 @@ def estimar_bases_cotizacion(salario_actual, años_cotizados, meses_cotizados, d
     # Ajustar los meses adicionales cotizados
     if meses_cotizados > 0:
         ipc_ajuste = 1 + (ipc_promedio_pre_1996 / 100)
-        base_ajustada = salario_actual * ipc_ajuste
+        base_ajustada = salario_actual * (ipc_ajuste ** (meses_cotizados / 12))  # Ajuste proporcional por meses
         bases_cotizacion.append(base_ajustada)
 
     return bases_cotizacion
 
 # Función para calcular la base reguladora
-def calcular_base_reguladora(bases_ajustadas, año_jubilacion):
+def calcular_base_reguladora(bases_ajustadas, anno_jubilacion):
     # Aplicar régimen dual (25 años o 29 años con exclusión de los 2 peores)
-    if año_jubilacion >= 2026:
-        # Suponemos que las bases ya están ordenadas, por lo tanto, evitamos ordenar nuevamente.
+    if anno_jubilacion >= 2026:
         bases_relevantes = sorted(bases_ajustadas[-29:])[:-2]  # Tomamos 29 años y excluimos los 2 peores
     else:
         bases_relevantes = bases_ajustadas[-25:] if len(bases_ajustadas) >= 25 else bases_ajustadas
     
     suma_bases = sum(bases_relevantes)
-    divisor = 350 if año_jubilacion < 2026 else len(bases_relevantes) * 14 / 12
+    divisor = 350 if anno_jubilacion < 2026 else len(bases_relevantes) * 14 / 12
     base_reguladora = suma_bases / divisor
     return base_reguladora
 
 # Aplicar el porcentaje según los años y meses cotizados
-def aplicar_porcentaje_segun_años_y_meses(años_cotizados, meses_cotizados):
-    total_meses = años_cotizados * 12 + meses_cotizados
+def aplicar_porcentaje_segun_annos_y_meses(annos_cotizados, meses_cotizados):
+    total_meses = annos_cotizados * 12 + meses_cotizados
     if total_meses >= 444:  # 37 años equivalen a 444 meses
         return 1.0  # 100%
     elif total_meses >= 180:  # Mínimo de 15 años equivalen a 180 meses
@@ -121,26 +126,29 @@ def aplicar_porcentaje_segun_años_y_meses(años_cotizados, meses_cotizados):
         return 0.5  # Si tiene al menos 15 años, mínimo el 50%
 
 # Función para calcular la reducción por jubilación anticipada o incremento por demora
-def aplicar_ajuste_anticipacion_o_demora(tipo_jubilacion, años_ajuste, porcentaje_aplicado, meses_ajuste):
+def aplicar_ajuste_anticipacion_o_demora(tipo_jubilacion, meses_ajuste, porcentaje_aplicado):
     if tipo_jubilacion == "anticipacion":
         # El coeficiente depende del total de meses de anticipación y años cotizados
-        coeficiente = 1.875 if años_ajuste >= 38.5 else 2.0  # En función de si ha cotizado más de 38.5 años
-        reduccion_total = coeficiente * meses_ajuste / 100
+        if meses_ajuste <= 24:
+            coeficiente = 2.0 / 100  # Para menos de 38.5 años cotizados
+        else:
+            coeficiente = 1.625 / 100  # Para más de 38.5 años cotizados
+        reduccion_total = coeficiente * meses_ajuste
         return max(0, porcentaje_aplicado * (1 - reduccion_total))  # Asegurar que no se reduzca por debajo de 0
     elif tipo_jubilacion == "demora":
-        incremento = 0.04  # Incremento del 4% por cada año adicional
-        return porcentaje_aplicado * (1 + incremento * años_ajuste)
+        incremento = 0.04 / 12  # Incremento del 4% anual dividido por cada mes adicional
+        return porcentaje_aplicado * (1 + incremento * meses_ajuste)
     else:
         return porcentaje_aplicado
 
 # Función para calcular la pensión pública
-def calcular_pension_publica(salario_actual, años_cotizados, meses_cotizados, df_annual_cpi, tipo_jubilacion, años_ajuste, meses_ajuste, año_jubilacion):
-    bases_cotizacion = estimar_bases_cotizacion(salario_actual, años_cotizados, meses_cotizados, df_annual_cpi)
-    base_reguladora = calcular_base_reguladora(bases_cotizacion, año_jubilacion)
-    porcentaje_aplicado = aplicar_porcentaje_segun_años_y_meses(años_cotizados, meses_cotizados)
+def calcular_pension_publica(salario_actual, annos_cotizados, meses_cotizados, df_annual_cpi, tipo_jubilacion, meses_ajuste, anno_jubilacion):
+    bases_cotizacion = estimar_bases_cotizacion(salario_actual, annos_cotizados, meses_cotizados, df_annual_cpi)
+    base_reguladora = calcular_base_reguladora(bases_cotizacion, anno_jubilacion)
+    porcentaje_aplicado = aplicar_porcentaje_segun_annos_y_meses(annos_cotizados, meses_cotizados)
 
     # Aplicar ajuste por anticipación o demora
-    porcentaje_aplicado = aplicar_ajuste_anticipacion_o_demora(tipo_jubilacion, años_ajuste, porcentaje_aplicado, meses_ajuste)
+    porcentaje_aplicado = aplicar_ajuste_anticipacion_o_demora(tipo_jubilacion, meses_ajuste, porcentaje_aplicado)
 
     # Calcular la pensión mensual
     pension_mensual = (base_reguladora * porcentaje_aplicado) / 12
@@ -156,16 +164,19 @@ def calcular_pension_publica(salario_actual, años_cotizados, meses_cotizados, d
     return pension_mensual
 
 # Ejecución del cálculo
-años_cotizados, meses_cotizados, fecha_nacimiento = estimar_tiempo_cotizado_simplificado()
+annos_cotizados, meses_cotizados, fecha_nacimiento = estimar_tiempo_cotizado_simplificado()
 salario_actual = float(input("Introduce tu salario bruto anual actual: "))
 edad_jubilacion_deseada = int(input("Introduce la edad a la que deseas jubilarte: "))
 edad_actual = calcular_edad(fecha_nacimiento)
-tipo_jubilacion, años_ajuste = calcular_anos_anticipacion_o_demora(edad_actual, edad_jubilacion_deseada)
-meses_ajuste = (edad_jubilacion_deseada - edad_actual) * 12 if tipo_jubilacion == "anticipacion" else 0
+while edad_jubilacion_deseada < edad_actual:
+    print("La edad de jubilación deseada debe ser mayor o igual que tu edad actual.")
+    edad_jubilacion_deseada = int(input("Introduce la edad a la que deseas jubilarte: "))
+    edad_actual = calcular_edad(fecha_nacimiento)
+tipo_jubilacion, meses_ajuste = calcular_annos_anticipacion_o_demora(edad_actual, edad_jubilacion_deseada, annos_cotizados)
 
 # Año de jubilación
-año_jubilacion = datetime.date.today().year + (edad_jubilacion_deseada - edad_actual)
+anno_jubilacion = datetime.date.today().year + (edad_jubilacion_deseada - edad_actual)
 
 # Calcular la pensión mensual
-pension_mensual = calcular_pension_publica(salario_actual, años_cotizados, meses_cotizados, df_annual_cpi, tipo_jubilacion, años_ajuste, meses_ajuste, año_jubilacion)
+pension_mensual = calcular_pension_publica(salario_actual, annos_cotizados, meses_cotizados, df_annual_cpi, tipo_jubilacion, meses_ajuste, anno_jubilacion)
 print(f"Pensión mensual estimada: {pension_mensual:.2f} €")
