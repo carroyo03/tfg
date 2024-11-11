@@ -6,4 +6,7 @@ assets/external/
 node_modules/
 .env/
 package-lock.json
+__azurite_db_table__.json
+
+
 
