@@ -5,31 +5,36 @@ from .colors import TextColor as txcolor
 from .fonts import Font
 
 # Constants
-MAX_WIDTH = "600px"
+MAX_WIDTH = "37em"
 
 # Sizes
 class Size(Enum):
     ZERO = "0px !important"
-    SMALL = "0.85em"
-    DEFAULT = "1.2em"
-    LARGE = "1.6em"
-    BIG = "3em"
-    REALLY_BIG = "4em"
+    SMALL = ["0.7em", "0.85em", "1em"]
+    DEFAULT = ["1em", "1.2em", "1.4em"]
+    LARGE = ["1.3em", "1.6em", "1.9em"]
+    BIG = ["2em", "3em", "4em"]
+    REALLY_BIG = ["3.5em", "4.5em", "5.5em"]
 
 # Styles
 
 BASE_STYLE = {
     "background_color" : color.BACKGROUND.value,
-    rx.button:{
-        "width":"100%",
-        "height":"100%",
-        "display":"block",
-        "padding": Size.SMALL.value,
-        "border_radius":Size.DEFAULT.value,
+    rx.button: {
+        "width": "100%",
+        "height": "4em",
+        "display": "block",
+        "padding": Size.DEFAULT.value,
+        "border_radius": "md",
         "color": txcolor.HEADER.value,
-        "background_color" : color.CONTENT.value,
-        "_hover":{
-            "background_color" : color.SECONDARY.value
+        "background_color": color.PRIMARY.value,
+        "font_weight": "bold",
+        "margin_top": "1em",
+        "_hover": {
+            "background_color": txcolor.HEADER.value,
+            "color": color.CONTENT.value,
+            "transform": "scale(1.02)",
+            "transition": "all 0.2s ease-in-out"
         }
     },
     rx.link:{

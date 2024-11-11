@@ -3,3 +3,7 @@
 .web
 __pycache__/
 assets/external/
+node_modules/
+.env/
+package-lock.json
+
