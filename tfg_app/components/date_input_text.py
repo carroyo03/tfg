@@ -1,65 +1,60 @@
 import reflex as rx
 
-class Day(rx.State):
-    values: list[str] = [str(i) for i in range(1, 32)]
-    value: str = "1"
+class DateState(rx.State):
+
+    # Value ranges for the date
+    day_values: list[str] = [str(i) for i in range(1, 32)]
+    month_values: list[str] = [str(i) for i in range(1, 13)]
+    year_values: list[str] = [str(i) for i in range(1900, 2024)]
+
+    # Default values for the date
+    day: str = "1"
+    month: str = "1"
+    year: str = "2000"
+
+    def set_day(self, day: str):
+        self.day = day
+
+    def set_month(self, month: str):
+        self.month = month
     
-    def set_value(self, value: int):
-        print(f"Estableciendo día: {value}")
-        self.value = value
+    def set_year(self, year: str):
+        self.year = year
 
     def reset_state(self):
-        print("Restableciendo día")
-        self.value = "1"
+        self.day = "1"
+        self.month = "1"
+        self.year = "2000"
 
-class Month(rx.State):
-    values: list[str] = [str(i) for i in range(1, 13)]
-    value: str = "1"
-    
-    def set_value(self, value: int):
-        print(f"Estableciendo mes: {value}")
-        self.value = value
 
-    def reset_state(self):
-        print("Restableciendo mes")
-        self.value = "1"
 
-class Year(rx.State):
-    values: list[str] = [str(i) for i in range(1900, 2024)]
-    value: str = "2000"
-    
-    def set_value(self, value: int):
-        print(f"Estableciendo año: {value}")
-        self.value = value
 
-    def reset_state(self):
-        print("Restableciendo año")
-        self.value = "2000"
+
 
 def date_picker(text: str) -> rx.Component:
     return rx.vstack(
         rx.text(text, color="white", margin_bottom="0.5em"),
         rx.hstack(
             rx.select(
-                Day.values,
+                DateState.day_values,
                 placeholder="Día",
-                on_change=Day.set_value,
+                on_change=DateState.set_day,
                 name="day",
                 width="29%",
                 color="black"
             ),
             rx.select(
-                Month.values,
+                DateState.month_values,
                 placeholder="Mes",
-                on_change=Month.set_value,
+                on_change=DateState.set_month,
                 name="month",
                 width="29%",
                 color="black"
             ),
             rx.select(
-                Year.values,
+                DateState.year_values,
                 placeholder="Año",
-                on_change=Year.set_value,
+                on_change=DateState.set_year,
                 name="year",
                 width="29%",
                 color="black"

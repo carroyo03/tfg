@@ -3,9 +3,10 @@ from tfg_app.styles.colors import TextColor as txcolor
 from tfg_app.styles.styles import Size as size
 from tfg_app.styles.fonts import Font
 from tfg_app.components.input_text import input_text, AgeState, StartAgeState
-from tfg_app.components.date_input_text import date_picker, Day, Month, Year
+from tfg_app.components.date_input_text import date_picker, DateState
 from tfg_app.components.gender import gender, GenderState
 from tfg_app.components.children import children, RadioGroupState, ChildrenNumberState
+from tfg_app.styles.styles import BASE_STYLE
 
 
 
@@ -14,19 +15,21 @@ class FormState(rx.State):
     form_data: dict = {}
 
     def handle_submit(self, form_data: dict):
-        """Handle the form submit."""
         print("Formulario enviado:", form_data)
-        self.form_data = form_data
+        self.save_form_data(form_data)
         self.reset_fields()
 
+    def save_form_data(self, form_data: dict):
+        # Función separada para manejar el guardado de datos
+        self.form_data = form_data
+
     def reset_fields(self):
+        # Restablece los campos, reutilizando la función
         for field in self.default_fields():
             field.reset_state()
 
     def default_fields(self):
-        yield Day
-        yield Month
-        yield Year
+        yield DateState
         yield GenderState
         yield RadioGroupState
         yield ChildrenNumberState

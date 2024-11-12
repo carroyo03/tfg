@@ -105,13 +105,15 @@ def calcular_base_reguladora(salario_anual, annos_a_incluir=25, num_pagas=14):
     return base_reguladora
 
 def calcular_complemento_brecha_genero(num_hijos):
-    if num_hijos > MAX_HIJOS_APLICABLES:
+    if num_hijos == "4+":
         num_hijos = MAX_HIJOS_APLICABLES
+    else:
+        num_hijos = int(num_hijos)
     complemento_base = num_hijos * COMPLEMENTO_MENSUAL_POR_HIJO
     complemento_total = complemento_base * INCREMENTO_COMPLEMENTO
     return complemento_total if num_hijos > 0 else 0
 
-def calcular_primer_pilar(base_reguladora, annos_cotizados):
+def calcular_primer_pilar(base_reguladora, annos_cotizados, tiene_hijos, num_hijos):
     if annos_cotizados < 15:
         return 0  # No tiene derecho a pensión si no ha cotizado al menos 15 años
     elif annos_cotizados == 15:
@@ -128,9 +130,7 @@ def calcular_primer_pilar(base_reguladora, annos_cotizados):
     pension_primer_pilar = max(PENSION_MINIMA, min(pension_primer_pilar, PENSION_MAXIMA))
 
     # Aplicar el complemento por brecha de género si tiene hijos
-    hijos = input("¿Tienes hijos? (si/no): ").lower()
-    if hijos == "si":
-        num_hijos = validar_entrada_numerica("Número de hijos: ", valor_minimo=0, valor_maximo=MAX_HIJOS_APLICABLES)
+    if tiene_hijos.lower() == "sí":
         complemento = calcular_complemento_brecha_genero(num_hijos)
         pension_primer_pilar += complemento
 
