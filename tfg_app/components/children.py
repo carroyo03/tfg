@@ -1,5 +1,5 @@
 import reflex as rx
-from ..styles.styles import Size as size
+from tfg_app.styles.styles import Size as size
 
 class RadioGroupState(rx.State):
     item: str = "None"

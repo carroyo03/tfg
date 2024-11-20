@@ -1,35 +1,41 @@
 import reflex as rx
+import logging
 
 class DateState(rx.State):
 
     # Value ranges for the date
     day_values: list[str] = [str(i) for i in range(1, 32)]
     month_values: list[str] = [str(i) for i in range(1, 13)]
-    year_values: list[str] = [str(i) for i in range(1900, 2024)]
+    year_values: list[str] = [str(i) for i in range(1900, 2023)]
 
     # Default values for the date
     day: str = "1"
     month: str = "1"
     year: str = "2000"
+    date: str = "01/01/2000"
+
+    def update_date(self):
+        self.date = f"{self.day}/{self.month}/{self.year}"
+        logging.info(f"Fecha actualizada: {self.date}")
 
     def set_day(self, day: str):
         self.day = day
+        self.update_date()
+
 
     def set_month(self, month: str):
         self.month = month
+        self.update_date()
     
     def set_year(self, year: str):
         self.year = year
+        self.update_date()
 
     def reset_state(self):
         self.day = "1"
         self.month = "1"
         self.year = "2000"
-
-
-
-
-
+        self.update_date()
 
 def date_picker(text: str) -> rx.Component:
     return rx.vstack(

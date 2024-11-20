@@ -1,6 +1,6 @@
 import reflex as rx
 import reflex_chakra as rc
-from ..styles.styles import Size as size
+from tfg_app.styles.styles import Size as size
 
 
 def navbar()->rx.Component:

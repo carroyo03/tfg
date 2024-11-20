@@ -50,14 +50,12 @@ def calcular_edad(fecha_nacimiento):
     return edad
 
 # Función para estimar tiempo cotizado aprox
-def estimar_tiempo_cotizado(fecha_nacimiento, edad_inicio_trabajo):
-    fecha_nacimiento = parser.parse(input("Fecha de nacimiento (dd/mm/YYYY): ")).date()
-    edad_inicio_trabajo = validar_entrada_numerica("Edad al comenzar a cotizar: ")
-    fecha_inicio_trabajo = datetime.date(fecha_nacimiento.year + int(edad_inicio_trabajo), 15, 6)  # Día aproximado para estimar
+def estimar_tiempo_cotizado(fecha_nacimiento:datetime.date, edad_inicio_trabajo:int):
+    fecha_inicio_trabajo = datetime.date(fecha_nacimiento.year + int(edad_inicio_trabajo), day=15, month=6)  # Día aproximado para estimar
     fecha_actual = datetime.date.today()
     diff = fecha_actual - fecha_inicio_trabajo
     annos_cotizados = diff.days / 365.25
-    return annos_cotizados, fecha_nacimiento
+    return annos_cotizados
 
 def calcular_edad_legal_jub():
     annos_cotizados, fecha_nacimiento = estimar_tiempo_cotizado()
@@ -125,18 +123,19 @@ def calcular_primer_pilar(base_reguladora, annos_cotizados, tiene_hijos, num_hij
 
     # Calcular la pensión base
     pension_primer_pilar = base_reguladora * (porcentaje / 100)
+    
 
         # Verificar si la pensión supera los límites de pensión mínima o máxima
-    pension_primer_pilar = max(PENSION_MINIMA, min(pension_primer_pilar, PENSION_MAXIMA))
+    pension_primer_pilar = max(PENSION_MINIMA*12, min(pension_primer_pilar, PENSION_MAXIMA*12))
 
     # Aplicar el complemento por brecha de género si tiene hijos
-    if tiene_hijos.lower() == "sí":
-        complemento = calcular_complemento_brecha_genero(num_hijos)
+    if tiene_hijos.lower().startswith("s"):
+        complemento = calcular_complemento_brecha_genero(num_hijos) *12
         pension_primer_pilar += complemento
 
 
 
-    return pension_primer_pilar
+    return pension_primer_pilar/12
 
 def obtener_datos_segundo_pilar_usuario(salario_actual, categoria, ppe_porcentaje_empresa=5, aportacion_voluntaria_ppe=0, aportacion_excesos_empresa=0, aportacion_excesos_voluntaria=0, derechos_consolidados=1000, provisiones_matematicas=500):
     """
