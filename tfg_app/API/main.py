@@ -4,7 +4,7 @@ from tfg_app.pens import calcular_primer_pilar,estimar_tiempo_cotizado
 import datetime
 import reflex as rx
 from datetime import datetime
-from tfg_app.global_state import GlobalState
+
 
 class FormData(BaseModel):
     fecha_nacimiento:str
@@ -17,13 +17,14 @@ class FormData(BaseModel):
     edad_jubilacion_deseada: float  # La edad a la que se desea jubilar
 
 
+
 async def calcular_pension(data: FormData):
 
     #edad_actual = calcular_edad(fecha_nacimiento)
     annos_cotizados = estimar_tiempo_cotizado(data['fecha_nacimiento'], data['edad_inicio_trabajo'])
     #tipo_jubilacion, meses_ajuste = calcular_annos_anticipacion_o_demora(edad_actual, data.edad_jubilacion_deseada, annos_cotizados)
     #anno_jubilacion = datetime.date.today().year + (data.edad_jubilacion_deseada - edad_actual)
+    data['salario_actual'] = data['salario_actual']
     pension_primer_pilar = calcular_primer_pilar(data['salario_actual'], annos_cotizados, data['tiene_hijos'],data['n_hijos'])
 
-    GlobalState.set_pension_primer_pilar(pension_primer_pilar)
-    return {"pension_primer_pilar": pension_primer_pilar}
+    return round(pension_primer_pilar,2)

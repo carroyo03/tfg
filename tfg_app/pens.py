@@ -1,7 +1,9 @@
 import pandas as pd
 from ecbdata import ecbdata as ecb # type: ignore
 import datetime
-from dateutil import parser
+import reflex as rx
+import math 
+
 
 # Obtengo los valores del IPC desde la librería del ECB desde 1996 hasta ahora
 try:
@@ -137,6 +139,10 @@ def calcular_primer_pilar(base_reguladora, annos_cotizados, tiene_hijos, num_hij
 
     return pension_primer_pilar/12
 
+def calcular_ratio_sustitucion(pension_primer_pilar:rx.Var, salario_actual:rx.Var) -> float:
+    r_s = (pension_primer_pilar *12 / salario_actual) * 100
+    return (math.ceil(r_s*100)/100).to(float) #Resultado redondeado
+
 def obtener_datos_segundo_pilar_usuario(salario_actual, categoria, ppe_porcentaje_empresa=5, aportacion_voluntaria_ppe=0, aportacion_excesos_empresa=0, aportacion_excesos_voluntaria=0, derechos_consolidados=1000, provisiones_matematicas=500):
     """
     Calcula las aportaciones al segundo pilar (PPE, Excesos, Flex) según la categoría del usuario y sus aportaciones existentes.
@@ -186,7 +192,7 @@ def obtener_datos_segundo_pilar_usuario(salario_actual, categoria, ppe_porcentaj
     return total_segundo_pilar
 
 # Función para calcular el ratio de sustitución de ingresos del segundo pilar
-def calcular_ratio_sustitucion(segundo_pilar_total, salario_pensionable):
+def calcular_ratio(segundo_pilar_total, salario_pensionable):
     ratio_sustitucion = (segundo_pilar_total / salario_pensionable) * 100
     print(f"Ratio de sustitución del Pilar II: {ratio_sustitucion:.2f}%")
     return ratio_sustitucion

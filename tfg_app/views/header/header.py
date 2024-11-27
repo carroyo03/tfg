@@ -5,13 +5,12 @@ from tfg_app.styles.fonts import Font
 from tfg_app.components.input_text import input_text, AgeState, StartAgeState
 from tfg_app.components.date_input_text import date_picker, DateState
 from tfg_app.components.gender import gender, GenderState
+from tfg_app.global_state import GlobalState
 from tfg_app.components.children import children, RadioGroupState, ChildrenNumberState
 from tfg_app.styles.styles import BASE_STYLE
-from tfg_app.API.main import calcular_pension
 import pandas as pd
 import datetime
 import logging
-from tfg_app.global_state import GlobalState
 
 # Configurar el logging
 logging.basicConfig(level=logging.INFO)
@@ -21,24 +20,26 @@ class FormState(rx.State):
 
     @rx.event
     async def handle_submit(self, form_data: dict):
-        self.save_form_data(form_data)
-        self.reset_fields()
-        await self.send_data_to_backend(form_data)
-        logging.info("Formulario enviado: %s", form_data)
-        return rx.redirect("/result")
+        try:
+            self.save_form_data(form_data)
+            pension = await self.send_data_to_backend(form_data)
+            # Obtener una instancia del estado global
+            state = await self.get_state(GlobalState)
+            # Actualizar el valor de pension_primer_pilar
+            state.set_pension_primer_pilar(pension)
+            return rx.redirect("/pilar1")
+        except Exception as e:
+            logging.error(f"Error en handle_submit: {e}")
+            return rx.window_alert("Error al procesar el formulario")
 
     def save_form_data(self, form_data: dict):
-        # Construir el campo 'date' a partir de 'day', 'month', y 'year'
-        form_data['date'] = f"{form_data['day']}/{form_data['month']}/{form_data['year']}"
-        # Eliminar los campos 'day', 'month', y 'year' del form_data
+        form_data['fecha_nacimiento'] = f"{form_data['day']}/{form_data['month']}/{form_data['year']}"
         del form_data['day']
         del form_data['month']
         del form_data['year']
-        # Función separada para manejar el guardado de datos
         self.form_data = form_data
 
     def reset_fields(self):
-        # Restablece los campos, reutilizando la función
         for field in self.default_fields():
             field.reset_state()
 
@@ -51,29 +52,16 @@ class FormState(rx.State):
         yield AgeState
 
     async def send_data_to_backend(self, form_data: dict):
-        """
-        class FormData(BaseModel):
-        date: str
-        gender: str
-        tiene_hijos: str
-        n_hijos: str
-        edad_jubilacion: str
-        salario_actual: float  # Asegúrate de incluir otros campos necesarios
-        edad_inicio_trabajo: float  # Por ejemplo, la edad al comenzar a trabajar
-        edad_jubilacion_deseada: float  # La edad
-        """
+        from tfg_app.API.main import calcular_pension
         try:
-            # Cargar el DataFrame desde el archivo CSV
             df_users = pd.read_csv('usuarios.csv', encoding='unicode_escape', sep=';')
             df_users['fecha_nacimiento'] = pd.to_datetime(df_users['fecha_nacimiento'], format='%d-%m-%Y')
             logging.info("DataFrame cargado: %s", df_users)
 
-            # Verificar los valores de form_data
             logging.info("Valores de form_data: %s", form_data)
 
-            # Filtrar el DataFrame
             df = df_users[
-                (df_users['fecha_nacimiento'] == datetime.datetime.strptime(form_data['date'], "%d/%m/%Y")) &
+                (df_users['fecha_nacimiento'] == datetime.datetime.strptime(form_data['fecha_nacimiento'], "%d/%m/%Y")) &
                 (df_users['genero'] == form_data['gender']) &
                 (
                     (df_users['tiene_hijos'] == 'No') |
@@ -83,10 +71,8 @@ class FormState(rx.State):
                 (df_users['edad_jubilacion_deseada'] == int(form_data['edad_jubilacion']))
             ]
 
-            # Verificar el DataFrame filtrado
             logging.info("DataFrame filtrado: %s", df)
 
-            # Construir form_data a partir del DataFrame filtrado
             if not df.empty:
                 form_data = df.iloc[0].to_dict()
             else:
@@ -94,13 +80,13 @@ class FormState(rx.State):
                 return
 
             logging.info("Datos filtrados: %s", form_data)
-            pension_primer_pilar = await calcular_pension(form_data)
-            logging.info("Pensión primer pilar calculada: %s", pension_primer_pilar)
-            
-            GlobalState.set_pension_primer_pilar(pension_primer_pilar)
+            pension = await calcular_pension(form_data)
+            self.form_data = form_data
+            logging.info(f"Pensión calculada: {pension}")
+            return pension
         except Exception as e:
-            logging.error("Error al enviar datos al backend: %s", e)
-
+            logging.error(f"Error al enviar datos al backend: {e}")
+            raise e
 
 def form_example():
     return rx.form(
