@@ -33,7 +33,7 @@ def pilar1():
         navbar(),
         rx.box(
             rx.heading(
-                "Resultados",
+                "Plan Público de Pensiones",
                 color="white",
                 font_family=Font.TITLE.value,
                 font_size=size.BIG.value,
