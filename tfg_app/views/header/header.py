@@ -7,6 +7,7 @@ from tfg_app.components.date_input_text import date_picker, DateState
 from tfg_app.components.gender import gender, GenderState
 from tfg_app.global_state import GlobalState
 from tfg_app.components.children import children, RadioGroupState, ChildrenNumberState
+from tfg_app.components.tipo_regimen import tipo_regimen, RadioGroup1State, TypeRegState, LagsCotState
 from tfg_app.styles.styles import BASE_STYLE
 import pandas as pd
 import datetime
@@ -50,6 +51,9 @@ class FormState(rx.State):
         yield ChildrenNumberState
         yield StartAgeState
         yield AgeState
+        yield RadioGroup1State
+        yield TypeRegState
+        yield LagsCotState
 
     async def send_data_to_backend(self, form_data: dict):
         from tfg_app.API.main import calcular_pension
@@ -96,6 +100,7 @@ def form_example():
             children(),
             input_text("Edad a la que empezaste a cotizar", StartAgeState, "number"),
             input_text("Edad deseada de jubilación", AgeState, "number"),
+            tipo_regimen(),
             rx.button("Siguiente", type="submit"),
             width="100%",
             spacing="5",

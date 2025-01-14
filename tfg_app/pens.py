@@ -60,11 +60,16 @@ def estimar_tiempo_cotizado(fecha_nacimiento:datetime.date, edad_inicio_trabajo:
     return annos_cotizados
 
 def calcular_edad_legal_jub():
-    annos_cotizados, fecha_nacimiento = estimar_tiempo_cotizado()
-    if annos_cotizados < 38:
-        return 66.5, fecha_nacimiento
-    else:
-        return 65, fecha_nacimiento
+    annos_cotizados = estimar_tiempo_cotizado()
+
+    if ANNO_ACTUAL >= 2027:
+        return 65 if annos_cotizados >= 37 else 67
+    elif ANNO_ACTUAL == 2024:
+        return 65 if annos_cotizados >= 38 else 66.5
+    elif ANNO_ACTUAL == 2025:
+        return 65 if annos_cotizados >= 38 else 66.75
+    elif ANNO_ACTUAL == 2026:
+        return 65 if annos_cotizados >= 38 else 66 + (10 / 12)
 
 def estimar_bases_cotizacion(annos_cotizados, num_pagas=14):
     salario_actual = validar_entrada_numerica("Introduce tu salario bruto anual actual: ")
@@ -85,24 +90,93 @@ def calcular_porcentaje_por_meses(months_cotizados):
         return 100  # Máximo del 100% si ha cotizado más de 444 meses (37 años)
 
 def actualizar_base_por_ipc(base, ipc):
-    return base * (1 + ipc / 100)
+    if pd.isna(ipc):
+        ipc = IPC_PROMEDIO_PRE_1996
+    try:
+        return base * (1 + ipc / 100)
+    except TypeError:
+        print("Error: IPC inválido, usando valor predeterminado.")
+        return base * (1 + IPC_PROMEDIO_PRE_1996 / 100)
 
-def calcular_base_reguladora(salario_anual, annos_a_incluir=25, num_pagas=14):
+
+def calcular_base_reguladora(salario_anual, annos_sin_cotizar, tipo_trabajador, es_mujer: bool, annos_a_incluir=25, num_pagas=14):
     meses_a_incluir = annos_a_meses(annos_a_incluir)
+    meses_sin_cotizar = annos_a_meses(annos_sin_cotizar)
     bases_cotizacion = estimar_bases_cotizacion(annos_a_incluir, num_pagas)
     bases_actualizadas = []
-    for i in range(len(bases_cotizacion)):
+
+    for i, base in enumerate(bases_cotizacion):
         if i < 24:
-            bases_actualizadas.append(bases_cotizacion[-(i + 1)])  # Los últimos 24 meses sin actualizar por IPC
+            bases_actualizadas.append(bases_cotizacion[-(i + 1)])
         else:
-            base = bases_cotizacion[i]
-            ipc = DF_CPI.iloc[i]['OBS_VALUE']
-            base_actualizada = actualizar_base_por_ipc(base, ipc)
-            bases_actualizadas.append(base_actualizada)
+            ipc = DF_CPI['OBS_VALUE'].iloc[i] if i < len(DF_CPI) else IPC_PROMEDIO_PRE_1996
+            bases_actualizadas.append(actualizar_base_por_ipc(base, ipc))
+
 
     suma_bases = sum(bases_actualizadas[:meses_a_incluir])
-    base_reguladora = suma_bases / DIVISOR_BASE_REG
+
+    # Gestión de lagunas de cotización
+    for mes_en_laguna in range(meses_sin_cotizar):
+        base_minima = obtener_base_minima(ANNO_ACTUAL, mes_en_laguna)
+        if tipo_trabajador == "general":
+            if es_mujer:
+                suma_bases += base_minima * (1 if mes_en_laguna < 60 else 0.8 if mes_en_laguna < 84 else 0.5)
+            else:
+                suma_bases += base_minima * (1 if mes_en_laguna < 48 else 0.5)
+
+
+    # Dualidad de cálculo (a partir de 2026)
+    if ANNO_ACTUAL >= 2026:
+        base_reguladora = calcular_base_reguladora_dual(bases_cotizacion)
+    else:
+        base_reguladora = suma_bases / DIVISOR_BASE_REG
+
+    # Aplicar límites
+    base_reguladora = max(PENSION_MINIMA, min(base_reguladora, PENSION_MAXIMA))
+
     return base_reguladora
+
+
+def ajustar_pension_por_edad(base_reguladora,edad_deseada, edad_legal, annos_cotizados):
+    meses_diferencia = (edad_deseada - edad_legal) * 12
+    if meses_diferencia < 0: # Jubilación anticipada
+        coef_reductor = calcular_coeficiente_reductor(-meses_diferencia,annos_cotizados)
+        return base_reguladora * (1 - coef_reductor)
+    elif meses_diferencia > 0: # Jubilación prolongada
+        incentivo = calcular_incentivo(meses_diferencia)
+        return base_reguladora * (1 + incentivo)
+    return base_reguladora
+
+def calcular_coeficiente_reductor(meses_anticipados, annos_cotizados):
+    if annos_cotizados < 38:
+        return meses_anticipados * 0.005  # Ejemplo: 0.5% por mes
+    else:
+        return meses_anticipados * 0.004  # 0.4% por mes para cotizaciones altas
+
+def calcular_incentivo(meses_demora):
+    return meses_demora * 0.006  # Ejemplo: 0.6% por mes adicional
+
+def calcular_base_reguladora_dual(bases_cotizacion):
+    if len(bases_cotizacion) < 29 * 12:
+        raise ValueError("No hay suficientes datos para calcular los 29 años de bases cotización.")
+    base_25 = sum(bases_cotizacion[-25:]) / DIVISOR_BASE_REG
+    bases_mejoradas = sorted(bases_cotizacion[:-2], reverse=True)[:27]
+    base_29 = sum(bases_mejoradas) / DIVISOR_BASE_REG
+    return max(base_25, base_29)
+
+
+def agregar_bases_pluriactividad(bases_regimenes, base_maxima):
+    total_base = sum(bases_regimenes)
+    return min(total_base, base_maxima)
+
+
+def obtener_base_minima(anno, mes_en_laguna):
+    base_minima_2024 = 1323
+    if anno == ANNO_ACTUAL:
+        return base_minima_2024
+    else:
+        ipc = DF_CPI[(DF_CPI['YEAR'] == anno) & (DF_CPI['MONTH'] == mes_en_laguna)]['OBS_VALUE'].iloc if not DF_CPI[(DF_CPI['YEAR'] == anno) & (DF_CPI['MONTH'] == mes_en_laguna)].empty else IPC_PROMEDIO_PRE_1996
+        return base_minima_2024 * (1 + ipc / 100) # Actualizar la base mínima por IPC
 
 def calcular_complemento_brecha_genero(num_hijos):
     if num_hijos == "4+":
@@ -127,15 +201,15 @@ def calcular_primer_pilar(base_reguladora, annos_cotizados, tiene_hijos, num_hij
     pension_primer_pilar = base_reguladora * (porcentaje / 100)
     
 
-        # Verificar si la pensión supera los límites de pensión mínima o máxima
-    pension_primer_pilar = max(PENSION_MINIMA*12, min(pension_primer_pilar, PENSION_MAXIMA*12))
+       
 
     # Aplicar el complemento por brecha de género si tiene hijos
     if tiene_hijos.lower().startswith("s"):
         complemento = calcular_complemento_brecha_genero(num_hijos) *12
         pension_primer_pilar += complemento
 
-
+     # Verificar si la pensión supera los límites de pensión mínima o máxima
+    pension_primer_pilar = max(PENSION_MINIMA*12, min(pension_primer_pilar, PENSION_MAXIMA*12))
 
     return pension_primer_pilar/12
 

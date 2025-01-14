@@ -4,20 +4,29 @@ from tfg_app.styles.fonts import Font
 from tfg_app.styles.styles import Size as size
 from tfg_app.pens import calcular_ratio_sustitucion
 from tfg_app.views.header.header import FormState
+from tfg_app.components.info_button import info_button
 import math
 
+
+def redondear(numero):
+    return math.ceil(numero*100)/100
 
 
 def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
     # Prepara los datos del gráfico
     data = [
-        {"name": "Pensión", "value": ratio_sustitucion, "fill": "#00FF7F"},
-        {"name": "Salario", "value": 100 - ratio_sustitucion, "fill": "#D3D3D3"},
+        {"name": "Pensión", "value": redondear(ratio_sustitucion), "fill": "#00FF7F"},
+        {"name": "Salario", "value": redondear(100 - ratio_sustitucion), "fill": "#D3D3D3"},
     ]
     
     return rx.vstack(
         rx.box(
-            rx.heading("Ratio de Sustitución", size="4", color="black", aria_label="Ratio de Sustitución"),
+            rx.hstack(
+                rx.heading("Ratio de Sustitución", size="4", color="black", aria_label="Ratio de Sustitución"),
+                info_button("El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión pública."),
+                spacing="2",
+                align="center"
+            ),
             rx.recharts.pie_chart(
                 rx.recharts.pie(
                     data=data,
@@ -60,26 +69,46 @@ def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
 
 def results_pilar1() -> rx.Component:
     pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
-    pension_1p_anual = (math.ceil(pension_primer_pilar*12*100)/100)
+    pension_1p_anual = redondear(pension_primer_pilar) * 12
     # (math.ceil(pension_primer_pilar*12*100)/100).to(float)
     salario_actual = FormState.form_data['salario_actual'].to(float)
+    salario_mensual = redondear(salario_actual/12)
     ratio_sustitucion = calcular_ratio_sustitucion(pension_primer_pilar, salario_actual)
     
     return rx.center(
         rx.vstack(
-            rx.vstack(
+            rx.flex(
                 rx.vstack(
-                    rx.heading("Pensión mensual:", size="4", color="black"),
-                    rx.text(f"{pension_primer_pilar:.2f} € / mes", color="black"),
-                    spacing="1",
-                    width="100%",
+                    rx.vstack(
+                        rx.heading("Pensión mensual:", size="4", color="black"),
+                        rx.text(f"{pension_primer_pilar:.2f} € / mes", color="black"),
+                        spacing="1",
+                        width="100%",
+                    ),
+                    rx.vstack(
+                        rx.heading("Pensión anual:", size="4", color="black"),
+                        rx.text(f"{pension_1p_anual:.2f} € / año", color="black"),
+                        spacing="1",
+                        width="100%",
+                    ),
+                    width="30%",
                 ),
                 rx.vstack(
-                    rx.heading("Pensión anual:", size="4", color="black"),
-                    rx.text(f"{pension_1p_anual:.2f} € / año", color="black"),
-                    spacing="1",
-                    width="100%",
+                    rx.vstack(
+                        rx.heading("Salario mensual:", size="4", color="black"),
+                        rx.text(f"{salario_mensual:.2f} € / mes", color="black"),
+                        spacing="1",
+                        width="100%",
+                    ),
+                    rx.vstack(
+                        rx.heading("Salario anual:", size="4", color="black"),
+                        rx.text(f"{salario_actual:.2f} € / año", color="black"),
+                        spacing="1",
+                        width="100%",
+                    ),
+                    width="30%",
                 ),
+                justify_content="space-between",
                 width="100%",
             ),
             show_ratio_pie_chart(ratio_sustitucion),

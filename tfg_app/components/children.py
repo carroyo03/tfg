@@ -26,7 +26,7 @@ class ChildrenNumberState(rx.State):
 def children() -> rx.Component:
     return rx.vstack(
         rx.hstack(
-            rx.text("Tiene hijos?", margin_bottom="0.5em"),
+            rx.text("¿Tiene hijos?", margin_bottom="0.5em"),
             rx.radio(
                 ["Sí", "No"], 
                 value=RadioGroupState.item, 
@@ -42,7 +42,7 @@ def children() -> rx.Component:
         rx.cond(
             RadioGroupState.item == "Sí",
             rx.vstack(
-                rx.text("Cuántos hijos tienes?", margin_bottom="0.5em"),
+                rx.text("¿Cuántos hijos tienes?", margin_bottom="0.5em"),
                 rx.select(
                     ["1", "2", "3", "4+"],
                     placeholder="Número de hijos",

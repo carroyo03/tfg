@@ -1,0 +1,31 @@
+import reflex_chakra as rc
+import reflex as rx
+
+def info_button(info:str):
+    return rx.tooltip(
+        rx.el.svg(
+            rx.el.svg.circle(
+                cx=8,
+                cy=8,
+                r=7,
+                stroke="gray",
+                stroke_width=2,
+                fill="transparent",
+                _hover={"bg": "gray.100"},
+            ),
+            rx.el.svg.text(
+                "i",
+                x=8,
+                y=9,
+                text_anchor="middle",
+                dominant_baseline="middle",
+                font_weight="bold",
+                color="gray",
+                font_size=9,
+            ),
+            width=16,
+            height=16,
+            overflow = "visible",
+        ),
+        content=info,
+    )

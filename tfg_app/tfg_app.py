@@ -7,10 +7,47 @@ from tfg_app.API.main import calcular_pension
 from tfg_app.views.results.result import final_result
 from tfg_app.views.page2.pilar1 import results_pilar1
 from tfg_app.styles.styles import Size as size
+from typing import Optional
+from datetime import datetime
+
+class User(rx.Model, table=True):
+    username: str
+    email: str
+    password_hash: str
+    failed_attempts: int = 0
+    last_failed_attempt: Optional[datetime] = None
+    is_active: bool = True
+    created_at: datetime = datetime.now()
+    last_login: Optional[datetime] = None
+
+
 
 
             
-    
+@rx.page("/login")
+def login_page():
+    return rx.vstack(
+        rx.heading("Iniciar sesión", size="2xl"),
+        rx.form(
+            rx.vstack(
+                rx.input(
+                    placeholder="Usuario", 
+                    type="text",
+                    on_change=AppState.set_username,
+                    value=AppState.username,
+                    width="100%"
+                ),
+                rx.input(
+                    placeholder="Contraseña", 
+                    type="password",
+                    on_change=AppState.set_password,
+                    value=AppState.password,
+                    width="100%"
+                ),
+                rx.button("Iniciar sesión", on_click=AppState.login, width="100%"),
+            )
+        )
+    )
 
 @rx.page("/")
 def index():
