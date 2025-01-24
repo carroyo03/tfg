@@ -56,9 +56,9 @@ title_style=dict(
 )
 
 button_title_style = dict(
-    font_family = Font.TITLE.value,
+    font_family = Font.DEFAULT.value,
     font_weight = "bold",
-    font_size = Size.DEFAULT.value,
+    font_size = Size.SMALL.value,
     color=txcolor.HEADER.value
 
 )

@@ -6,7 +6,7 @@ class DateState(rx.State):
     # Value ranges for the date
     day_values: list[str] = [str(i) for i in range(1, 32)]
     month_values: list[str] = [str(i) for i in range(1, 13)]
-    year_values: list[str] = [str(i) for i in range(1900, 2023)]
+    year_values: list[str] = [str(i) for i in range(1940, 2023)]
 
     # Default values for the date
     day: str = "1"
@@ -31,10 +31,11 @@ class DateState(rx.State):
         self.year = year
         self.update_date()
 
-    def reset_state(self):
-        self.day = "1"
-        self.month = "1"
-        self.year = "2000"
+    @rx.event
+    async def reset_values(self):
+        self.day = ""
+        self.month = ""
+        self.year = ""
         self.update_date()
 
 def date_picker(text: str) -> rx.Component:

@@ -2,28 +2,41 @@ import reflex as rx
 from tfg_app.styles.fonts import Font
 
 class AgeState(rx.State):
-    value: str = "65"
+    value: str = ""
     
     def set_value(self, value: str):
         print(f"Estableciendo edad: {value}")
         self.value = value
     
-    def reset_state(self):
+    @rx.event
+    async def reset_values(self):
         print("Restableciendo edad")
-        self.value = "65"
+        self.value = ""
 
 class StartAgeState(rx.State):
-    value: str = "24"
+    value: str = ""
     
     def set_value(self, value: str):
         print(f"Estableciendo edad: {value}")
         self.value = value
-    
-    def reset_state(self):
+    @rx.event
+    async def reset_values(self):
         print("Restableciendo edad")
-        self.value = "24"
+        self.value = ""
 
-def input_text(title: str, state:rx.State, type: str) -> rx.Component:
+class AvgSalaryState(rx.State):
+    value = ""
+
+    def set_value(self, value):
+        print(f"Estableciendo salario medio: {value}")
+        self.value = str(value)
+        
+    @rx.event
+    async def reset_values(self):
+        print("Restableciendo salario medio")
+        self.set_value("")
+
+def input_text(title: str, name:str, state:rx.State, type: str) -> rx.Component:
     return rx.vstack(
         rx.text(
             title,
@@ -34,9 +47,9 @@ def input_text(title: str, state:rx.State, type: str) -> rx.Component:
             placeholder=state.value,
             type=type,
             on_change=state.set_value,
-            name="edad_jubilacion",
+            name=name,
             width="100%",
-            size="lg",
+            size="2",
             border_radius="md",
         ),
         font_family=Font.DEFAULT.value,

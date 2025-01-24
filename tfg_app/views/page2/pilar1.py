@@ -2,7 +2,7 @@ import reflex as rx
 from tfg_app.global_state import GlobalState
 from tfg_app.styles.fonts import Font
 from tfg_app.styles.styles import Size as size
-from tfg_app.pens import calcular_ratio_sustitucion
+from tfg_app.backend.pens import calcular_ratio_sustitucion
 from tfg_app.views.header.header import FormState
 from tfg_app.components.info_button import info_button
 import math
@@ -71,7 +71,7 @@ def results_pilar1() -> rx.Component:
     pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
     pension_1p_anual = redondear(pension_primer_pilar) * 12
     # (math.ceil(pension_primer_pilar*12*100)/100).to(float)
-    salario_actual = FormState.form_data['salario_actual'].to(float)
+    salario_actual = FormState.form_data['salario_medio'].to(float)
     salario_mensual = redondear(salario_actual/12)
     ratio_sustitucion = calcular_ratio_sustitucion(pension_primer_pilar, salario_actual)
     
@@ -79,36 +79,38 @@ def results_pilar1() -> rx.Component:
         rx.vstack(
             rx.flex(
                 rx.vstack(
-                    rx.vstack(
+                    rx.hstack(
                         rx.heading("Pensión mensual:", size="4", color="black"),
-                        rx.text(f"{pension_primer_pilar:.2f} € / mes", color="black"),
+                        rx.text(f"{redondear(pension_primer_pilar)} € / mes", color="black"),
                         spacing="1",
                         width="100%",
                     ),
-                    rx.vstack(
+                    rx.hstack(
                         rx.heading("Pensión anual:", size="4", color="black"),
-                        rx.text(f"{pension_1p_anual:.2f} € / año", color="black"),
+                        rx.text(f"{redondear(pension_1p_anual)} € / año", color="black"),
                         spacing="1",
                         width="100%",
                     ),
-                    width="30%",
+                    width="50%",
                 ),
                 rx.vstack(
-                    rx.vstack(
+                    rx.hstack(
                         rx.heading("Salario mensual:", size="4", color="black"),
-                        rx.text(f"{salario_mensual:.2f} € / mes", color="black"),
+                        rx.text(f"{redondear(salario_mensual):.2f} € / mes", color="black"),
                         spacing="1",
                         width="100%",
                     ),
-                    rx.vstack(
+                    rx.hstack(
                         rx.heading("Salario anual:", size="4", color="black"),
-                        rx.text(f"{salario_actual:.2f} € / año", color="black"),
+                        rx.text(f"{redondear(salario_actual):.2f} € / año", color="black"),
                         spacing="1",
                         width="100%",
                     ),
-                    width="30%",
+                    width="50%",
                 ),
-                justify_content="space-between",
+                display="flex",
+                flex_direction="row",
+                justify="between",
                 width="100%",
             ),
             show_ratio_pie_chart(ratio_sustitucion),

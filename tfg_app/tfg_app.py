@@ -1,70 +1,81 @@
 import reflex as rx
 from tfg_app.views.header.header import header
 from tfg_app.components.navbar import navbar
-from tfg_app.styles import styles
+from tfg_app.styles import styles,colors
 from tfg_app.styles.fonts import Font
 from tfg_app.API.main import calcular_pension
 from tfg_app.views.results.result import final_result
 from tfg_app.views.page2.pilar1 import results_pilar1
 from tfg_app.styles.styles import Size as size
-from typing import Optional
+from typing import Callable
 from datetime import datetime
+import os
+from reflex_clerk import ClerkState
+import reflex_clerk as clerk
+from dotenv import load_dotenv
+from tfg_app.views.login.login_form import AppState,sign_in_v1
+#from tfg_app.views.login.clerk_components import sign_in_page
+#from tfg_app.views.login.login_form import login_page,LOGIN_ROUTE,State as AuthState
+"""
+@rx.page("/sign-in")
+def login():
+    return lform()
 
-class User(rx.Model, table=True):
-    username: str
-    email: str
-    password_hash: str
-    failed_attempts: int = 0
-    last_failed_attempt: Optional[datetime] = None
-    is_active: bool = True
-    created_at: datetime = datetime.now()
-    last_login: Optional[datetime] = None
+
+load_dotenv()
 
 
 
 
-            
-@rx.page("/login")
-def login_page():
-    return rx.vstack(
-        rx.heading("Iniciar sesión", size="2xl"),
-        rx.form(
-            rx.vstack(
-                rx.input(
-                    placeholder="Usuario", 
-                    type="text",
-                    on_change=AppState.set_username,
-                    value=AppState.username,
-                    width="100%"
-                ),
-                rx.input(
-                    placeholder="Contraseña", 
-                    type="password",
-                    on_change=AppState.set_password,
-                    value=AppState.password,
-                    width="100%"
-                ),
-                rx.button("Iniciar sesión", on_click=AppState.login, width="100%"),
-            )
-        )
+
+
+@rx.page(LOGIN_ROUTE)
+def sign_in():
+    return rx.flex(
+        login_page(),
+        width="100%",
+        height="100vh",
+        align_items="center",
+        justify_content="center",
     )
+
+
+@rx.page("/check-your-email")
+def check_email():
+    return rx.box(
+        rx.heading("Check your email inbox or spam folder", size="3"),
+    )
+"""
+
+
+
+
+@rx.page("/sign-in")
+def sign_in():
+    return sign_in_v1()
+
 
 @rx.page("/")
 def index():
-    return rx.box(
-        navbar(),
-        rx.vstack(
-            header(),
-            width="100%",
-            max_width=["100%", "90%", "80%", "70%"],
-            height="100vh",
-            spacing="1",
-            align_items="center",
-            margin_bottom="0"
-        )
+    return rx.cond(
+        AppState.signed_in,
+        rx.box(
+            navbar(),
+            rx.vstack(
+                header(),
+                width="100%",
+                max_width=["100%", "90%", "80%", "70%"],
+                height="100vh",
+                spacing="1",
+                align_items="center",
+                margin_bottom="0"
+            )
+        ),
+        sign_in_v1()
     )
 
-@rx.page("/pilar1")
+
+@rx.page("/pilar1")#,on_load=AuthState.on_load)
 def pilar1():
     return rx.vstack(
         navbar(),
@@ -94,6 +105,34 @@ def pilar1():
             margin_top="-5rem",
             padding_x="1rem",  # Añade un poco de padding horizontal
         ),
+        rx.center(
+            rx.button(
+                "Atrás", 
+                on_click=rx.redirect("/"), 
+                color="white",
+                background_color="transparent",
+                border="1px solid",
+                box_shadow="0 .25rem .375rem #0003",
+                width="20%",
+                height="auto"
+            ),
+            rx.button(
+                "Siguiente",
+                on_click=rx.redirect("/result"),
+                background_color="white",
+                color=colors.Color.BACKGROUND.value,
+                border="1px solid",
+                box_shadow="0 .25rem .375rem #0003",
+                width="20%",
+                height="auto"
+            ),
+            width="100%",
+            margin_top="-7rem",
+            spacing="2",
+            align="center",
+            justify="center",
+        ),
+
         width="100%",
         min_height="100vh",
         spacing="0",
@@ -101,7 +140,7 @@ def pilar1():
         background_color="#00338D",  # Fondo azul
     )
 
-@rx.page("/result")
+@rx.page("/result")#,on_load=AuthState.on_load) 
 def result():
     return rx.box(
         navbar(),
@@ -117,7 +156,10 @@ def result():
     )
 
 
-app = rx.App(style=styles.BASE_STYLE, stylesheets=[f"https://fonts.googleapis.com/css?family={font.value}" for font in Font])
+app = rx.App(style=styles.BASE_STYLE, stylesheets=[f"https://fonts.googleapis.com/css?family={font.value}" for font in Font if font != Font.TITLE.value])
+app.add_page(sign_in)
+#app.add_page(check_email)
 app.add_page(index)
 app.api.add_api_route("/calcular_pension/", calcular_pension, methods=["POST"])
 app.add_page(pilar1)
+

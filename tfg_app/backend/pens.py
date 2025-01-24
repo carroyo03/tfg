@@ -19,8 +19,8 @@ df_cpi['MONTH'] = pd.to_datetime(df_cpi['TIME_PERIOD']).dt.month
 
 DF_CPI = df_cpi.drop(columns=['TIME_PERIOD'], axis=1)[['YEAR', 'MONTH', 'OBS_VALUE']].sort_values(by='YEAR', ascending=False).reset_index(drop=True)
 
-# Parámetros globales
-COMPLEMENTO_MENSUAL_POR_HIJO = 33.20  # En euros, según normativa de 2024
+# Parámetros globales según la normativa de 2024
+COMPLEMENTO_MENSUAL_POR_HIJO = 36.52  # En euros, según normativa de 2024
 MAX_HIJOS_APLICABLES = 4
 INCREMENTO_COMPLEMENTO = 1.10
 IPC_PROMEDIO_PRE_1996 = 2.5  # Asumimos un 2.5% de inflación anual antes de 1996
@@ -52,18 +52,19 @@ def calcular_edad(fecha_nacimiento):
     return edad
 
 # Función para estimar tiempo cotizado aprox
-def estimar_tiempo_cotizado(fecha_nacimiento:datetime.date, edad_inicio_trabajo:int):
+def estimar_tiempo_cotizado(fecha_nacimiento:datetime.date, edad_inicio_trabajo:int,edad_jubilacion_deseada:int):
     fecha_inicio_trabajo = datetime.date(fecha_nacimiento.year + int(edad_inicio_trabajo), day=15, month=6)  # Día aproximado para estimar
-    fecha_actual = datetime.date.today()
-    diff = fecha_actual - fecha_inicio_trabajo
+    #fecha_actual = datetime.date.today()
+    fecha_jubilacion_deseada = datetime.date(fecha_nacimiento.year + int(edad_jubilacion_deseada), day=15, month=6)
+    diff = fecha_jubilacion_deseada - fecha_inicio_trabajo
     annos_cotizados = diff.days / 365.25
     return annos_cotizados
 
-def calcular_edad_legal_jub():
-    annos_cotizados = estimar_tiempo_cotizado()
+def calcular_edad_legal_jub(fecha_nacimiento:datetime.date,edad_inicio_trabajo:int):
+    annos_cotizados = estimar_tiempo_cotizado(fecha_nacimiento,edad_inicio_trabajo)
 
     if ANNO_ACTUAL >= 2027:
-        return 65 if annos_cotizados >= 37 else 67
+        return 65 if annos_cotizados >= 38.5 else 67
     elif ANNO_ACTUAL == 2024:
         return 65 if annos_cotizados >= 38 else 66.5
     elif ANNO_ACTUAL == 2025:
@@ -71,11 +72,15 @@ def calcular_edad_legal_jub():
     elif ANNO_ACTUAL == 2026:
         return 65 if annos_cotizados >= 38 else 66 + (10 / 12)
 
-def estimar_bases_cotizacion(annos_cotizados, num_pagas=14):
-    salario_actual = validar_entrada_numerica("Introduce tu salario bruto anual actual: ")
+def estimar_bases_cotizacion(salario_actual,annos_cotizados, num_pagas=14):
     base_mensual = salario_actual / num_pagas  # Incluyendo pagas extras
-    meses_cotizados = int(annos_a_meses(annos_cotizados))
-    return [base_mensual] * meses_cotizados
+    annos_cotizados = validar_entrada_numerica(annos_cotizados, 0)
+    if type(annos_cotizados) == int:
+        meses_cotizados = int(annos_a_meses(validar_entrada_numerica(annos_cotizados,0)))
+        return [base_mensual] * meses_cotizados
+    else:
+        print("Error: Años cotizados no válido. Introduce un número entero.")
+        return
 
 def calcular_porcentaje_por_meses(months_cotizados):
     if months_cotizados < 180:  # 15 años (180 meses)
@@ -117,12 +122,24 @@ def calcular_base_reguladora(salario_anual, annos_sin_cotizar, tipo_trabajador, 
 
     # Gestión de lagunas de cotización
     for mes_en_laguna in range(meses_sin_cotizar):
-        base_minima = obtener_base_minima(ANNO_ACTUAL, mes_en_laguna)
+        base_minima = obtener_base_minima(ANNO_ACTUAL, mes_en_laguna, tipo_trabajador)
         if tipo_trabajador == "general":
             if es_mujer:
-                suma_bases += base_minima * (1 if mes_en_laguna < 60 else 0.8 if mes_en_laguna < 84 else 0.5)
+                if mes_en_laguna < 60:
+                    factor = 1
+                elif mes_en_laguna < 84:
+                    factor = 0.8
+                else:
+                    factor = 0.5
             else:
-                suma_bases += base_minima * (1 if mes_en_laguna < 48 else 0.5)
+                if mes_en_laguna < 48:
+                    factor = 1
+                else:
+                    factor = 0.5
+            suma_bases += base_minima * factor
+        elif tipo_trabajador == "autonomo":
+            if mes_en_laguna < 6:
+                suma_bases += base_minima
 
 
     # Dualidad de cálculo (a partir de 2026)
@@ -170,12 +187,20 @@ def agregar_bases_pluriactividad(bases_regimenes, base_maxima):
     return min(total_base, base_maxima)
 
 
-def obtener_base_minima(anno, mes_en_laguna):
-    base_minima_2024 = 1323
+
+
+def obtener_base_minima(anno, mes_en_laguna, tipo_trabajador):
+
+    # Definir bases minimas de 2024 según tipo de trabajador
+    if tipo_trabajador == "general":
+        base_minima_2024 = 1323
+    else:
+        base_minima_2024 = 960.78
+    
     if anno == ANNO_ACTUAL:
         return base_minima_2024
     else:
-        ipc = DF_CPI[(DF_CPI['YEAR'] == anno) & (DF_CPI['MONTH'] == mes_en_laguna)]['OBS_VALUE'].iloc if not DF_CPI[(DF_CPI['YEAR'] == anno) & (DF_CPI['MONTH'] == mes_en_laguna)].empty else IPC_PROMEDIO_PRE_1996
+        ipc = DF_CPI[(DF_CPI['YEAR'] == anno) & (DF_CPI['MONTH'] == mes_en_laguna)]['OBS_VALUE'].iloc[0] if not DF_CPI[(DF_CPI['YEAR'] == anno) & (DF_CPI['MONTH'] == mes_en_laguna)].empty else IPC_PROMEDIO_PRE_1996
         return base_minima_2024 * (1 + ipc / 100) # Actualizar la base mínima por IPC
 
 def calcular_complemento_brecha_genero(num_hijos):
@@ -198,20 +223,20 @@ def calcular_primer_pilar(base_reguladora, annos_cotizados, tiene_hijos, num_hij
         porcentaje = 100  # A partir de 36 años y medio, se tiene derecho al 100%
 
     # Calcular la pensión base
-    pension_primer_pilar = base_reguladora * (porcentaje / 100)
+    pension_primer_pilar = base_reguladora * (porcentaje / 100) / 12  # Pensión mensual
     
 
        
 
     # Aplicar el complemento por brecha de género si tiene hijos
     if tiene_hijos.lower().startswith("s"):
-        complemento = calcular_complemento_brecha_genero(num_hijos) *12
+        complemento = calcular_complemento_brecha_genero(num_hijos) 
         pension_primer_pilar += complemento
 
      # Verificar si la pensión supera los límites de pensión mínima o máxima
-    pension_primer_pilar = max(PENSION_MINIMA*12, min(pension_primer_pilar, PENSION_MAXIMA*12))
+    pension_primer_pilar = max(PENSION_MINIMA, min(pension_primer_pilar, PENSION_MAXIMA))
 
-    return pension_primer_pilar/12
+    return pension_primer_pilar
 
 def calcular_ratio_sustitucion(pension_primer_pilar:rx.Var, salario_actual:rx.Var) -> float:
     r_s = (pension_primer_pilar *12 / salario_actual) * 100

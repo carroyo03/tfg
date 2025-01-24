@@ -8,7 +8,8 @@ class RadioGroupState(rx.State):
         print(f"Estableciendo item: {item}")
         self.item = item
     
-    def reset_state(self):
+    @rx.event
+    async def reset_values(self):
         print("Restableciendo item")
         self.item = "None"
 
@@ -18,15 +19,15 @@ class ChildrenNumberState(rx.State):
     def set_value(self, value: str):
         print(f"Estableciendo número de hijos: {value}")
         self.value = value
-    
-    def reset_state(self):
+    @rx.event
+    async def reset_values(self):
         print("Restableciendo número de hijos")
         self.value = ""
 
 def children() -> rx.Component:
     return rx.vstack(
         rx.hstack(
-            rx.text("¿Tiene hijos?", margin_bottom="0.5em"),
+            rx.text("¿Tiene hijos?"),
             rx.radio(
                 ["Sí", "No"], 
                 value=RadioGroupState.item, 
@@ -36,7 +37,7 @@ def children() -> rx.Component:
                 margin_left="2em"
             ),
             width="100%",
-            justify="space-between",
+            justify="between",
             align="center"
         ),
         rx.cond(

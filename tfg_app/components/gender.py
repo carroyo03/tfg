@@ -2,15 +2,16 @@ import reflex as rx
 
 class GenderState(rx.State):
     values: list[str] = ["Hombre", "Mujer"]
-    value: str = "Hombre"
+    value: str = ""
     
     def set_value(self, value: str):
         print(f"Estableciendo género: {value}")
         self.value = value
 
-    def reset_state(self):
+    @rx.event
+    async def reset_values(self):
         print("Restableciendo género")
-        self.value = "Hombre"
+        self.value = ""
 
 def gender() -> rx.Component:
     return rx.vstack(
