@@ -1,11 +1,11 @@
 import reflex as rx
-from tfg_app.views.header.header import header
+from tfg_app.views.pilar1.pilar1form import header
 from tfg_app.components.navbar import navbar
 from tfg_app.styles import styles,colors
 from tfg_app.styles.fonts import Font
-from tfg_app.API.main import calcular_pension
+from tfg_app.backend.main import calcular_pension
 from tfg_app.views.results.result import final_result
-from tfg_app.views.page2.pilar1 import results_pilar1
+from tfg_app.views.pilar1.pilar1results import results_pilar1
 from tfg_app.styles.styles import Size as size
 from typing import Callable
 from datetime import datetime
