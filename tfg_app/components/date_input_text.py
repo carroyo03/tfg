@@ -6,7 +6,7 @@ class DateState(rx.State):
     # Value ranges for the date
     day_values: list[str] = [str(i) for i in range(1, 32)]
     month_values: list[str] = [str(i) for i in range(1, 13)]
-    year_values: list[str] = [str(i) for i in range(1940, 2023)]
+    year_values: list[str] = [str(i) for i in range(2005,1950,-1)]
 
     # Default values for the date
     day: str = "1"

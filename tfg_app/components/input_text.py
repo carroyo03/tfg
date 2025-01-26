@@ -36,7 +36,7 @@ class AvgSalaryState(rx.State):
         print("Restableciendo salario medio")
         self.set_value("")
 
-def input_text(title: str, name:str, state:rx.State, type: str) -> rx.Component:
+def input_text(title: str, name:str, state:rx.State, type_: str) -> rx.Component:
     return rx.vstack(
         rx.text(
             title,
@@ -44,8 +44,7 @@ def input_text(title: str, name:str, state:rx.State, type: str) -> rx.Component:
             margin_bottom="0.5em"
         ),
         rx.input(
-            placeholder=state.value,
-            type=type,
+            type=type_,
             on_change=state.set_value,
             name=name,
             width="100%",

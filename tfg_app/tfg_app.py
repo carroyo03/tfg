@@ -1,5 +1,6 @@
 import reflex as rx
-from tfg_app.views.pilar1.pilar1form import header
+from tfg_app.views.pilar1.pilar1form import form1_
+from tfg_app.views.pilar2.pilar2form import form2_
 from tfg_app.components.navbar import navbar
 from tfg_app.styles import styles,colors
 from tfg_app.styles.fonts import Font
@@ -56,20 +57,20 @@ def sign_in():
 
 
 @rx.page("/")
-def index():
+def form_pilar1():
     return rx.cond(
         AppState.signed_in,
-        rx.box(
+        rx.vstack(
             navbar(),
             rx.vstack(
-                header(),
+                form1_(),
                 width="100%",
                 max_width=["100%", "90%", "80%", "70%"],
                 height="100vh",
                 spacing="1",
                 align_items="center",
-                margin_bottom="0"
-            )
+                margin_top="4rem"
+            ),
         ),
         sign_in_v1()
     )
@@ -93,7 +94,7 @@ def pilar1():
             width="100%",
             position="sticky",
             top="0",
-            z_index="1",
+            z_form1="1",
             background_color="rgba(0, 51, 141, 0.9)",  # Azul semi-transparente
             backdrop_filter="blur(5px)",
         ),
@@ -118,7 +119,7 @@ def pilar1():
             ),
             rx.button(
                 "Siguiente",
-                on_click=rx.redirect("/result"),
+                on_click=rx.redirect("/form2"),
                 background_color="white",
                 color=colors.Color.BACKGROUND.value,
                 border="1px solid",
@@ -140,6 +141,55 @@ def pilar1():
         background_color="#00338D",  # Fondo azul
     )
 
+
+@rx.page("/form2")
+def form_pilar2():
+    return rx.cond(
+        AppState.signed_in,
+        rx.vstack(
+            rx.box(
+                rx.button(
+                    "Atrás", 
+                    on_click=rx.redirect("/"), 
+                    color="white",
+                    background_color="transparent",
+                    border="1px solid",
+                    box_shadow="0 .25rem .375rem #0003",
+                    width="100%",
+                    height="auto",
+                    justify="start",
+                    align="start",
+                ),
+                    
+                navbar(),
+            ),
+            rx.hstack(
+                rx.box(
+                    results_pilar1(),
+                    width="100%",
+                    max_width="800px",  # Limita el ancho máximo del contenido
+                    margin="0 auto",  # Centra horizontalmente
+                    margin_top="-5rem",
+                    padding_x="1rem",  # Añade un poco de padding horizontal
+                ),
+                rx.vstack(
+                    form2_(),
+                    width="100%",
+                    max_width=["100%", "90%", "80%", "70%"],
+                    height="100vh",
+                    spacing="1",
+                    align_items="center",
+                    justify_content="center",
+                    margin_top="-5rem"
+                ),
+            ),
+            spacing="5",
+            align_items="center",
+            justify_content="center",
+        ),
+        sign_in_v1()
+    )
+
 @rx.page("/result")#,on_load=AuthState.on_load) 
 def result():
     return rx.box(
@@ -156,10 +206,12 @@ def result():
     )
 
 
+
 app = rx.App(style=styles.BASE_STYLE, stylesheets=[f"https://fonts.googleapis.com/css?family={font.value}" for font in Font if font != Font.TITLE.value])
 app.add_page(sign_in)
 #app.add_page(check_email)
-app.add_page(index)
+app.add_page(form_pilar1)
 app.api.add_api_route("/calcular_pension/", calcular_pension, methods=["POST"])
 app.add_page(pilar1)
+app.add_page(form_pilar2)
 

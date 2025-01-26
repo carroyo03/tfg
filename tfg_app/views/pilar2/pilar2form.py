@@ -1,5 +1,5 @@
 import reflex as rx
-from tfg_app.styles.colors import TextColor as txcolor, Color as color
+from tfg_app.styles.colors import Color as color
 from tfg_app.styles.styles import Size as size
 from tfg_app.styles.fonts import Font
 from tfg_app.components.input_text import input_text, AgeState, StartAgeState, AvgSalaryState
@@ -8,7 +8,9 @@ from tfg_app.components.gender import gender, GenderState
 from tfg_app.global_state import GlobalState
 from tfg_app.components.children import children, RadioGroupState, ChildrenNumberState
 from tfg_app.components.tipo_regimen import tipo_regimen, RadioGroup1State, TypeRegState, LagsCotState
+from tfg_app.components.seg_pilar.aportaciones import Company2PState, Employee2PState
 from tfg_app.styles.styles import BASE_STYLE
+from tfg_app.views.pilar1.pilar1results import results_pilar1
 import pandas as pd
 import datetime
 import logging
@@ -35,7 +37,7 @@ class FormState(rx.State):
             
             pension = await self.send_data_to_backend(form_data)
             state = await self.get_state(GlobalState)
-            state.set_pension_primer_pilar(pension)
+            state.set_pension_segundo_pilar(pension)
             return rx.redirect("/pilar1")
         except Exception as e:
             logging.error(f"Error en handle_submit: {e}")
@@ -54,13 +56,7 @@ class FormState(rx.State):
         # Fuerza actualización del frontend
         return rx.call_script("window.location.reload();")
     
-        # Obtén y resetea cada estado individual
-        """for state_class in self.default_fields():
-            state = await self.get_state(state_class)
-            await state.reset_values()
-        
-        return rx.call_script("window.location.reload();")
-        """
+     
 
     def default_fields(self):
         yield DateState
@@ -134,16 +130,11 @@ class FormState(rx.State):
             logging.error(f"Error al enviar datos al backend: {e}")
             raise e
 
-def form1():
+def form2():
     return rx.form(
         rx.vstack(
-            date_picker("Fecha de nacimiento"),
-            gender(),
-            input_text("Salario medio obtenido","salario_medio", AvgSalaryState, "number"),
-            children(),
-            input_text("Edad a la que empezaste a cotizar","edad_inicio_trabajo", StartAgeState, "number"),
-            input_text("Edad deseada de jubilación", "edad_jubilacion",AgeState, "number"),
-            tipo_regimen(),
+            input_text("Aportación anual de la empresa al PPE","aportacion_empresa", Company2PState,"number"),
+            input_text(f"¿Quieres aportar un 2% a tu plan de pensiones de la empresa?","aportacion_voluntaria_pers",Employee2PState,"number"),
             rx.hstack(
                 rx.button(
                     "Limpiar formulario",
@@ -178,25 +169,25 @@ def form1():
         ),
         on_submit=FormState.handle_submit,
         value=FormState.stored_form_data,
-        margin_top=size.DEFAULT.value,
         align="center",
     )
 
-def header():
+def form2_():
     return rx.vstack(
         rx.vstack(
             rx.heading(
-                "Simulador de pensiones",
+                "Simulador de pensiones: 2º Pilar",
                 color="white",
                 font_family=Font.TITLE.value,
-                font_size=size.BIG.value,
+                font_size=size.LARGE.value,
                 font_weight="bold",
                 margin_top=size.SMALL.value,
             ),
-            form1(),
+            form2(),
             overflow="hidden",
             align="center",
             padding="1em",
             height="100%",
         ),
+        align="center"
     )

@@ -180,9 +180,10 @@ def form1():
         value=FormState.stored_form_data,
         margin_top=size.DEFAULT.value,
         align="center",
+        width="100%",
     )
 
-def header():
+def form1_():
     return rx.vstack(
         rx.vstack(
             rx.heading(

@@ -8,17 +8,18 @@ def navbar()->rx.Component:
         rx.box(
             rc.image(
                 src="/icons/KPMG_NoCP_White.png",
-                alt = "Logo de KPMG",
+                alt="Logo de KPMG",
                 loading="lazy",
-                height=["5vw", "4vw", "3vw"],
-                width=["7vw", "6vw", "5vw"],
+                height=["8vw", "6vw", "4vw"],  # Increased size for mobile
+                width="auto",
                 margin_left=["0.5em", size.DEFAULT.value, size.DEFAULT.value],
                 margin_top=["0.5em", size.DEFAULT.value, size.DEFAULT.value]
             )
         ),
         width="100%",
         padding="1em",
-        position= "fixed",
-        top = "0",
-        z_index = "1000"
+        position="absolute",
+        top="0",
+        z_index="1000",
+        align="center"
     )
