@@ -2,13 +2,14 @@ import reflex as rx
 from tfg_app.styles.colors import Color as color
 from tfg_app.styles.styles import Size as size
 from tfg_app.styles.fonts import Font
+from tfg_app.components.seg_pilar.aportaciones import Employee2PState, aportar
 from tfg_app.components.input_text import input_text, AgeState, StartAgeState, AvgSalaryState
 from tfg_app.components.date_input_text import date_picker, DateState
 from tfg_app.components.gender import gender, GenderState
 from tfg_app.global_state import GlobalState
 from tfg_app.components.children import children, RadioGroupState, ChildrenNumberState
 from tfg_app.components.tipo_regimen import tipo_regimen, RadioGroup1State, TypeRegState, LagsCotState
-from tfg_app.components.seg_pilar.aportaciones import Company2PState, Employee2PState
+from tfg_app.components.seg_pilar.aportaciones import Company2PState
 from tfg_app.styles.styles import BASE_STYLE
 from tfg_app.views.pilar1.pilar1results import results_pilar1
 import pandas as pd
@@ -25,6 +26,10 @@ class FormState(rx.State):
     def stored_form_data(self) -> dict:
         """Una computed var que maneja los datos del formulario."""
         return self.form_data
+
+    ####################################################################
+    #### Cambiar handle_submit para adaptarlo al segundo formulario ####
+    ####################################################################
 
     @rx.event
     async def handle_submit(self, form_data: dict):
@@ -49,7 +54,7 @@ class FormState(rx.State):
         self.form_data = {}
         
         # Limpia los substates
-        for state_class in [AgeState, GenderState, DateState, RadioGroupState, ChildrenNumberState, StartAgeState, RadioGroup1State, TypeRegState, LagsCotState, AvgSalaryState]:
+        for state_class in [Employee2PState, Company2PState]:
             state= await self.get_state(state_class)
             await state.reset_values()
         
@@ -58,83 +63,13 @@ class FormState(rx.State):
     
      
 
-    def default_fields(self):
-        yield DateState
-        yield GenderState
-        yield RadioGroupState
-        yield ChildrenNumberState
-        yield StartAgeState
-        yield AgeState
-        yield RadioGroup1State
-        yield TypeRegState
-        yield LagsCotState
-        yield AvgSalaryState
-
-    async def send_data_to_backend(self, form_data: dict):
-        from tfg_app.backend.main import calcular_pension
-        try:
-            """
-            df_users = pd.read_csv('usuarios.csv', encoding='unicode_escape', sep=';')
-            df_users['fecha_nacimiento'] = pd.to_datetime(df_users['fecha_nacimiento'], format='%d-%m-%Y')
-            logging.info("DataFrame cargado: %s", df_users)
- """
-            logging.info("Valores de form_data: %s", form_data)
-
-            """
-            df = df_users[
-                (df_users['fecha_nacimiento'] == datetime.datetime.strptime(form_data['fecha_nacimiento'], "%d/%m/%Y")) &
-                (df_users['genero'] == form_data['gender']) &
-                (
-                    (df_users['tiene_hijos'] == 'No') |
-                    (df_users['n_hijos'] == int(form_data['n_hijos'])) |
-                    ((df_users['n_hijos'] >= 4) & (form_data['n_hijos'] == '4+'))
-                ) &
-                (df_users['edad_jubilacion_deseada'] == int(form_data['edad_jubilacion']))
-            ]
-            """
-
-            df= pd.DataFrame()
-            df["fecha_nacimiento"] = [datetime.datetime.strptime(form_data['fecha_nacimiento'], "%d/%m/%Y")]
-            if form_data["tiene_hijos"].lower().startswith("s"):
-                df["tiene_hijos"] = "Sí"
-                df["n_hijos"] = "4+" if form_data['n_hijos'] == "4+" else int(form_data['n_hijos'])
-            else:
-                df["tiene_hijos"] = "No"
-                df["n_hijos"] = None
-
-            df["edad_jubilacion_deseada"] = int(form_data['edad_jubilacion'])
-
-            
-
-            columnas_restantes = ['gender', 'salario_medio', 'edad_inicio_trabajo', 'r_cotizacion']
-            for columna in columnas_restantes:
-                df[columna] = form_data[columna]
-
-            if form_data["lagunas_cotizacion"].lower().startswith("s"):
-                df["n_lagunas"] = form_data["n_lagunas"]
-
-            logging.info("DataFrame filtrado: %s", df)
-
-            if not df.empty:
-                form_data = df.iloc[0].to_dict()
-            else:
-                logging.error("No se encontraron registros que coincidan con los criterios.")
-                return
-
-            logging.info("Datos filtrados: %s", form_data)
-            pension = await calcular_pension(form_data)
-            self.form_data = form_data
-            logging.info(f"Pensión calculada: {pension}")
-            return pension
-        except Exception as e:
-            logging.error(f"Error al enviar datos al backend: {e}")
-            raise e
+    
 
 def form2():
     return rx.form(
         rx.vstack(
             input_text("Aportación anual de la empresa al PPE","aportacion_empresa", Company2PState,"number"),
-            input_text(f"¿Quieres aportar un 2% a tu plan de pensiones de la empresa?","aportacion_voluntaria_pers",Employee2PState,"number"),
+            aportar(f"¿Quieres aportar un 2% a tu plan de pensiones de la empresa?"),
             rx.hstack(
                 rx.button(
                     "Limpiar formulario",

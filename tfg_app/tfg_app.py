@@ -147,45 +147,51 @@ def form_pilar2():
     return rx.cond(
         AppState.signed_in,
         rx.vstack(
-            rx.box(
                 rx.button(
-                    "Atrás", 
-                    on_click=rx.redirect("/"), 
+                    "<- Atrás", 
+                    on_click=rx.redirect("/pilar1"), 
                     color="white",
                     background_color="transparent",
                     border="1px solid",
                     box_shadow="0 .25rem .375rem #0003",
-                    width="100%",
+                    width="auto",
                     height="auto",
-                    justify="start",
-                    align="start",
+                    position="absolute",
+                    top="1rem",
+                    left="1rem",
+                    _hover={"bg": colors.Color.SECONDARY.value, "color": "white"}
                 ),
-                    
-                navbar(),
-            ),
-            rx.hstack(
+            rx.vstack(
                 rx.box(
-                    results_pilar1(),
-                    width="100%",
-                    max_width="800px",  # Limita el ancho máximo del contenido
-                    margin="0 auto",  # Centra horizontalmente
-                    margin_top="-5rem",
-                    padding_x="1rem",  # Añade un poco de padding horizontal
+                        navbar(),
+                        justify="center",
+            
                 ),
-                rx.vstack(
-                    form2_(),
-                    width="100%",
-                    max_width=["100%", "90%", "80%", "70%"],
-                    height="100vh",
-                    spacing="1",
-                    align_items="center",
-                    justify_content="center",
-                    margin_top="-5rem"
-                ),
+                rx.hstack(
+                    rx.box(
+                        results_pilar1(),
+                        width="100%",
+                        align_items="center",
+                        margin_top="-5rem",
+                        padding_x="-1rem",  
+                    ),
+                    rx.vstack(
+                        form2_(),
+                        width="100%",
+                        max_width=["100%", "90%", "80%", "70%"],
+                        height="100vh",
+                        spacing="1",
+                        align_items="center",
+                        justify_content="center",
+                        margin_top="-5rem"
+                        ),
+                    ),
             ),
             spacing="5",
+            display="flex",
             align_items="center",
             justify_content="center",
+            align_content="baseline"
         ),
         sign_in_v1()
     )
