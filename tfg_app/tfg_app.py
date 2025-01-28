@@ -216,8 +216,8 @@ def result():
 app = rx.App(style=styles.BASE_STYLE, stylesheets=[f"https://fonts.googleapis.com/css?family={font.value}" for font in Font if font != Font.TITLE.value])
 app.add_page(sign_in)
 #app.add_page(check_email)
-app.add_page(form_pilar1)
+app.add_page(form_pilar1, on_load=AppState.check_sign_in())
 app.api.add_api_route("/calcular_pension/", calcular_pension, methods=["POST"])
-app.add_page(pilar1)
-app.add_page(form_pilar2)
+app.add_page(pilar1,on_load=AppState.check_sign_in())
+app.add_page(form_pilar2,on_load=AppState.check_sign_in())
 

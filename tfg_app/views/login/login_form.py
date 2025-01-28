@@ -3,10 +3,76 @@ from tfg_app.styles.styles import color
 
 class AppState(rx.State):
     signed_in: bool = False
-
+    guest: bool = False
+    def set_guest(self):
+        self.guest = True
     def sign_in(self):
         self.signed_in = True
         return rx.redirect("/")
+    
+    def check_sign_in(self):
+        if self.signed_in:
+            return rx.redirect("/")
+        return rx.redirect("/sign-in")
+    
+    def guest_session(self):
+        self.guest = True
+        return rx.redirect("/")
+def continue_as_guest():
+
+    return rx.dialog.root(
+            rx.dialog.trigger(rx.button(
+                "Continuar como invitado",
+                type="submit",
+                size="3",
+                padding=["1em", "1.5em", "2em"],
+                width=["100%", "50%", "20%"],  # Responsive widths
+                max_width="100%",
+                bg=color.BACKGROUND.value,
+                border=".0625rem solid", 
+                color="white",
+                box_shadow="0 .25rem .375rem #0003",
+                _hover={"bg": "gray.100"},
+                display="flex",
+                justify_content="center"
+            ),),
+            rx.dialog.content(
+                rx.dialog.title("¿Estás seguro?"),
+                rx.dialog.description("Si continúas como invitado, perderás precisión en las predicciones."),
+                rx.flex(
+                    rx.dialog.close(
+                        rx.button("Cancelar",
+                                   
+                        bg="white",
+                        color="navy",
+                        border="1px solid",
+                        box_shadow="0 .25rem .375rem #0003",
+                        ),
+                        color_scheme="gray",
+                        variant="soft",
+                        width="50%"
+                    
+                       
+                    ),
+                    rx.dialog.close(
+                        rx.button("Continuar",
+                                  on_click=AppState.guest_session,
+                        bg="navy",
+                        color="white",
+                        border="1px solid",
+                        box_shadow="0 .25rem .375rem #0003",),
+                        width="50%"
+                    ),
+                    width="60%",
+                    spacing="3",
+                    margin_top="1rem",
+                    justify="end",
+                    align="end"
+                ),
+                bg="navy"
+            ),
+            
+        )
 def sign_in_v1() -> rx.Component:
     return rx.center(
         rx.vstack(
@@ -30,22 +96,7 @@ def sign_in_v1() -> rx.Component:
                 _hover={"bg": "white.100"},
                 on_click=AppState.sign_in,
             ),
-            rx.button(
-                "Continuar como invitado",
-                type="submit",
-                size="3",
-                padding=["1em", "1.5em", "2em"],
-                width=["100%", "50%", "20%"],  # Responsive widths
-                max_width="100%",
-                bg=color.BACKGROUND.value,
-                border=".0625rem solid", 
-                color="white",
-                box_shadow="0 .25rem .375rem #0003",
-                _hover={"bg": "gray.100"},
-                on_click=AppState.sign_in,
-                display="flex",
-                justify_content="center"
-            ),
+            continue_as_guest(),
             width="100%",
             height="100vh",
             color="white",
