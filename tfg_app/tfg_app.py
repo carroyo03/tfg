@@ -59,7 +59,7 @@ def sign_in():
 @rx.page("/")
 def form_pilar1():
     return rx.cond(
-        AppState.signed_in,
+        AppState.signed_in | AppState.guest,
         rx.vstack(
             navbar(),
             rx.vstack(
@@ -145,7 +145,7 @@ def pilar1():
 @rx.page("/form2")
 def form_pilar2():
     return rx.cond(
-        AppState.signed_in,
+        AppState.signed_in | AppState.guest,
         rx.vstack(
                 rx.button(
                     "<- Atrás", 
@@ -172,7 +172,6 @@ def form_pilar2():
                         results_pilar1(),
                         width="100%",
                         align_items="center",
-                        margin_top="-5rem",
                         padding_x="-1rem",  
                     ),
                     rx.vstack(
@@ -183,7 +182,6 @@ def form_pilar2():
                         spacing="1",
                         align_items="center",
                         justify_content="center",
-                        margin_top="-5rem"
                         ),
                     ),
             ),
@@ -218,6 +216,6 @@ app.add_page(sign_in)
 #app.add_page(check_email)
 app.add_page(form_pilar1, on_load=AppState.check_sign_in())
 app.api.add_api_route("/calcular_pension/", calcular_pension, methods=["POST"])
-app.add_page(pilar1,on_load=AppState.check_sign_in())
-app.add_page(form_pilar2,on_load=AppState.check_sign_in())
+app.add_page(pilar1,on_load=AppState.check_sign_in("/pilar1"))
+app.add_page(form_pilar2,on_load=AppState.check_sign_in("/form2"))
 
