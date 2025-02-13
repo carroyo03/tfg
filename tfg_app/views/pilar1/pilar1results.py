@@ -15,7 +15,7 @@ def redondear(numero):
 def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
     # Prepara los datos del gráfico
     data = [
-        {"name": "Pensión", "value": redondear(ratio_sustitucion), "fill": "#00FF7F"},
+        {"name": "Pensión pública", "value": redondear(ratio_sustitucion), "fill": "#00FF7F"},
         {"name": "Salario", "value": redondear(100 - ratio_sustitucion), "fill": "#D3D3D3"},
     ]
     

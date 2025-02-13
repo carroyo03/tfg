@@ -4,10 +4,10 @@ import reflex as rx
 from tfg_app.styles.styles import Size as size
 
 class Company2PState(rx.State):
-    value = 0
+    value : float = 0
 
     def set_value(self,value):
-        self.value = value
+        self.value = float(value)
 
     @rx.event
     async def reset_values(self):

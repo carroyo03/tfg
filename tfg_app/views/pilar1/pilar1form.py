@@ -33,7 +33,7 @@ class FormState(rx.State):
             del form_data['year']
             self.form_data = form_data
             
-            pension = await self.send_data_to_backend(form_data)
+            pension = await self.send_data_to_backend(self.form_data)
             state = await self.get_state(GlobalState)
             state.set_pension_primer_pilar(pension)
             return rx.redirect("/pilar1")
@@ -75,7 +75,7 @@ class FormState(rx.State):
         yield AvgSalaryState
 
     async def send_data_to_backend(self, form_data: dict):
-        from tfg_app.backend.main import calcular_pension
+        from tfg_app.backend.main import calcular_pension_1p
         try:
             """
             df_users = pd.read_csv('usuarios.csv', encoding='unicode_escape', sep=';')
@@ -126,7 +126,7 @@ class FormState(rx.State):
                 return
 
             logging.info("Datos filtrados: %s", form_data)
-            pension = await calcular_pension(form_data)
+            pension = await calcular_pension_1p(form_data)
             self.form_data = form_data
             logging.info(f"Pensión calculada: {pension}")
             return pension

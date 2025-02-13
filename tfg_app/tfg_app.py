@@ -4,9 +4,10 @@ from tfg_app.views.pilar2.pilar2form import form2_
 from tfg_app.components.navbar import navbar
 from tfg_app.styles import styles,colors
 from tfg_app.styles.fonts import Font
-from tfg_app.backend.main import calcular_pension
+from tfg_app.backend.main import calcular_pension_1p
 from tfg_app.views.results.result import final_result
 from tfg_app.views.pilar1.pilar1results import results_pilar1
+from tfg_app.views.pilar2.pilar2results import results_pilar2
 from tfg_app.styles.styles import Size as size
 from typing import Callable
 from datetime import datetime
@@ -194,6 +195,74 @@ def form_pilar2():
         sign_in_v1()
     )
 
+
+@rx.page("/pilar2")#,on_load=AuthState.on_load)
+def pilar2():
+    return rx.vstack(
+        navbar(),
+        rx.box(
+            rx.heading(
+                "Cálculo de pensión pública y de empresa",
+                color="white",
+                font_family=Font.TITLE.value,
+                font_size=size.BIG.value,
+                font_weight="bold",
+                text_align="center",
+                width="100%",
+                padding_top="3rem"
+            ),
+            width="100%",
+            position="sticky",
+            top="0",
+            z_form1="1",
+            background_color="rgba(0, 51, 141, 0.9)",  # Azul semi-transparente
+            backdrop_filter="blur(5px)",
+        ),
+        rx.box(
+            results_pilar2(),
+            width="100%",
+            max_width="800px",  # Limita el ancho máximo del contenido
+            margin="0 auto",  # Centra horizontalmente
+            margin_top="-5rem",
+            padding_x="1rem",  # Añade un poco de padding horizontal
+        ),
+        rx.center(
+            rx.button(
+                "Atrás", 
+                on_click=rx.redirect("/form2"), 
+                color="white",
+                background_color="transparent",
+                border="1px solid",
+                box_shadow="0 .25rem .375rem #0003",
+                width="20%",
+                height="auto"
+            ),
+            rx.button(
+                "Siguiente",
+                on_click=rx.redirect("/form3"),
+                background_color="white",
+                color=colors.Color.BACKGROUND.value,
+                border="1px solid",
+                box_shadow="0 .25rem .375rem #0003",
+                width="20%",
+                height="auto"
+            ),
+            width="100%",
+            margin_top="-7rem",
+            spacing="2",
+            align="center",
+            justify="center",
+        ),
+
+        width="100%",
+        min_height="100vh",
+        spacing="0",
+        align_items="stretch",
+        background_color="#00338D",  # Fondo azul
+    )
+
+
+
 @rx.page("/result")#,on_load=AuthState.on_load) 
 def result():
     return rx.box(
@@ -215,7 +284,7 @@ app = rx.App(style=styles.BASE_STYLE, stylesheets=[f"https://fonts.googleapis.co
 app.add_page(sign_in)
 #app.add_page(check_email)
 app.add_page(form_pilar1, on_load=AppState.check_sign_in())
-app.api.add_api_route("/calcular_pension/", calcular_pension, methods=["POST"])
+app.api.add_api_route("/calcular_pension/", calcular_pension_1p, methods=["POST"])
 app.add_page(pilar1,on_load=AppState.check_sign_in("/pilar1"))
 app.add_page(form_pilar2,on_load=AppState.check_sign_in("/form2"))
 

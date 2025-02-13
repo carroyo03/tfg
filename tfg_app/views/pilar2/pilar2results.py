@@ -12,11 +12,12 @@ def redondear(numero):
     return math.ceil(numero*100)/100
 
 
-def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
+def show_ratio_pie_chart2(ratio_sust_1,ratio_sust_2) -> rx.Component:
     # Prepara los datos del gráfico
     data = [
-        {"name": "Pensión", "value": redondear(ratio_sustitucion), "fill": "#00FF7F"},
-        {"name": "Salario", "value": redondear(100 - ratio_sustitucion), "fill": "#D3D3D3"},
+        {"name": "Pensión pública", "value": redondear(ratio_sust_1), "fill": "#00FF7F"},
+        {"name":"Pensión de empresa","value":redondear(ratio_sust_2),"fill":"#FFA500"},
+        {"name": "Salario", "value": redondear(100 - ratio_sust_1 - ratio_sust_2), "fill": "#D3D3D3"},
     ]
     
     return rx.vstack(
@@ -46,7 +47,7 @@ def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
                 width="100%",
                 height=250,
             ),
-            rx.text(f"{ratio_sustitucion:.2f}% de cobertura", color="black", font_size="1.5em", text_align="center"),
+            rx.text(f"{ratio_sust_1 + ratio_sust_2:.2f}% de cobertura", color="black", font_size="1.5em", text_align="center"),
             border_radius="md",
             box_shadow="lg",
             background_color="white",
@@ -67,13 +68,16 @@ def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
 
 
 
-def results_pilar1() -> rx.Component:
+def results_pilar2() -> rx.Component:
     pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
     pension_1p_anual = redondear(pension_primer_pilar) * 12
+    pension_segundo_pilar = GlobalState.pension_segundo_pilar.to(float)
+    pension_2p_anual = redondear(pension_segundo_pilar) * 12
     # (math.ceil(pension_primer_pilar*12*100)/100).to(float)
     salario_actual = FormState.form_data['salario_medio'].to(float)
     salario_mensual = redondear(salario_actual/12)
-    ratio_sustitucion = calcular_ratio_sustitucion(pension_primer_pilar, salario_actual)
+    ratio_sust_1 = calcular_ratio_sustitucion(pension_primer_pilar, salario_actual)
+    ratio_sust_2 = calcular_ratio_sustitucion(pension_segundo_pilar, salario_actual)
     
     return rx.center(
         rx.vstack(
@@ -81,13 +85,13 @@ def results_pilar1() -> rx.Component:
                 rx.vstack(
                     rx.hstack(
                         rx.heading("Pensión mensual:", size="4", color="black"),
-                        rx.text(f"{redondear(pension_primer_pilar)} € / mes", color="black"),
+                        rx.text(f"{redondear(pension_primer_pilar + pension_segundo_pilar)} € / mes", color="black"),
                         spacing="1",
                         width="100%",
                     ),
                     rx.hstack(
                         rx.heading("Pensión anual:", size="4", color="black"),
-                        rx.text(f"{redondear(pension_1p_anual)} € / año", color="black"),
+                        rx.text(f"{redondear(pension_1p_anual + pension_2p_anual)} € / año", color="black"),
                         spacing="1",
                         width="100%",
                     ),
@@ -113,7 +117,7 @@ def results_pilar1() -> rx.Component:
                 justify="between",
                 width="100%",
             ),
-            show_ratio_pie_chart(ratio_sustitucion),
+            show_ratio_pie_chart2(ratio_sust_1, ratio_sust_2),
             align_items="center",
             justify_content="center",
             padding="1em",
