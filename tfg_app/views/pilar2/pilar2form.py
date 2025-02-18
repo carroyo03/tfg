@@ -1,5 +1,5 @@
 import reflex as rx
-from tfg_app.components.slider import rentabilidad_estimada
+from tfg_app.components.slider import SliderState, rentabilidad_estimada
 from tfg_app.styles.colors import Color as color
 from tfg_app.styles.styles import Size as size
 from tfg_app.styles.fonts import Font
@@ -85,7 +85,7 @@ class Form2State(rx.State):
         self.form_data = {}
         
         # Limpia los substates
-        for state_class in [Employee2PState, Company2PState]:
+        for state_class in [Employee2PState, Company2PState, SliderState]:
             state= await self.get_state(state_class)
             await state.reset_values()
         
@@ -140,7 +140,7 @@ def form2():
         rx.vstack(
             input_text("Aportación anual de la empresa al PPE","aportacion_empresa", Company2PState,"number"),
             aportar(f"¿Quieres aportar un 2% a tu plan de pensiones de la empresa?"),
-            rentabilidad_estimada(),
+            rentabilidad_estimada(2),
             rx.hstack(
                 rx.button(
                     "Limpiar formulario",
@@ -200,7 +200,7 @@ def form2_():
                 align="center"
         ),
         rx.center(
-            rx.spinner(size="9"),
+            rx.spinner(size="3"),
             padding="10em"
         )
     )

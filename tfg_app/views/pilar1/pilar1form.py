@@ -211,7 +211,7 @@ def form1_():
             ),
         ),
         rx.center(
-            rx.spinner(size="9"),
+            rx.spinner(size="3"),
             padding="10em"
         )
     )

@@ -329,7 +329,7 @@ def calcular_pension_segundo_pilar(aportacion_empleador, aportacion_empleado_vol
     return pension_2p / 12
 
 
-def calcular_pension_tercer_pilar(aportacion_periodica, periodo_aportacion_annos, rentabilidad_anual_esperada, edad_jubilacion, tipo_interes_tecnico, gastos_gestion_anual_percent):
+def calcular_pension_tercer_pilar(aportacion_periodica, periodo_aportacion_annos, rentabilidad_anual_esperada, edad_jubilacion):
     """
     Calcula una estimación MUY SIMPLIFICADA de la pensión anual del TERCER PILAR
     (ahorro individual para la jubilación) considerando las aportaciones periódicas,
@@ -343,9 +343,7 @@ def calcular_pension_tercer_pilar(aportacion_periodica, periodo_aportacion_annos
         periodo_aportacion_annos (int): Número de años durante los que se realizan las aportaciones.
         rentabilidad_anual_esperada (float): Rentabilidad anual esperada de las inversiones (en decimal, e.g., 0.05 para 5%).
         edad_jubilacion (int): Edad de jubilación deseada del empleado.
-        tipo_interes_tecnico (float): Tipo de interés técnico anual (en decimal, e.g., 0.01 para 1%).
-        gastos_gestion_anual_percent (float): Gastos de gestión anuales en porcentaje (e.g., 0.5 para 0.5%).
-
+        
     Returns:
         float: Estimación MUY SIMPLIFICADA de la pensión anual del tercer pilar.
     """
@@ -360,12 +358,10 @@ def calcular_pension_tercer_pilar(aportacion_periodica, periodo_aportacion_annos
         capital_acumulado += rendimiento # Añadir rendimiento al capital
 
 
-    renta_anual_base = capital_acumulado / esperanza_vida_jubilacion
-    renta_anual_ajustada_interes = renta_anual_base * (1 + tipo_interes_tecnico)
-    gastos_gestion = renta_anual_ajustada_interes * (gastos_gestion_anual_percent / 100)
-    pension_3p = renta_anual_ajustada_interes - gastos_gestion
+    pension_3p = capital_acumulado / esperanza_vida_jubilacion
+   
 
-    return pension_3p
+    return pension_3p/12
 
 
 

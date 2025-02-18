@@ -34,21 +34,9 @@ class Form3State(rx.State):
     async def handle_submit(self, form_data: dict):
         try:
             prev_form_state = await self.get_state(Form2State)
-            fecha_nacimiento = prev_form_state.stored_form_data['prev_form']['fecha_nacimiento'].strftime("%d/%m/%Y")  # Convertir a string
-            n_hijos = str(prev_form_state.stored_form_data['prev_form'].get('n_hijos', '0'))  # Usar '0' si es None
-            edad_jubilacion = str(prev_form_state.stored_form_data['prev_form']['edad_jubilacion_deseada'])  # Convertir a string
-            
+            prev_form_data = prev_form_state.stored_form_data
             self.form_data['prev_form'] = {
-                'fecha_nacimiento': fecha_nacimiento,
-                'tiene_hijos': prev_form_state.stored_form_data['prev_form']['tiene_hijos'],
-                'n_hijos': n_hijos,
-                'edad_jubilacion_deseada': edad_jubilacion,  # Asegúrate de que este campo esté presente
-                'gender': prev_form_state.stored_form_data['prev_form']['gender'],
-                'salario_medio': prev_form_state.stored_form_data['prev_form']['salario_medio'],
-                'edad_inicio_trabajo': prev_form_state.stored_form_data['prev_form']['edad_inicio_trabajo'],
-                'r_cotizacion': prev_form_state.stored_form_data['prev_form']['r_cotizacion'],
-                'lagunas_cotizacion': prev_form_state.stored_form_data['prev_form'].get('lagunas_cotizacion', ''),  # Asegúrate de que este campo esté presente
-                'n_lagunas': prev_form_state.stored_form_data['prev_form'].get('n_lagunas', 0),  # Asegúrate de que este campo esté presente
+                'first_form':prev_form_data['prev_form'],
                 'aportacion_empresa': prev_form_state.stored_form_data.get('aportacion_empresa',0),
                 'quiere_aportar': prev_form_state.stored_form_data.get('quiere_aportar','No'),
                 'aportacion_empleado_2p': prev_form_state.stored_form_data.get('aportacion_empleado',0)
@@ -111,7 +99,7 @@ def form3():
     return rx.form(
         rx.vstack(
             input_text("Aportación anual al plan privado de pensiones","aportacion_empleado_3p", Employee3PState,"number"),
-            rentabilidad_estimada(),
+            rentabilidad_estimada(3),
             rx.hstack(
                 rx.button(
                     "Limpiar formulario",
@@ -159,7 +147,7 @@ def form3_():
                         "Simulador de pensiones: Pensión privada",
                         color="white",
                         font_family=Font.TITLE.value,
-                        font_size=size.BIG.value,
+                        font_size=size.LARGE.value,
                         font_weight="bold",
                         margin_top=size.SMALL.value,
                     ),
@@ -171,7 +159,7 @@ def form3_():
                 ),
         ),
         rx.center(
-            rx.spinner(size="9"),
+            rx.spinner(size="3"),
             padding="10em"
         )
     )

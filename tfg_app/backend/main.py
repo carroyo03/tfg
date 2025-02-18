@@ -23,11 +23,13 @@ class FormData2(BaseModel):
     prev_form: FormData
     quiere_aportar: str
     aportacion_empresa: float
+    rentabilidad_2: int
 
 
 class FormData3(BaseModel):
     prev_form: FormData2
     aportacion_empleado_3p: float
+    rentabilidad_3: int
 
 def calcular_edad(fecha_nacimiento):
     fecha_nacimiento = datetime.strptime(fecha_nacimiento, "%d/%m/%Y")
@@ -57,7 +59,7 @@ async def calcular_pension_2p(data: dict):
         categoria=2,  # Asumir que la categoría es 2
         edad_jubilacion=form_data.prev_form.edad_jubilacion_deseada,
         periodo_aportacion_annos=annos_por_trabajar(edad_actual, form_data.prev_form.edad_jubilacion_deseada),
-        rentabilidad_anual_esperada=0.03  # Asumir una rentabilidad anual del 3%,!!!!!!!!! habrá que cambiar esto
+        rentabilidad_anual_esperada=form_data.rentabilidad_2/100  # ¡habrá que cambiar esto
     )
     return round(pension_segundo_pilar, 2)
 
@@ -70,7 +72,7 @@ async def calcular_pension_3p(data:dict):
     pension_tercer_pilar = calcular_pension_tercer_pilar(
         aportacion_periodica=form_data.aportacion_empleado_3p,
         edad_jubilacion=first_form_data.edad_jubilacion_deseada,
-        rentabilidad_anual_esperada=0.03,  # Asumir una rentabilidad anual del 3%
+        rentabilidad_anual_esperada=form_data.rentabilidad_3/100,  #Cambiar esto
         periodo_aportacion_annos=annos_por_trabajar(edad_actual, first_form_data.edad_jubilacion_deseada)
     )
 

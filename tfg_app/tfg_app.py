@@ -291,7 +291,7 @@ def form_pilar3():
 
 
 
-@rx.page("/result")#,on_load=AuthState.on_load) 
+@rx.page("/results")#,on_load=AuthState.on_load) 
 def result():
     return rx.cond(
         AppState.signed_in | AppState.guest,
@@ -319,4 +319,7 @@ app.add_page(form_pilar1, on_load=AppState.check_sign_in())
 app.api.add_api_route("/calcular_pension/", calcular_pension_1p, methods=["POST"])
 app.add_page(pilar1,on_load=AppState.check_sign_in("/pilar1"))
 app.add_page(form_pilar2,on_load=AppState.check_sign_in("/form2"))
+app.add_page(pilar2,on_load=AppState.check_sign_in("/pilar2"))
+app.add_page(form_pilar3,on_load=AppState.check_sign_in("/form3"))
+app.add_page(result,on_load=AppState.check_sign_in("/results"))
 
