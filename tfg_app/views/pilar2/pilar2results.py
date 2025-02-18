@@ -26,7 +26,7 @@ def show_ratio_pie_chart2(ratio_sust_1,ratio_sust_2) -> rx.Component:
         rx.box(
             rx.hstack(
                 rx.heading("Ratio de Sustitución", size="4", color="black", aria_label="Ratio de Sustitución"),
-                info_button("El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión pública."),
+                info_button("El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión."),
                 spacing="2",
                 align="center"
             ),
@@ -71,14 +71,18 @@ def show_ratio_pie_chart2(ratio_sust_1,ratio_sust_2) -> rx.Component:
 
 
 def results_pilar2() -> rx.Component:
-    pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
-    pension_1p_anual = redondear(pension_primer_pilar) * 12
-    pension_segundo_pilar = GlobalState.pension_segundo_pilar.to(float)
-    pension_2p_anual = redondear(pension_segundo_pilar) * 12
-    # (math.ceil(pension_primer_pilar*12*100)/100).to(float)
+    # Salario
     salario_actual = FormState.form_data['salario_medio'].to(float)
     salario_mensual = redondear(salario_actual/12)
+
+    # 1er pilar
+    pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
+    pension_1p_anual = redondear(pension_primer_pilar) * 12
     ratio_sust_1 = calcular_ratio_sustitucion(pension_primer_pilar, salario_actual)
+
+    # 2o pilar
+    pension_segundo_pilar = GlobalState.pension_segundo_pilar.to(float)
+    pension_2p_anual = redondear(pension_segundo_pilar) * 12
     ratio_sust_2 = calcular_ratio_sustitucion(pension_segundo_pilar, salario_actual)
     
     return rx.center(

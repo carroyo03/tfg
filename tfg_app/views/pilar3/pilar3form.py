@@ -1,4 +1,6 @@
 import reflex as rx
+from tfg_app.backend.pens import calcular_pension_tercer_pilar
+from tfg_app.components.slider import rentabilidad_estimada
 from tfg_app.styles.colors import TextColor as txcolor, Color as color
 from tfg_app.styles.styles import Size as size
 from tfg_app.styles.fonts import Font
@@ -82,42 +84,19 @@ class Form3State(rx.State):
     def default_fields(self):
         yield Employee3PState
 
-    async def send_data_to_backend(self, form_data: dict):
-        from tfg_app.backend.main import calcular_pension_tercer_pilar
+    async def send_data_to_backend(self, form_data_prev: dict):
+        from tfg_app.backend.main import calcular_pension_3p
         try:
            
+
+            form_data = {}
+            prev_form_state = await self.get_state(Form2State)
+            form_data['prev_form'] = prev_form_state.stored_form_data
+            form_data.update(form_data_prev)
             logging.info("Valores de form_data: %s", form_data)
 
-            df= pd.DataFrame()
-            df["fecha_nacimiento"] = [datetime.datetime.strptime(form_data['fecha_nacimiento'], "%d/%m/%Y")]
-            if form_data["tiene_hijos"].lower().startswith("s"):
-                df["tiene_hijos"] = "Sí"
-                df["n_hijos"] = "4+" if form_data['n_hijos'] == "4+" else int(form_data['n_hijos'])
-            else:
-                df["tiene_hijos"] = "No"
-                df["n_hijos"] = None
-
-            df["edad_jubilacion_deseada"] = int(form_data['edad_jubilacion'])
-
-            
-
-            columnas_restantes = ['gender', 'salario_medio', 'edad_inicio_trabajo', 'r_cotizacion']
-            for columna in columnas_restantes:
-                df[columna] = form_data[columna]
-
-            if form_data["lagunas_cotizacion"].lower().startswith("s"):
-                df["n_lagunas"] = form_data["n_lagunas"]
-
-            logging.info("DataFrame filtrado: %s", df)
-
-            if not df.empty:
-                form_data = df.iloc[0].to_dict()
-            else:
-                logging.error("No se encontraron registros que coincidan con los criterios.")
-                return
-
             logging.info("Datos filtrados: %s", form_data)
-            pension = await calcular_pension_tercer_pilar(form_data)
+            pension = await calcular_pension_3p(form_data)
             self.form_data = form_data
             logging.info(f"Pensión calculada: {pension}")
             return pension
@@ -125,16 +104,14 @@ class Form3State(rx.State):
             logging.error(f"Error al enviar datos al backend: {e}")
             raise e
 
+
+
+
 def form3():
     return rx.form(
         rx.vstack(
-            date_picker("Fecha de nacimiento"),
-            gender(),
-            input_text("Salario medio obtenido","salario_medio", AvgSalaryState, "number"),
-            children(),
-            input_text("Edad a la que empezaste a cotizar","edad_inicio_trabajo", StartAgeState, "number"),
-            input_text("Edad deseada de jubilación", "edad_jubilacion",AgeState, "number"),
-            tipo_regimen(),
+            input_text("Aportación anual al plan privado de pensiones","aportacion_empleado_3p", Employee3PState,"number"),
+            rentabilidad_estimada(),
             rx.hstack(
                 rx.button(
                     "Limpiar formulario",
@@ -179,7 +156,7 @@ def form3_():
         rx.vstack(
                 rx.vstack(
                     rx.heading(
-                        "Simulador de pensiones",
+                        "Simulador de pensiones: Pensión privada",
                         color="white",
                         font_family=Font.TITLE.value,
                         font_size=size.BIG.value,

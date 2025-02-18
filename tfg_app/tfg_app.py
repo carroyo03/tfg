@@ -6,7 +6,8 @@ from tfg_app.components.navbar import navbar
 from tfg_app.styles import styles,colors
 from tfg_app.styles.fonts import Font
 from tfg_app.backend.main import calcular_pension_1p
-from tfg_app.views.results.result import final_result
+from tfg_app.views.pilar3.pilar3form import form3_
+from tfg_app.views.results.result import final_result, final_results
 from tfg_app.views.pilar1.pilar1results import results_pilar1
 from tfg_app.views.pilar2.pilar2results import results_pilar2
 from tfg_app.styles.styles import Size as size
@@ -22,38 +23,7 @@ from reflex_clerk import ClerkState
 import reflex_clerk as clerk
 from dotenv import load_dotenv
 
-#from tfg_app.views.login.clerk_components import sign_in_page
-#from tfg_app.views.login.login_form import login_page,LOGIN_ROUTE,State as AuthState
-"""
-@rx.page("/sign-in")
-def login():
-    return lform()
 
-
-load_dotenv()
-
-
-
-
-
-
-@rx.page(LOGIN_ROUTE)
-def sign_in():
-    return rx.flex(
-        login_page(),
-        width="100%",
-        height="100vh",
-        align_items="center",
-        justify_content="center",
-    )
-
-
-@rx.page("/check-your-email")
-def check_email():
-    return rx.box(
-        rx.heading("Check your email inbox or spam folder", size="3"),
-    )
-"""
 
 
 
@@ -267,21 +237,77 @@ def pilar2():
         background_color="#00338D",  # Fondo azul
     )
 
+@rx.page("/form3")
+def form_pilar3():
+    return rx.cond(
+        AppState.signed_in | AppState.guest,
+        rx.vstack(
+                rx.button(
+                    "<- Atrás", 
+                    on_click=rx.redirect("/pilar2"), 
+                    color="white",
+                    background_color="transparent",
+                    border="1px solid",
+                    box_shadow="0 .25rem .375rem #0003",
+                    width="auto",
+                    height="auto",
+                    position="absolute",
+                    top="1rem",
+                    left="1rem",
+                    _hover={"bg": colors.Color.SECONDARY.value, "color": "white"}
+                ),
+            rx.vstack(
+                rx.box(
+                        navbar(),
+                        justify="center",
+            
+                ),
+                rx.hstack(
+                    rx.box(
+                        results_pilar2(),
+                        width="100%",
+                        align_items="center",
+                        padding_x="-1rem",  
+                    ),
+                    rx.vstack(
+                        form3_(),
+                        width="100%",
+                        max_width=["100%", "90%", "80%", "70%"],
+                        height="100vh",
+                        spacing="1",
+                        align_items="center",
+                        justify_content="center",
+                        ),
+                    ),
+            ),
+            spacing="5",
+            display="flex",
+            align_items="center",
+            justify_content="center",
+            align_content="baseline"
+        ),
+        sign_in_v1()
+    )
+
 
 
 @rx.page("/result")#,on_load=AuthState.on_load) 
 def result():
-    return rx.box(
-        navbar(),
-        rx.vstack(
-            final_result(),
-            width="100%",
-            max_width=["100%", "90%", "80%", "70%"],
-            height="100vh",
-            spacing="1",
-            align_items="center",
-            margin_bottom="0"
-        )
+    return rx.cond(
+        AppState.signed_in | AppState.guest,
+        rx.box(
+                navbar(),
+                rx.vstack(
+                    final_results(),
+                    width="100%",
+                    max_width=["100%", "90%", "80%", "70%"],
+                    height="100vh",
+                    spacing="1",
+                    align_items="center",
+                    margin_bottom="0"
+                )
+        ),
+        sign_in_v1()
     )
 
 

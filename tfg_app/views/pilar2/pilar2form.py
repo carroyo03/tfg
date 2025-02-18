@@ -1,4 +1,5 @@
 import reflex as rx
+from tfg_app.components.slider import rentabilidad_estimada
 from tfg_app.styles.colors import Color as color
 from tfg_app.styles.styles import Size as size
 from tfg_app.styles.fonts import Font
@@ -139,6 +140,7 @@ def form2():
         rx.vstack(
             input_text("Aportación anual de la empresa al PPE","aportacion_empresa", Company2PState,"number"),
             aportar(f"¿Quieres aportar un 2% a tu plan de pensiones de la empresa?"),
+            rentabilidad_estimada(),
             rx.hstack(
                 rx.button(
                     "Limpiar formulario",
@@ -182,7 +184,7 @@ def form2_():
         rx.vstack(
                 rx.vstack(
                     rx.heading(
-                        "Simulador de pensiones: 2º Pilar",
+                        "Simulador de pensiones: Pensión de empresa",
                         color="white",
                         font_family=Font.TITLE.value,
                         font_size=size.LARGE.value,

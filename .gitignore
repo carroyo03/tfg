@@ -11,6 +11,6 @@ __azurite_db_table__.json
 .vscode/
 .env
 .states/
-
+git-update.bat
 
 
