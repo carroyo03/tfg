@@ -3,6 +3,8 @@ import reflex_chakra as rc
 from tfg_app.styles.styles import Size as size
 
 
+
+
 def navbar()->rx.Component:
     return rx.hstack(
         rx.box(

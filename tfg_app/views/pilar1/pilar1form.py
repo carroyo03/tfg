@@ -18,6 +18,7 @@ logging.basicConfig(level=logging.INFO)
 
 class FormState(rx.State):
     form_data: dict = {}
+    is_loading: bool = False
     
     @rx.var
     def stored_form_data(self) -> dict:
@@ -35,7 +36,7 @@ class FormState(rx.State):
             
             pension = await self.send_data_to_backend(self.form_data)
             state = await self.get_state(GlobalState)
-            state.set_pension_primer_pilar(pension)
+            state.set_pension("primer",pension)
             return rx.redirect("/pilar1")
         except Exception as e:
             logging.error(f"Error en handle_submit: {e}")
@@ -43,11 +44,17 @@ class FormState(rx.State):
 
     @rx.event
     async def clear_form(self):
+
+        self.is_loading = True
+
         # Limpia el estado principal
         self.form_data = {}
         
         # Limpia los substates
-        for state_class in [AgeState, GenderState, DateState, RadioGroupState, ChildrenNumberState, StartAgeState, RadioGroup1State, TypeRegState, LagsCotState, AvgSalaryState]:
+        for state_class in [AgeState, GenderState, DateState, RadioGroupState, 
+                            ChildrenNumberState, StartAgeState, 
+                            RadioGroup1State, TypeRegState,
+                            LagsCotState, AvgSalaryState]:
             state= await self.get_state(state_class)
             await state.reset_values()
         
@@ -184,20 +191,27 @@ def form1():
     )
 
 def form1_():
-    return rx.vstack(
+    return rx.cond(
+        rx.State.is_hydrated,
         rx.vstack(
-            rx.heading(
-                "Simulador de pensiones",
-                color="white",
-                font_family=Font.TITLE.value,
-                font_size=size.BIG.value,
-                font_weight="bold",
-                margin_top=size.SMALL.value,
+            rx.vstack(
+                rx.heading(
+                    "Simulador de pensiones",
+                    color="white",
+                    font_family=Font.TITLE.value,
+                    font_size=size.BIG.value,
+                    font_weight="bold",
+                    margin_top=size.SMALL.value,
+                ),
+                form1(),
+                overflow="hidden",
+                align="center",
+                padding="1em",
+                height="100%",
             ),
-            form1(),
-            overflow="hidden",
-            align="center",
-            padding="1em",
-            height="100%",
         ),
+        rx.center(
+            rx.spinner(size="9"),
+            padding="10em"
+        )
     )

@@ -5,6 +5,8 @@ from tfg_app.styles.styles import Size as size
 from tfg_app.backend.pens import calcular_ratio_sustitucion
 from tfg_app.views.pilar1.pilar1form import FormState
 from tfg_app.components.info_button import info_button
+
+
 import math
 
 

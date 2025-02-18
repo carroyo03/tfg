@@ -13,6 +13,12 @@ from tfg_app.components.tipo_regimen import tipo_regimen, RadioGroup1State, Type
 from tfg_app.components.seg_pilar.aportaciones import Company2PState
 from tfg_app.styles.styles import BASE_STYLE
 from tfg_app.views.pilar1.pilar1results import results_pilar1
+
+
+
+
+
+
 import pandas as pd
 import datetime
 import logging
@@ -22,6 +28,7 @@ logging.basicConfig(level=logging.INFO)
 
 class Form2State(rx.State):
     form_data: dict = {}
+    is_loading: bool = False
     
     @rx.var
     def stored_form_data(self) -> dict:
@@ -35,7 +42,7 @@ class Form2State(rx.State):
             prev_form_state = await self.get_state(FormState)
             
             # Convertir fecha_nacimiento a string
-            fecha_nacimiento = prev_form_state.stored_form_data['fecha_nacimiento'].strftime("%Y-%m-%d")  # Convertir a string
+            fecha_nacimiento = prev_form_state.stored_form_data['fecha_nacimiento'].strftime("%d/%m/%Y")  # Convertir a string
             
             # Asegurarse de que n_hijos tenga un valor válido
             n_hijos = str(prev_form_state.stored_form_data.get('n_hijos', '0'))  # Usar '0' si es None
@@ -64,7 +71,7 @@ class Form2State(rx.State):
             
             pension = await self.send_data_to_backend(self.form_data)
             state = await self.get_state(GlobalState)
-            state.set_pension_segundo_pilar(pension)
+            state.set_pension("segundo",pension)
             return rx.redirect("/pilar2")
         except Exception as e:
             logging.error(f"Error en handle_submit: {e}")
@@ -72,6 +79,7 @@ class Form2State(rx.State):
 
     @rx.event
     async def clear_form(self):
+        self.is_loading = True
         # Limpia el estado principal
         self.form_data = {}
         
@@ -169,21 +177,28 @@ def form2():
     )
 
 def form2_():
-    return rx.vstack(
+    return rx.cond(
+        rx.State.is_hydrated,
         rx.vstack(
-            rx.heading(
-                "Simulador de pensiones: 2º Pilar",
-                color="white",
-                font_family=Font.TITLE.value,
-                font_size=size.LARGE.value,
-                font_weight="bold",
-                margin_top=size.SMALL.value,
-            ),
-            form2(),
-            overflow="hidden",
-            align="center",
-            padding="1em",
-            height="100%",
+                rx.vstack(
+                    rx.heading(
+                        "Simulador de pensiones: 2º Pilar",
+                        color="white",
+                        font_family=Font.TITLE.value,
+                        font_size=size.LARGE.value,
+                        font_weight="bold",
+                        margin_top=size.SMALL.value,
+                    ),
+                    form2(),
+                    overflow="hidden",
+                    align="center",
+                    padding="1em",
+                    height="100%",
+                ),
+                align="center"
         ),
-        align="center"
+        rx.center(
+            rx.spinner(size="9"),
+            padding="10em"
+        )
     )

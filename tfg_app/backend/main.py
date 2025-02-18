@@ -1,5 +1,7 @@
 from pydantic import BaseModel
-from tfg_app.backend.pens import calcular_primer_pilar,estimar_tiempo_cotizado, calcular_segundo_pilar
+from tfg_app.backend.pens import calcular_primer_pilar,estimar_tiempo_cotizado, calcular_pension_segundo_pilar, calcular_pension_tercer_pilar
+
+
 import datetime
 import reflex as rx
 from datetime import datetime
@@ -23,6 +25,16 @@ class FormData2(BaseModel):
     aportacion_empresa: float
 
 
+class FormData3(BaseModel):
+    prev_form: FormData2
+    aportacion_empleado_3p: float
+
+def calcular_edad(fecha_nacimiento):
+    fecha_nacimiento = datetime.strptime(fecha_nacimiento, "%d/%m/%Y")
+    return int(datetime.today().year - fecha_nacimiento.year)
+
+def annos_por_trabajar(edad_actual,edad_jubilacion_deseada):
+    return int(edad_jubilacion_deseada - edad_actual)
 
 async def calcular_pension_1p(data: FormData):
 
@@ -37,10 +49,29 @@ async def calcular_pension_1p(data: FormData):
 async def calcular_pension_2p(data: dict):
     # Convertir el diccionario a una instancia de FormData2
     form_data = FormData2(**data)  # Desempaquetar el diccionario
-    pension_segundo_pilar = calcular_segundo_pilar(
-        salario_actual=form_data.prev_form.salario_medio,  # Acceder como un diccionario
-        categoria=2,
-        aportacion_voluntaria_ppe=2 if form_data.quiere_aportar.lower().startswith("s") else 0,
-        ppe_porcentaje_empresa=form_data.aportacion_empresa
+    edad_actual = calcular_edad(form_data.prev_form.fecha_nacimiento)
+    pension_segundo_pilar = calcular_pension_segundo_pilar(
+        salario_anual=form_data.prev_form.salario_medio,  # Acceder como un diccionario
+        aportacion_empleado_voluntaria=2 if form_data.quiere_aportar.lower().startswith("s") else 0,
+        aportacion_empleador=form_data.aportacion_empresa,
+        categoria=2,  # Asumir que la categoría es 2
+        edad_jubilacion=form_data.prev_form.edad_jubilacion_deseada,
+        periodo_aportacion_annos=annos_por_trabajar(edad_actual, form_data.prev_form.edad_jubilacion_deseada),
+        rentabilidad_anual_esperada=0.03  # Asumir una rentabilidad anual del 3%,!!!!!!!!! habrá que cambiar esto
     )
     return round(pension_segundo_pilar, 2)
+
+
+async def calcular_pension_3p(data:dict):
+
+    form_data = FormData3(**data)
+    first_form_data = form_data.prev_form.prev_form
+    edad_actual = calcular_edad(first_form_data.fecha_nacimiento)
+    pension_tercer_pilar = calcular_pension_tercer_pilar(
+        aportacion_periodica=form_data.aportacion_empleado_3p,
+        edad_jubilacion=first_form_data.edad_jubilacion_deseada,
+        rentabilidad_anual_esperada=0.03,  # Asumir una rentabilidad anual del 3%
+        periodo_aportacion_annos=annos_por_trabajar(edad_actual, first_form_data.edad_jubilacion_deseada)
+    )
+
+    return round(pension_tercer_pilar, 2)

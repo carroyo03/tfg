@@ -1,6 +1,7 @@
 import reflex as rx
 from tfg_app.styles.fonts import Font
 
+
 class AgeState(rx.State):
     value: str = ""
     

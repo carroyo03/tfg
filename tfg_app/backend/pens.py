@@ -1,8 +1,23 @@
+import os
 import pandas as pd
 from ecbdata import ecbdata as ecb # type: ignore
 import datetime
 import reflex as rx
 import math 
+import requests
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import logging
+import warnings
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.support.ui import WebDriverWait
+
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+warnings.filterwarnings('ignore', message='Unverified HTTPS request')
+
 
 
 # Obtengo los valores del IPC desde la librería del ECB desde 1996 hasta ahora
@@ -107,7 +122,7 @@ def actualizar_base_por_ipc(base, ipc):
 def calcular_base_reguladora(salario_anual, annos_sin_cotizar, tipo_trabajador, es_mujer: bool, annos_a_incluir=25, num_pagas=14):
     meses_a_incluir = annos_a_meses(annos_a_incluir)
     meses_sin_cotizar = annos_a_meses(annos_sin_cotizar)
-    bases_cotizacion = estimar_bases_cotizacion(annos_a_incluir, num_pagas)
+    bases_cotizacion = estimar_bases_cotizacion(salario_anual,annos_a_incluir, num_pagas)
     bases_actualizadas = []
 
     for i, base in enumerate(bases_cotizacion):
@@ -242,57 +257,135 @@ def calcular_ratio_sustitucion(pension_primer_pilar:rx.Var, salario_actual:rx.Va
     r_s = (pension_primer_pilar *12 / salario_actual) * 100
     return (math.ceil(r_s*100)/100).to(float) #Resultado redondeado
 
-def calcular_segundo_pilar(salario_actual, categoria, ppe_porcentaje_empresa=5, aportacion_voluntaria_ppe=0, aportacion_excesos_empresa=0, aportacion_excesos_voluntaria=0, derechos_consolidados=1000, provisiones_matematicas=500):
-    """
-    Calcula las aportaciones al segundo pilar (PPE, Excesos, Flex) según la categoría del usuario y sus aportaciones existentes.
-    
+def obtener_esperanza_vida_jub(edad_jubilacion):
+    """Obtener la esperanza de vida restante en años desde la edad de jubilación.
     Args:
-    - salario_actual: Salario anual bruto del usuario.
-    - categoria: La categoría del usuario (1-5).
-    - ppe_porcentaje_empresa: Porcentaje que la empresa aporta al PPE.
-    - aportacion_voluntaria_ppe: Aportación voluntaria del empleado al PPE.
-    - aportacion_excesos_empresa: Aportación de la empresa al plan de Excesos.
-    - aportacion_excesos_voluntaria: Aportación voluntaria del empleado al plan de Excesos.
-    - derechos_consolidados: Derechos ya acumulados hasta la fecha (PPE y Excesos).
-    - provisiones_matematicas: Provisiones matemáticas ya calculadas.
-    
+        edad_jubilacion (int): Edad de jubilación en años.
     Returns:
-    - total_segundo_pilar: Contribución total del segundo pilar con derechos y provisiones.
+        int: Esperanza de vida restante en años desde la edad de jubilación.
     """
-    
-    print("\n--- Calculando las Aportaciones al Segundo Pilar según categoría ---")
-    
-    # Aportación de la empresa al PPE
-    if categoria in [1, 2, 3]:  # Categorías con PPE y Excesos
-        aportacion_empresa_ppe = salario_actual * (ppe_porcentaje_empresa / 100)
-    else:
-        aportacion_empresa_ppe = 0  # Categorías sin acceso a PPE
-    
-    # Aportaciones voluntarias y de excesos
-    if categoria in [1, 2, 3]:  # Excesos y flexibilidad solo en algunas categorías
-        total_excesos = aportacion_excesos_empresa + aportacion_excesos_voluntaria
-    else:
-        total_excesos = 0
+    try:
+        # Obtención de la esperanza de vida (valor aproximado) usando la API del Banco Mundial
+        url = "http://api.worldbank.org/v2/country/ESP/indicator/SP.DYN.LE00.IN?format=json&per_page=5"
+        response = requests.get(url)
+        data = response.json()[1]
+        # Se recorre para obtener el primer valor disponible (valor reciente)
+        esperanza_vida = None
+        for registro in data:
+            if registro['value'] is not None:
+                esperanza_vida = round(registro['value'], 2)
+                break
+        if esperanza_vida is None:
+            raise ValueError("No se encontró valor válido de esperanza de vida.")
+    except Exception as e:
+        print(f"Error al obtener los datos de esperanza de vida: {e}")
+        esperanza_vida = 83  # Valor por defecto en caso de error
 
-    aportacion_voluntaria_ppe *= salario_actual / 100  # Convertir aportación voluntaria a cantidad monetaria
-    
-    total_ppe = aportacion_empresa_ppe + aportacion_voluntaria_ppe
-    
-    # Mostrar resumen de aportaciones
-    print(f"Aportación de la empresa al PPE: {aportacion_empresa_ppe:.2f} €")
-    print(f"Aportación voluntaria al PPE: {aportacion_voluntaria_ppe:.2f} €")
-    print(f"Total aportación al PPE: {total_ppe:.2f} €")
-    print(f"Aportación total al plan de Excesos: {total_excesos:.2f} €")
-    
-    # Total segundo pilar incluyendo derechos consolidados y provisiones
-    total_segundo_pilar = total_ppe + total_excesos
-    print(f"Derechos consolidados: {derechos_consolidados:.2f} €")
-    print(f"Provisiones matemáticas: {provisiones_matematicas:.2f} €")
-    print(f"Total aportaciones al segundo pilar (con derechos y provisiones): {total_segundo_pilar:.2f} €")
-    
-    return total_segundo_pilar/12
+    print(f"Esperanza de vida: {esperanza_vida} años")
+
+    return int(esperanza_vida - edad_jubilacion)
+
+
+   
 
 
 
 
+
+def calcular_pension_segundo_pilar(aportacion_empleador, aportacion_empleado_voluntaria, categoria, salario_anual, periodo_aportacion_annos:int, edad_jubilacion, rentabilidad_anual_esperada):
+    """
+    Calcula una estimación MUY SIMPLIFICADA de la pensión mensual del SEGUNDO PILAR
+    (previsión social empresarial) separando la aportación del empleador y la aportación voluntaria del empleado,
+    considerando las aportaciones periódicas, la rentabilidad esperada, el factor actuarial (esperanza de vida)
+    y otros factores simplificados.
+
+    Args:
+        aportacion_empleador (float): Porcentaje del salario anual aportado periódicamente por el empleador (por ejemplo, 5%).
+        aportacion_empleado_voluntaria (float): Porcentaje del salario anual aportado voluntariamente por el empleado (e.g., 2.0 para 2%).
+        salario_anual (float): Salario anual del empleado.
+        periodo_aportacion_anios (int): Número de años durante los que se realizan las aportaciones.
+        rentabilidad_anual_esperada (float): Rentabilidad anual esperada de las inversiones (en decimal, e.g., 0.05 para 5%).
+        edad_jubilacion (int): Edad de jubilación deseada del empleado.
+    Returns:
+        float: Estimación MUY SIMPLIFICADA de la pensión anual del segundo pilar.
+    """
+
+    esperanza_vida_jubilacion = obtener_esperanza_vida_jub(edad_jubilacion)
+    if esperanza_vida_jubilacion <= 0:
+        return 0
+    print("Esperanza de vida de jubilación: ", esperanza_vida_jubilacion)
+    capital_acumulado = 0
+    for _ in range(int(periodo_aportacion_annos)):
+        aportacion_anual_empleador = salario_anual * (aportacion_empleador / 100)
+        aportacion_anual_empleado = salario_anual * (aportacion_empleado_voluntaria / 100)
+        aportacion_total_anual = aportacion_anual_empleador + aportacion_anual_empleado
+
+        capital_acumulado += aportacion_total_anual  # Realizar aportación total (empleador + empleado)
+        rendimiento = capital_acumulado * rentabilidad_anual_esperada  # Calcular rendimiento
+        capital_acumulado += rendimiento  # Añadir rendimiento al capital
+    print("Capital acumulado: ", capital_acumulado)
+    pension_2p = capital_acumulado / esperanza_vida_jubilacion
     
+    return pension_2p / 12
+
+
+def calcular_pension_tercer_pilar(aportacion_periodica, periodo_aportacion_annos, rentabilidad_anual_esperada, edad_jubilacion, tipo_interes_tecnico, gastos_gestion_anual_percent):
+    """
+    Calcula una estimación MUY SIMPLIFICADA de la pensión anual del TERCER PILAR
+    (ahorro individual para la jubilación) considerando las aportaciones periódicas,
+    la rentabilidad esperada, el factor actuarial (esperanza de vida) y otros factores simplificados.
+
+    ESTA FUNCIÓN ES SOLO PARA FINES ILUSTRATIVOS Y NO REFLEJA LA COMPLEJIDAD
+    DE LOS CÁLCULOS REALES DE PENSIONES.
+
+    Args:
+        aportacion_periodica (float): Cantidad aportada periódicamente (e.g., anual).
+        periodo_aportacion_annos (int): Número de años durante los que se realizan las aportaciones.
+        rentabilidad_anual_esperada (float): Rentabilidad anual esperada de las inversiones (en decimal, e.g., 0.05 para 5%).
+        edad_jubilacion (int): Edad de jubilación deseada del empleado.
+        tipo_interes_tecnico (float): Tipo de interés técnico anual (en decimal, e.g., 0.01 para 1%).
+        gastos_gestion_anual_percent (float): Gastos de gestión anuales en porcentaje (e.g., 0.5 para 0.5%).
+
+    Returns:
+        float: Estimación MUY SIMPLIFICADA de la pensión anual del tercer pilar.
+    """
+    esperanza_vida_jubilacion = obtener_esperanza_vida_jub(edad_jubilacion)
+    if esperanza_vida_jubilacion <= 0:
+        return 0
+
+    capital_acumulado = 0
+    for _ in range(int(periodo_aportacion_annos)):
+        capital_acumulado += aportacion_periodica  # Realizar aportación
+        rendimiento = capital_acumulado * rentabilidad_anual_esperada # Calcular rendimiento
+        capital_acumulado += rendimiento # Añadir rendimiento al capital
+
+
+    renta_anual_base = capital_acumulado / esperanza_vida_jubilacion
+    renta_anual_ajustada_interes = renta_anual_base * (1 + tipo_interes_tecnico)
+    gastos_gestion = renta_anual_ajustada_interes * (gastos_gestion_anual_percent / 100)
+    pension_3p = renta_anual_ajustada_interes - gastos_gestion
+
+    return pension_3p
+
+
+
+"""
+def calcular_tercer_pilar(capital_inicial, rentabilidad_esperada, aportacion_anual, annos, edad_jubilacion, tasa_conversion=3) -> float:
+    """
+"""
+Calcula la pensión mensual del tercer pilar (ahorro individual) a partir del capital inicial,
+las aportaciones anuales y la rentabilidad esperada.
+
+La acumulación se realiza con la rentabilidad esperada, pero la conversión a anualidad utiliza 
+una tasa de conversión (tasa_conversion) que suele ser más conservadora.
+"""
+"""
+    # Acumular el capital usando interés compuesto y aportaciones anuales
+    capital_final = (capital_inicial * (1 + rentabilidad_esperada / 100) ** annos +
+                     aportacion_anual * (((1 + rentabilidad_esperada / 100) ** annos - 1) / (rentabilidad_esperada / 100)))
+    # Obtener el factor actuarial basado en la tasa_conversion y la edad de jubilación
+    factor_actuarial = calcular_factor_actuarial(tasa_conversion, edad_jubilacion)
+    # La pensión mensual es el capital final dividido por el factor actuarial
+    pension_mensual = capital_final / factor_actuarial
+    return pension_mensual
+"""
