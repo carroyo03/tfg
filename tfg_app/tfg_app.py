@@ -7,7 +7,7 @@ from tfg_app.styles import styles,colors
 from tfg_app.styles.fonts import Font
 from tfg_app.backend.main import calcular_pension_1p
 from tfg_app.views.pilar3.pilar3form import form3_
-from tfg_app.views.results.result import final_result, final_results
+from tfg_app.views.results.result import final_results
 from tfg_app.views.pilar1.pilar1results import results_pilar1
 from tfg_app.views.pilar2.pilar2results import results_pilar2
 from tfg_app.styles.styles import Size as size
