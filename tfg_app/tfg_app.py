@@ -1,12 +1,12 @@
 import reflex as rx
 
-from tfg_app.views.pilar1.pilar1form import form1_
-from tfg_app.views.pilar2.pilar2form import form2_
+from tfg_app.views.pilar1.pilar1form import FormState, form1, form1_
+from tfg_app.views.pilar2.pilar2form import form2, form2_
 from tfg_app.components.navbar import navbar
 from tfg_app.styles import styles,colors
 from tfg_app.styles.fonts import Font
 from tfg_app.backend.main import calcular_pension_1p
-from tfg_app.views.pilar3.pilar3form import form3_
+from tfg_app.views.pilar3.pilar3form import form3, form3_
 from tfg_app.views.results.result import final_results
 from tfg_app.views.pilar1.pilar1results import results_pilar1
 from tfg_app.views.pilar2.pilar2results import results_pilar2
@@ -24,7 +24,12 @@ import reflex_clerk as clerk
 from dotenv import load_dotenv
 
 
-
+def loading():
+    return rx.center(
+        rx.spinner(size="3"),
+        padding="10em",
+        height="100vh"
+    )
 
 
 
@@ -37,21 +42,40 @@ def sign_in():
 def form_pilar1():
     return rx.cond(
         AppState.signed_in | AppState.guest,
-        rx.vstack(
-            navbar(),
+        rx.cond(
+            rx.State.is_hydrated,
+            # Contenido principal cuando está cargado
             rx.vstack(
-                form1_(),
-                width="100%",
-                max_width=["100%", "90%", "80%", "70%"],
-                height="100vh",
-                spacing="1",
-                align_items="center",
-                margin_top="4rem"
+                navbar(),
+                rx.vstack(
+                    rx.vstack(
+                        rx.heading(
+                            "Simulador de pensiones",
+                            color="white",
+                            font_family=Font.TITLE.value,
+                            font_size=size.BIG.value,
+                            font_weight="bold",
+                            margin_top=size.SMALL.value,
+                        ),
+                        form1(),
+                        overflow="hidden",
+                        align="center",
+                        padding="1em",
+                        height="100%",
+                    ),
+                    width="100%",
+                    max_width=["100%", "90%", "80%", "70%"],
+                    height="100vh",
+                    spacing="1",
+                    align_items="center",
+                    margin_top="4rem"
+                ),
             ),
+            # Spinner mientras carga
+            loading()
         ),
         sign_in_v1()
     )
-
 
 @rx.page("/pilar1")#,on_load=AuthState.on_load)
 def pilar1():
@@ -123,7 +147,9 @@ def pilar1():
 def form_pilar2():
     return rx.cond(
         AppState.signed_in | AppState.guest,
-        rx.vstack(
+        rx.cond(
+            rx.State.is_hydrated,
+            rx.vstack(
                 rx.button(
                     "<- Atrás", 
                     on_click=rx.redirect("/pilar1"), 
@@ -138,36 +164,57 @@ def form_pilar2():
                     left="1rem",
                     _hover={"bg": colors.Color.SECONDARY.value, "color": "white"}
                 ),
-            rx.vstack(
-                rx.box(
-                        navbar(),
-                        justify="center",
-            
-                ),
-                rx.hstack(
+                rx.vstack(
                     rx.box(
-                        results_pilar1(),
-                        width="100%",
-                        align_items="center",
-                        padding_x="-1rem",  
+                            navbar(),
+                            justify="center",
+                
                     ),
-                    rx.vstack(
-                        form2_(),
-                        width="100%",
-                        max_width=["100%", "90%", "80%", "70%"],
-                        height="100vh",
-                        spacing="1",
-                        align_items="center",
-                        justify_content="center",
+                    rx.hstack(
+                        rx.box(
+                            results_pilar1(),
+                            width="100%",
+                            align_items="center",
+                            padding_x="-1rem",  
                         ),
-                    ),
+                        rx.vstack(
+                            rx.vstack(
+                                rx.vstack(
+                                    rx.heading(
+                                        "Simulador de pensiones: Pensión de empresa",
+                                        color="white",
+                                        font_family=Font.TITLE.value,
+                                        font_size=size.LARGE.value,
+                                        font_weight="bold",
+                                        margin_top=size.SMALL.value,
+                                    ),
+                                    form2(),
+                                    overflow="hidden",
+                                    align="center",
+                                    padding="1em",
+                                    height="100%",
+                                ),
+                                align="center"
+                            ),
+                            width="100%",
+                            max_width=["100%", "90%", "80%", "70%"],
+                            height="100vh",
+                            spacing="1",
+                            align_items="center",
+                            justify_content="center",
+                            ),
+                        ),
+                ),
+                spacing="5",
+                display="flex",
+                align_items="center",
+                justify_content="center",
+                align_content="baseline"
             ),
-            spacing="5",
-            display="flex",
-            align_items="center",
-            justify_content="center",
-            align_content="baseline"
+            loading()
+            
         ),
+        
         sign_in_v1()
     )
 
@@ -241,50 +288,70 @@ def pilar2():
 def form_pilar3():
     return rx.cond(
         AppState.signed_in | AppState.guest,
-        rx.vstack(
-                rx.button(
-                    "<- Atrás", 
-                    on_click=rx.redirect("/pilar2"), 
-                    color="white",
-                    background_color="transparent",
-                    border="1px solid",
-                    box_shadow="0 .25rem .375rem #0003",
-                    width="auto",
-                    height="auto",
-                    position="absolute",
-                    top="1rem",
-                    left="1rem",
-                    _hover={"bg": colors.Color.SECONDARY.value, "color": "white"}
-                ),
+        rx.cond(
+            rx.State.is_hydrated,
             rx.vstack(
-                rx.box(
-                        navbar(),
-                        justify="center",
-            
-                ),
-                rx.hstack(
+                    rx.button(
+                        "<- Atrás", 
+                        on_click=rx.redirect("/pilar2"), 
+                        color="white",
+                        background_color="transparent",
+                        border="1px solid",
+                        box_shadow="0 .25rem .375rem #0003",
+                        width="auto",
+                        height="auto",
+                        position="absolute",
+                        top="1rem",
+                        left="1rem",
+                        _hover={"bg": colors.Color.SECONDARY.value, "color": "white"}
+                    ),
+                rx.vstack(
                     rx.box(
-                        results_pilar2(),
-                        width="100%",
-                        align_items="center",
-                        padding_x="-1rem",  
+                            navbar(),
+                            justify="center",
+                
                     ),
-                    rx.vstack(
-                        form3_(),
-                        width="100%",
-                        max_width=["100%", "90%", "80%", "70%"],
-                        height="100vh",
-                        spacing="1",
-                        align_items="center",
-                        justify_content="center",
+                    rx.hstack(
+                        rx.box(
+                            results_pilar2(),
+                            width="100%",
+                            align_items="center",
+                            padding_x="-1rem",  
                         ),
-                    ),
+                        rx.vstack(
+                            rx.vstack(
+                                    rx.vstack(
+                                        rx.heading(
+                                            "Simulador de pensiones: Pensión privada",
+                                            color="white",
+                                            font_family=Font.TITLE.value,
+                                            font_size=size.LARGE.value,
+                                            font_weight="bold",
+                                            margin_top=size.SMALL.value,
+                                        ),
+                                        form3(),
+                                        overflow="hidden",
+                                        align="center",
+                                        padding="1em",
+                                        height="100%",
+                                    ),
+                            ),
+                            width="100%",
+                            max_width=["100%", "90%", "80%", "70%"],
+                            height="100vh",
+                            spacing="1",
+                            align_items="center",
+                            justify_content="center",
+                            ),
+                        ),
+                ),
+                spacing="5",
+                display="flex",
+                align_items="center",
+                justify_content="center",
+                align_content="baseline"
             ),
-            spacing="5",
-            display="flex",
-            align_items="center",
-            justify_content="center",
-            align_content="baseline"
+            loading()
         ),
         sign_in_v1()
     )
@@ -295,17 +362,21 @@ def form_pilar3():
 def result():
     return rx.cond(
         AppState.signed_in | AppState.guest,
-        rx.box(
-                navbar(),
-                rx.vstack(
-                    final_results(),
-                    width="100%",
-                    max_width=["100%", "90%", "80%", "70%"],
-                    height="100vh",
-                    spacing="1",
-                    align_items="center",
-                    margin_bottom="0"
-                )
+        rx.cond(
+            rx.State.is_hydrated,
+            rx.box(
+                    navbar(),
+                    rx.vstack(
+                        final_results(),
+                        width="100%",
+                        max_width=["100%", "90%", "80%", "70%"],
+                        height="100vh",
+                        spacing="1",
+                        align_items="center",
+                        margin_bottom="0"
+                    )
+            ),
+            loading()
         ),
         sign_in_v1()
     )

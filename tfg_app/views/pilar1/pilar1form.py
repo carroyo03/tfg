@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 
 class FormState(rx.State):
     form_data: dict = {}
-    is_loading: bool = False
+    is_page_loading: bool = False
     
     @rx.var
     def stored_form_data(self) -> dict:
@@ -188,30 +188,4 @@ def form1():
         margin_top=size.DEFAULT.value,
         align="center",
         width="100%",
-    )
-
-def form1_():
-    return rx.cond(
-        rx.State.is_hydrated,
-        rx.vstack(
-            rx.vstack(
-                rx.heading(
-                    "Simulador de pensiones",
-                    color="white",
-                    font_family=Font.TITLE.value,
-                    font_size=size.BIG.value,
-                    font_weight="bold",
-                    margin_top=size.SMALL.value,
-                ),
-                form1(),
-                overflow="hidden",
-                align="center",
-                padding="1em",
-                height="100%",
-            ),
-        ),
-        rx.center(
-            rx.spinner(size="3"),
-            padding="10em"
-        )
     )

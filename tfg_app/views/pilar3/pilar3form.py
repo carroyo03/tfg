@@ -138,28 +138,4 @@ def form3():
         align="center",
     )
 
-def form3_():
-    return rx.cond(
-        rx.State.is_hydrated,
-        rx.vstack(
-                rx.vstack(
-                    rx.heading(
-                        "Simulador de pensiones: Pensión privada",
-                        color="white",
-                        font_family=Font.TITLE.value,
-                        font_size=size.LARGE.value,
-                        font_weight="bold",
-                        margin_top=size.SMALL.value,
-                    ),
-                    form3(),
-                    overflow="hidden",
-                    align="center",
-                    padding="1em",
-                    height="100%",
-                ),
-        ),
-        rx.center(
-            rx.spinner(size="3"),
-            padding="10em"
-        )
-    )
+

@@ -178,29 +178,3 @@ def form2():
         align="center",
     )
 
-def form2_():
-    return rx.cond(
-        rx.State.is_hydrated,
-        rx.vstack(
-                rx.vstack(
-                    rx.heading(
-                        "Simulador de pensiones: Pensión de empresa",
-                        color="white",
-                        font_family=Font.TITLE.value,
-                        font_size=size.LARGE.value,
-                        font_weight="bold",
-                        margin_top=size.SMALL.value,
-                    ),
-                    form2(),
-                    overflow="hidden",
-                    align="center",
-                    padding="1em",
-                    height="100%",
-                ),
-                align="center"
-        ),
-        rx.center(
-            rx.spinner(size="3"),
-            padding="10em"
-        )
-    )
