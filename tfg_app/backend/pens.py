@@ -46,19 +46,6 @@ PENSION_MAXIMA = 3175.04
 
 def annos_a_meses(annos):
     return annos * 12
-# Función para validar que el input es un valor numérico
-def validar_entrada_numerica(mensaje, valor_minimo=None, valor_maximo=None):
-    while True:
-        try:
-            valor = float(input(mensaje))
-            if valor_minimo is not None and valor < valor_minimo:
-                print(f"El valor debe ser mayor o igual a {valor_minimo}. Inténtalo de nuevo.")
-            elif valor_maximo is not None and valor > valor_maximo:
-                print(f"El valor debe ser menor o igual a {valor_maximo}. Inténtalo de nuevo.")
-            else:
-                return valor
-        except ValueError:
-            print("Entrada inválida. Por favor, introduce un número.")
 
 # Función para calcular la edad
 def calcular_edad(fecha_nacimiento):
@@ -75,8 +62,8 @@ def estimar_tiempo_cotizado(fecha_nacimiento:datetime.date, edad_inicio_trabajo:
     annos_cotizados = diff.days / 365.25
     return annos_cotizados
 
-def calcular_edad_legal_jub(fecha_nacimiento:datetime.date,edad_inicio_trabajo:int):
-    annos_cotizados = estimar_tiempo_cotizado(fecha_nacimiento,edad_inicio_trabajo)
+def calcular_edad_legal_jub(fecha_nacimiento:datetime.date,edad_inicio_trabajo:int,edad_jubilacion_deseada:int):
+    annos_cotizados = estimar_tiempo_cotizado(fecha_nacimiento,edad_inicio_trabajo,edad_jubilacion_deseada)
 
     if ANNO_ACTUAL >= 2027:
         return 65 if annos_cotizados >= 38.5 else 67
@@ -89,25 +76,22 @@ def calcular_edad_legal_jub(fecha_nacimiento:datetime.date,edad_inicio_trabajo:i
 
 def estimar_bases_cotizacion(salario_actual,annos_cotizados, num_pagas=14):
     base_mensual = salario_actual / num_pagas  # Incluyendo pagas extras
-    annos_cotizados = validar_entrada_numerica(annos_cotizados, 0)
-    if type(annos_cotizados) == int:
-        meses_cotizados = int(annos_a_meses(validar_entrada_numerica(annos_cotizados,0)))
+    if type(annos_cotizados) == int or type(annos_cotizados) == float:
+        meses_cotizados = int(annos_a_meses(annos_cotizados))
         return [base_mensual] * meses_cotizados
     else:
         print("Error: Años cotizados no válido. Introduce un número entero.")
         return
 
-def calcular_porcentaje_por_meses(months_cotizados):
-    if months_cotizados < 180:  # 15 años (180 meses)
+def calcular_porcentaje_por_meses(meses_cotizados):
+    if meses_cotizados < 180:  # Menos de 15 años
         return 0
-    elif months_cotizados == 180:
-        return 50  # 50% si ha cotizado exactamente 15 años (180 meses)
-    elif months_cotizados <= 300:  # Entre 15 y 25 años (180-300 meses)
-        return 50 + (months_cotizados - 180) * (1.5 / 12)
-    elif months_cotizados > 300 and months_cotizados <= 444:  # Entre 25 y 37 años (300-444 meses)
-        return 80 + (months_cotizados - 300) * (1.5 / 12)
+    elif meses_cotizados == 180:  # Exactamente 15 años
+        return 50
+    elif meses_cotizados <= 438:  # Hasta 36.5 años
+        return 50 + ((meses_cotizados - 180) * (50/258))  # 50% restante distribuido en los meses hasta 36.5 años
     else:
-        return 100  # Máximo del 100% si ha cotizado más de 444 meses (37 años)
+        return 100
 
 def actualizar_base_por_ipc(base, ipc):
     if pd.isna(ipc):
@@ -169,24 +153,83 @@ def calcular_base_reguladora(salario_anual, annos_sin_cotizar, tipo_trabajador, 
     return base_reguladora
 
 
-def ajustar_pension_por_edad(base_reguladora,edad_deseada, edad_legal, annos_cotizados):
+def ajustar_pension_por_edad(base_reguladora, edad_deseada, edad_legal, annos_cotizados):
+    """
+    Ajusta la pensión según la edad de jubilación, aplicando reducciones por jubilación
+    anticipada o bonificaciones por demora.
+    
+    Args:
+        base_reguladora (float): Base reguladora calculada
+        edad_deseada (float): Edad a la que se desea jubilar
+        edad_legal (float): Edad legal de jubilación según años cotizados
+        annos_cotizados (float): Años totales cotizados
+    
+    Returns:
+        float: Pensión ajustada según la edad
+    """
     meses_diferencia = (edad_deseada - edad_legal) * 12
-    if meses_diferencia < 0: # Jubilación anticipada
-        coef_reductor = calcular_coeficiente_reductor(-meses_diferencia,annos_cotizados)
-        return base_reguladora * (1 - coef_reductor)
-    elif meses_diferencia > 0: # Jubilación prolongada
-        incentivo = calcular_incentivo(meses_diferencia)
-        return base_reguladora * (1 + incentivo)
-    return base_reguladora
+    pension_base = base_reguladora / 12  # Convertimos a mensual para los cálculos
+    
+    if meses_diferencia < 0:  # Jubilación anticipada
+        if abs(meses_diferencia) > 24:  # Máximo 24 meses de anticipación voluntaria
+            return 0  # No permitido anticipar más de 24 meses de forma voluntaria
+        
+        # Coeficientes reductores según años cotizados
+        if annos_cotizados < 38:
+            coef_reductor = abs(meses_diferencia) * 0.005  # 0.5% por mes
+        else:
+            coef_reductor = abs(meses_diferencia) * 0.004  # 0.4% por mes
+            
+        pension_ajustada = pension_base * (1 - coef_reductor)
+        
+    elif meses_diferencia > 0:  # Jubilación demorada
+        # Calculamos las tres opciones de bonificación
+        pension_con_bonus = calcular_bonificacion_demora(
+            pension_base=pension_base,
+            meses_demora=meses_diferencia
+        )
+        pension_ajustada = pension_base + pension_con_bonus
+        
+    else:  # Jubilación a la edad legal
+        pension_ajustada = pension_base
+    
+    # Aplicamos límites mensuales
+    return max(PENSION_MINIMA, min(pension_ajustada, PENSION_MAXIMA))
+
+def calcular_bonificacion_demora(pension_base, meses_demora):
+    """
+    Calcula la bonificación por demora de la jubilación según las tres opciones disponibles:
+    1. Porcentaje adicional sobre la pensión
+    2. Cantidad a tanto alzado
+    3. Opción mixta
+    
+    Args:
+        pension_base (float): Pensión mensual base
+        meses_demora (int): Número de meses de demora en la jubilación
+    
+    Returns:
+        float: La mejor bonificación mensual entre las tres opciones
+    """
+    # Opción 1: Porcentaje adicional (4% por año completo adicional)
+    bonus_porcentaje = pension_base * (meses_demora * 0.04/12)
+    
+    # Opción 2: Cantidad a tanto alzado
+    # Se percibe una cantidad equivalente a la pensión mensual por cada año completo
+    # multiplicada por 2
+    cantidad_alzada = pension_base * (meses_demora/12) * 2
+    
+    # Opción 3: Mixta (combina un porcentaje menor con una cantidad alzada)
+    # 2% adicional + la mitad de la cantidad alzada
+    mixta = (pension_base * (meses_demora * 0.02/12)) + (pension_base * (meses_demora/24))
+    
+    # Devolvemos la opción más beneficiosa
+    return max(bonus_porcentaje, cantidad_alzada, mixta)
 
 def calcular_coeficiente_reductor(meses_anticipados, annos_cotizados):
     if annos_cotizados < 38:
         return meses_anticipados * 0.005  # Ejemplo: 0.5% por mes
     else:
         return meses_anticipados * 0.004  # 0.4% por mes para cotizaciones altas
-
-def calcular_incentivo(meses_demora):
-    return meses_demora * 0.006  # Ejemplo: 0.6% por mes adicional
 
 def calcular_base_reguladora_dual(bases_cotizacion):
     if len(bases_cotizacion) < 29 * 12:
@@ -228,27 +271,27 @@ def calcular_complemento_brecha_genero(num_hijos):
     return complemento_total if num_hijos > 0 else 0
 
 def calcular_primer_pilar(base_reguladora, annos_cotizados, tiene_hijos, num_hijos):
-    if annos_cotizados < 15:
-        return 0  # No tiene derecho a pensión si no ha cotizado al menos 15 años
-    elif annos_cotizados == 15:
-        porcentaje = 50  # 50% de la base reguladora
+    diferencia_annos_porcentaje = 36.5 - 15
+    if annos_cotizados <= 15:
+        porcentaje = 50  # Se garantiza el mínimo del 50%
     elif annos_cotizados < 36.5:
-        porcentaje = 50 + (annos_cotizados - 15) * 1.5  # 1.5% adicional por año entre 15 y 36.5
+        incremento_anual = 50 / diferencia_annos_porcentaje  # Aproximadamente 2.33% por año adicional
+        porcentaje = 50 + (annos_cotizados - 15) * incremento_anual
     else:
-        porcentaje = 100  # A partir de 36 años y medio, se tiene derecho al 100%
+        porcentaje = 100  # Se alcanza el 100% a partir de 36,5 años cotizados
+
 
     # Calcular la pensión base
     pension_primer_pilar = base_reguladora * (porcentaje / 100) / 12  # Pensión mensual
     
 
-       
 
     # Aplicar el complemento por brecha de género si tiene hijos
     if tiene_hijos.lower().startswith("s"):
         complemento = calcular_complemento_brecha_genero(num_hijos) 
         pension_primer_pilar += complemento
 
-     # Verificar si la pensión supera los límites de pensión mínima o máxima
+    # Verificar si la pensión supera los límites de pensión mínima o máxima
     pension_primer_pilar = max(PENSION_MINIMA, min(pension_primer_pilar, PENSION_MAXIMA))
 
     return pension_primer_pilar
@@ -286,7 +329,6 @@ def obtener_esperanza_vida_jub(edad_jubilacion):
     return int(esperanza_vida - edad_jubilacion)
 
 
-   
 
 
 
@@ -359,29 +401,5 @@ def calcular_pension_tercer_pilar(aportacion_periodica, periodo_aportacion_annos
 
 
     pension_3p = capital_acumulado / esperanza_vida_jubilacion
-   
 
     return pension_3p/12
-
-
-
-"""
-def calcular_tercer_pilar(capital_inicial, rentabilidad_esperada, aportacion_anual, annos, edad_jubilacion, tasa_conversion=3) -> float:
-    """
-"""
-Calcula la pensión mensual del tercer pilar (ahorro individual) a partir del capital inicial,
-las aportaciones anuales y la rentabilidad esperada.
-
-La acumulación se realiza con la rentabilidad esperada, pero la conversión a anualidad utiliza 
-una tasa de conversión (tasa_conversion) que suele ser más conservadora.
-"""
-"""
-    # Acumular el capital usando interés compuesto y aportaciones anuales
-    capital_final = (capital_inicial * (1 + rentabilidad_esperada / 100) ** annos +
-                     aportacion_anual * (((1 + rentabilidad_esperada / 100) ** annos - 1) / (rentabilidad_esperada / 100)))
-    # Obtener el factor actuarial basado en la tasa_conversion y la edad de jubilación
-    factor_actuarial = calcular_factor_actuarial(tasa_conversion, edad_jubilacion)
-    # La pensión mensual es el capital final dividido por el factor actuarial
-    pension_mensual = capital_final / factor_actuarial
-    return pension_mensual
-"""
