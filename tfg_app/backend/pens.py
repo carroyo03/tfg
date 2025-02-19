@@ -44,7 +44,7 @@ DIVISOR_BASE_REG = 350
 PENSION_MINIMA = 1033.30
 PENSION_MAXIMA = 3175.04
 
-def annos_a_meses(annos):
+def annos_a_meses(annos: float):
     return annos * 12
 
 # Función para calcular la edad
@@ -103,9 +103,10 @@ def actualizar_base_por_ipc(base, ipc):
         return base * (1 + IPC_PROMEDIO_PRE_1996 / 100)
 
 
-def calcular_base_reguladora(salario_anual, annos_sin_cotizar, tipo_trabajador, es_mujer: bool, annos_a_incluir=25, num_pagas=14):
+def calcular_base_reguladora(salario_anual, annos_sin_cotizar:float, tipo_trabajador, es_mujer: bool, annos_a_incluir:float=25, num_pagas=14):
     meses_a_incluir = annos_a_meses(annos_a_incluir)
-    meses_sin_cotizar = annos_a_meses(annos_sin_cotizar)
+    meses_sin_cotizar = round(annos_a_meses(annos_sin_cotizar))
+    print("Pasados años a meses")
     bases_cotizacion = estimar_bases_cotizacion(salario_anual,annos_a_incluir, num_pagas)
     bases_actualizadas = []
 
@@ -146,9 +147,7 @@ def calcular_base_reguladora(salario_anual, annos_sin_cotizar, tipo_trabajador, 
         base_reguladora = calcular_base_reguladora_dual(bases_cotizacion)
     else:
         base_reguladora = suma_bases / DIVISOR_BASE_REG
-
-    # Aplicar límites
-    base_reguladora = max(PENSION_MINIMA, min(base_reguladora, PENSION_MAXIMA))
+    
 
     return base_reguladora
 
@@ -282,7 +281,7 @@ def calcular_primer_pilar(base_reguladora, annos_cotizados, tiene_hijos, num_hij
 
 
     # Calcular la pensión base
-    pension_primer_pilar = base_reguladora * (porcentaje / 100) / 12  # Pensión mensual
+    pension_primer_pilar = base_reguladora * (porcentaje / 100)  # Pensión mensual
     
 
 

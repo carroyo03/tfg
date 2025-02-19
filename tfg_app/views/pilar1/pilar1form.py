@@ -117,7 +117,7 @@ class FormState(rx.State):
 
             
 
-            columnas_restantes = ['gender', 'salario_medio', 'edad_inicio_trabajo', 'r_cotizacion']
+            columnas_restantes = ['gender', 'salario_medio', 'edad_inicio_trabajo', 'r_cotizacion', 'lagunas_cotizacion']
             for columna in columnas_restantes:
                 df[columna] = form_data[columna]
 

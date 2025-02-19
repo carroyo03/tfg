@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from tfg_app.backend.pens import calcular_primer_pilar,estimar_tiempo_cotizado, calcular_pension_segundo_pilar, calcular_pension_tercer_pilar
+from tfg_app.backend.pens import calcular_base_reguladora, calcular_primer_pilar,estimar_tiempo_cotizado, calcular_pension_segundo_pilar, calcular_pension_tercer_pilar
 
 
 import datetime
@@ -17,7 +17,7 @@ class FormData(BaseModel):
     edad_jubilacion_deseada: float  # La edad a la que se desea jubilar
     r_cotizacion: str
     lagunas_cotizacion: str
-    n_lagunas: int
+    n_lagunas: float
 
 class FormData2(BaseModel):
     prev_form: FormData
@@ -44,7 +44,33 @@ async def calcular_pension_1p(data: FormData):
     annos_cotizados = estimar_tiempo_cotizado(data['fecha_nacimiento'], data['edad_inicio_trabajo'],data['edad_jubilacion_deseada'])
     #tipo_jubilacion, meses_ajuste = calcular_annos_anticipacion_o_demora(edad_actual, data.edad_jubilacion_deseada, annos_cotizados)
     #anno_jubilacion = datetime.date.today().year + (data.edad_jubilacion_deseada - edad_actual)
-    pension_primer_pilar = calcular_primer_pilar(float(data['salario_medio']), annos_cotizados, data['tiene_hijos'],data['n_hijos'])
+    
+    # Determinar si hay lagunas de cotización
+    # Si el usuario indica que tiene lagunas, usamos el valor proporcionado; de lo contrario, 0.
+    if 'n_lagunas' in data and data['n_lagunas'] is not None:
+        print(f"Hay {data['n_lagunas']} lagunas")
+        lagunas = float(data['n_lagunas'])
+    else:
+        lagunas = 0
+    
+    # Determinar el tipo de cotización y el género
+    tipo_trabajador = data['r_cotizacion']  # Por ejemplo, "General"
+    es_mujer = True if data['gender'].lower().startswith("m") else False
+
+    # Calcular la base reguladora a partir de los últimos 25 años
+    base_reguladora = calcular_base_reguladora(
+        salario_anual = float(data['salario_medio']),
+        annos_sin_cotizar = lagunas,
+        tipo_trabajador = tipo_trabajador,
+        es_mujer = es_mujer,
+        annos_a_incluir = 25,
+        num_pagas = 14
+    )
+    print(f"Base reguladora: {base_reguladora}")
+    
+    pension_primer_pilar = calcular_primer_pilar(base_reguladora, annos_cotizados, data['tiene_hijos'],data['n_hijos'])
+    
+    print(f"Pensión primer pilar: {pension_primer_pilar}")
 
     return round(pension_primer_pilar,2)
 
