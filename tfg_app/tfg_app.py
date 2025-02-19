@@ -1,12 +1,12 @@
 import reflex as rx
 
-from tfg_app.views.pilar1.pilar1form import FormState, form1, form1_
-from tfg_app.views.pilar2.pilar2form import form2, form2_
+from tfg_app.views.pilar1.pilar1form import form1
+from tfg_app.views.pilar2.pilar2form import form2
 from tfg_app.components.navbar import navbar
 from tfg_app.styles import styles,colors
 from tfg_app.styles.fonts import Font
 from tfg_app.backend.main import calcular_pension_1p
-from tfg_app.views.pilar3.pilar3form import form3, form3_
+from tfg_app.views.pilar3.pilar3form import form3
 from tfg_app.views.results.result import final_results
 from tfg_app.views.pilar1.pilar1results import results_pilar1
 from tfg_app.views.pilar2.pilar2results import results_pilar2
@@ -60,12 +60,12 @@ def form_pilar1():
                         form1(),
                         overflow="hidden",
                         align="center",
-                        padding="1em",
-                        height="100%",
+                        padding_bottom="7em",
+                        height="auto",
                     ),
                     width="100%",
                     max_width=["100%", "90%", "80%", "70%"],
-                    height="100vh",
+                    height="auto",
                     spacing="1",
                     align_items="center",
                     margin_top="4rem"

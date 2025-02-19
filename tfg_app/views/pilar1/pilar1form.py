@@ -178,6 +178,7 @@ def form1():
                 
             ),
             width="100%",
+            height="100vh",
             spacing="5",
             padding=["1em", "1.5em", "2em"],
             max_width="100%",
@@ -187,5 +188,5 @@ def form1():
         value=FormState.stored_form_data,
         margin_top=size.DEFAULT.value,
         align="center",
-        width="100%",
+        width="100%"
     )
