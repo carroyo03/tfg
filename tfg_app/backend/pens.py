@@ -224,12 +224,6 @@ def calcular_bonificacion_demora(pension_base, meses_demora):
     # Devolvemos la opción más beneficiosa
     return max(bonus_porcentaje, cantidad_alzada, mixta)
 
-def calcular_coeficiente_reductor(meses_anticipados, annos_cotizados):
-    if annos_cotizados < 38:
-        return meses_anticipados * 0.005  # Ejemplo: 0.5% por mes
-    else:
-        return meses_anticipados * 0.004  # 0.4% por mes para cotizaciones altas
-
 def calcular_base_reguladora_dual(bases_cotizacion):
     if len(bases_cotizacion) < 29 * 12:
         raise ValueError("No hay suficientes datos para calcular los 29 años de bases cotización.")
@@ -237,11 +231,6 @@ def calcular_base_reguladora_dual(bases_cotizacion):
     bases_mejoradas = sorted(bases_cotizacion[:-2], reverse=True)[:27]
     base_29 = sum(bases_mejoradas) / DIVISOR_BASE_REG
     return max(base_25, base_29)
-
-
-def agregar_bases_pluriactividad(bases_regimenes, base_maxima):
-    total_base = sum(bases_regimenes)
-    return min(total_base, base_maxima)
 
 
 
