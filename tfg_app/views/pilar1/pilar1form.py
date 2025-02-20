@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 
 class FormState(rx.State):
     form_data: dict = {}
-    is_page_loading: bool = False
+    is_loading: bool = False
     
     @rx.var
     def stored_form_data(self) -> dict:

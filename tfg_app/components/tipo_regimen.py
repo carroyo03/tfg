@@ -1,4 +1,5 @@
 import reflex as rx
+from tfg_app.components.info_button import info_button
 from tfg_app.styles.styles import Size as size
 
 
@@ -55,7 +56,12 @@ def tipo_regimen() -> rx.Component:
                 ),
 
         rx.hstack(
-            rx.text("¿Existen lagunas de cotización?"),
+            rx.hstack(
+                rx.text("¿Existen lagunas de cotización?"),
+                info_button(color="white",info="Las lagunas de cotización son los años en los que no se ha cotizado a la Seguridad Social. Si has tenido lagunas de cotización, es posible que tu pensión se vea afectada."),
+                width="100%",
+                align_items="center",
+            ),
             rx.radio(
                 ["Sí", "No"], 
                 value=RadioGroup1State.item, 

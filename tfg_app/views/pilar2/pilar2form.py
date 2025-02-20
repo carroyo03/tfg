@@ -138,7 +138,7 @@ class Form2State(rx.State):
 def form2():
     return rx.form(
         rx.vstack(
-            input_text("Aportación anual de la empresa al PPE","aportacion_empresa", Company2PState,"number"),
+            input_text("Aportación anual de la empresa al PPE (%)","aportacion_empresa", Company2PState,"number"),
             aportar(f"¿Quieres aportar un 2% a tu plan de pensiones de la empresa?"),
             rentabilidad_estimada(2),
             rx.hstack(

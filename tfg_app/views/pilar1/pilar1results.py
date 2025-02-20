@@ -27,30 +27,32 @@ def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
         rx.box(
             rx.hstack(
                 rx.heading("Ratio de Sustitución", size="4", color="black", aria_label="Ratio de Sustitución"),
-                info_button("El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión pública."),
+                info_button(color="gray",info="El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión pública."),
                 spacing="2",
                 align="center"
             ),
-            rx.recharts.pie_chart(
-                rx.recharts.pie(
-                    data=data,
-                    data_key="value",
-                    name_key="name",
-                    stroke="0",
-                    start_angle=180,
-                    end_angle=180+360,
-                    inner_radius="60%",
-                    active_index=0,
-                    aria_label="Gráfico de tarta con el ratio de sustitución",
+            rx.box(
+                rx.recharts.pie_chart(
+                    rx.recharts.pie(
+                        data=data,
+                        data_key="value",
+                        name_key="name",
+                        stroke="0",
+                        start_angle=180,
+                        end_angle=180+360,
+                        inner_radius="60%",
+                        active_index=0,
+                        aria_label="Gráfico de tarta con el ratio de sustitución",
+                    ),
+                    rx.recharts.pie(
+                        outer_radius="50%",
+                    ),
+                    rx.recharts.graphing_tooltip(),
+                    width="100%",
+                    height=250,
                 ),
-                rx.recharts.pie(
-                    outer_radius="50%",
-                ),
-                rx.recharts.graphing_tooltip(),
-                width="100%",
-                height=250,
+                rx.text(f"{ratio_sustitucion:.2f}% de cobertura", color="black", font_size="1.5em", text_align="center"),
             ),
-            rx.text(f"{ratio_sustitucion:.2f}% de cobertura", color="black", font_size="1.5em", text_align="center"),
             border_radius="md",
             box_shadow="lg",
             background_color="white",
