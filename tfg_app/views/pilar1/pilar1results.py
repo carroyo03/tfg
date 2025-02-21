@@ -1,6 +1,7 @@
 import reflex as rx
 
 
+from tfg_app.components.leyenda import leyenda1
 from tfg_app.global_state import GlobalState
 from tfg_app.styles.fonts import Font
 from tfg_app.styles.styles import Size as size
@@ -31,41 +32,39 @@ def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
                 spacing="2",
                 align="center"
             ),
-            rx.box(
-                rx.recharts.pie_chart(
-                    rx.recharts.pie(
-                        data=data,
-                        data_key="value",
-                        name_key="name",
-                        stroke="0",
-                        start_angle=180,
-                        end_angle=180+360,
-                        inner_radius="60%",
-                        active_index=0,
-                        aria_label="Gráfico de tarta con el ratio de sustitución",
-                    ),
-                    rx.recharts.pie(
-                        outer_radius="50%",
-                    ),
-                    rx.recharts.graphing_tooltip(),
-                    width="100%",
-                    height=250,
+            rx.recharts.pie_chart(
+                rx.recharts.pie(
+                    data=data,
+                    data_key="value",
+                    name_key="name",
+                    stroke="0",
+                    start_angle=180,
+                    end_angle=180+360,
+                    inner_radius="60%",
+                    active_index=0,
+                    aria_label="Gráfico de tarta con el ratio de sustitución",
                 ),
-                rx.text(f"{ratio_sustitucion:.2f}% de cobertura", color="black", font_size="1.5em", text_align="center"),
+                rx.recharts.pie(
+                    outer_radius="50%",
+                ),
+                rx.recharts.graphing_tooltip(),
+                width="100%",
+                height=225,
+                margin_top="-1em"
             ),
+            rx.text(f"{ratio_sustitucion:.2f}% de cobertura", color="black", font_size="1.5em", text_align="center",margin_top="-.5em"),
             border_radius="md",
             box_shadow="lg",
             background_color="white",
             width="100%",
             justify_content="center",
             flex_direction="column",
-        ),
+            ),
         width="100%",
         height="auto",
         align_items="center",
         justify_content="center",
         padding="1em 0em",
-        spacing="1"
 
     )
 
@@ -120,16 +119,16 @@ def results_pilar1() -> rx.Component:
                 width="100%",
             ),
             show_ratio_pie_chart(ratio_sustitucion),
+            leyenda1(),
             align_items="center",
             justify_content="center",
             padding="1em",
             border_radius="4%",
             box_shadow="lg",
             background_color="white",
-            width="100%",
-            max_width="600px",  # Limita el ancho máximo
-            margin_top="2em",
-            margin_bottom="2em",
+            width="80%",
+            margin_top="1em",
+            margin_bottom="1em",
             height="auto",  # Cambiado de 70% a auto para mejor responsividad
         ),
         height="100vh",  # Asegura que el contenedor ocupe toda la altura de la pantalla

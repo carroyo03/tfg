@@ -1,4 +1,5 @@
 import reflex as rx
+from tfg_app.components.leyenda import leyenda2
 from tfg_app.global_state import GlobalState
 from tfg_app.styles.fonts import Font
 from tfg_app.styles.styles import Size as size
@@ -47,9 +48,10 @@ def show_ratio_pie_chart2(ratio_sust_1,ratio_sust_2) -> rx.Component:
                 ),
                 rx.recharts.graphing_tooltip(),
                 width="100%",
-                height=250,
+                height=225,
+                margin_top="-1em"
             ),
-            rx.text(f"{ratio_sust_1 + ratio_sust_2:.2f}% de cobertura", color="black", font_size="1.5em", text_align="center"),
+            rx.text(f"{ratio_sust_1 + ratio_sust_2:.2f}% de cobertura", color="black", font_size="1.5em", text_align="center",margin="-.5em .05em"),
             border_radius="md",
             box_shadow="lg",
             background_color="white",
@@ -62,7 +64,6 @@ def show_ratio_pie_chart2(ratio_sust_1,ratio_sust_2) -> rx.Component:
         align_items="center",
         justify_content="center",
         padding="1em 0em",
-        spacing="1"
 
     )
 
@@ -124,17 +125,17 @@ def results_pilar2() -> rx.Component:
                 width="100%",
             ),
             show_ratio_pie_chart2(ratio_sust_1, ratio_sust_2),
+            leyenda2(),
             align_items="center",
             justify_content="center",
             padding="1em",
             border_radius="4%",
             box_shadow="lg",
             background_color="white",
-            width="100%",
-            max_width="600px",  # Limita el ancho máximo
-            margin_top="2em",
-            margin_bottom="2em",
-            height="auto",  # Cambiado de 70% a auto para mejor responsividad
+            width="80%",
+            margin_top="1em",
+            margin_bottom="1em",
+            height="auto",   # Cambiado de 70% a auto para mejor responsividad
         ),
         height="100vh",  # Asegura que el contenedor ocupe toda la altura de la pantalla
         width="100%",

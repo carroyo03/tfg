@@ -104,7 +104,8 @@ def pilar1():
             width="100%",
             max_width="800px",  # Limita el ancho máximo del contenido
             margin="0 auto",  # Centra horizontalmente
-            margin_top="-5rem",
+            margin_top="-5.3rem",
+            margin_bottom="1.5rem",
             padding_x="1rem",  # Añade un poco de padding horizontal
         ),
         rx.center(
@@ -129,7 +130,7 @@ def pilar1():
                 height="auto"
             ),
             width="100%",
-            margin_top="-7rem",
+            margin_top="-8rem",
             spacing="2",
             align="center",
             justify="center",
@@ -137,7 +138,7 @@ def pilar1():
 
         width="100%",
         min_height="100vh",
-        spacing="0",
+        spacing="1",
         align_items="stretch",
         background_color="#00338D",  # Fondo azul
     )
@@ -175,7 +176,8 @@ def form_pilar2():
                             results_pilar1(),
                             width="100%",
                             align_items="center",
-                            padding_x="-1rem",  
+                            padding_x="-1rem", 
+                            margin_top="2em" 
                         ),
                         rx.vstack(
                             rx.vstack(
@@ -246,8 +248,9 @@ def pilar2():
             width="100%",
             max_width="800px",  # Limita el ancho máximo del contenido
             margin="0 auto",  # Centra horizontalmente
-            margin_top="-5rem",
-            padding_x="1rem",  # Añade un poco de padding horizontal
+            margin_top="-4.3rem",
+            margin_bottom="1.5rem",
+            padding_x="1rem",     # Añade un poco de padding horizontal
         ),
         rx.center(
             rx.button(
@@ -316,7 +319,8 @@ def form_pilar3():
                             results_pilar2(),
                             width="100%",
                             align_items="center",
-                            padding_x="-1rem",  
+                            padding_x="-1rem", 
+                            margin_top="2em",
                         ),
                         rx.vstack(
                             rx.vstack(
@@ -365,16 +369,40 @@ def result():
         rx.cond(
             rx.State.is_hydrated,
             rx.box(
-                    navbar(),
-                    rx.vstack(
-                        final_results(),
-                        width="100%",
-                        max_width=["100%", "90%", "80%", "70%"],
-                        height="100vh",
-                        spacing="1",
-                        align_items="center",
-                        margin_bottom="0"
-                    )
+                    rx.hstack(
+                        navbar(),
+                        rx.box(
+                            rx.heading(
+                                "Resultados",
+                                color="white",
+                                font_family=Font.TITLE.value,
+                                font_size=size.BIG.value,
+                                font_weight="bold",
+                                text_align="center",
+                                width="100%",
+                            ),
+                            width="100%",
+                            position="sticky",
+                            top="0",
+                            z_form1="1",
+                            background_color="rgba(0, 51, 141, 0.9)",  # Azul semi-transparente
+                            backdrop_filter="blur(5px)",
+                        ),
+                        align_items="center"
+                    ),
+                    rx.box(
+                        rx.box(
+                            final_results(),
+                            width="100%",
+                            margin="0 auto",  # Centra horizontalmente
+                            margin_top="-3.3rem",
+                            margin_bottom="1.5rem",
+                            padding_x="1rem", 
+                        ),
+                    ),
+                display="flex",
+                justify_content="center",
+                align="center",
             ),
             loading()
         ),
