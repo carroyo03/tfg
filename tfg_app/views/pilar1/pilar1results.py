@@ -52,7 +52,7 @@ def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
                 height=225,
                 margin_top="-1em"
             ),
-            rx.text(f"{ratio_sustitucion:.2f}% de cobertura", color="black", font_size="1.5em", text_align="center",margin_top="-.5em"),
+            rx.text(f"{redondear(ratio_sustitucion)}% de cobertura", color="black", font_size="1.5em", text_align="center",margin_top="-.5em"),
             border_radius="md",
             box_shadow="lg",
             background_color="white",

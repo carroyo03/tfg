@@ -368,38 +368,62 @@ def result():
         AppState.signed_in | AppState.guest,
         rx.cond(
             rx.State.is_hydrated,
-            rx.box(
-                    rx.hstack(
-                        navbar(),
-                        rx.box(
-                            rx.heading(
-                                "Resultados",
-                                color="white",
-                                font_family=Font.TITLE.value,
-                                font_size=size.BIG.value,
-                                font_weight="bold",
-                                text_align="center",
-                                width="100%",
-                            ),
-                            width="100%",
-                            position="sticky",
-                            top="0",
-                            z_form1="1",
-                            background_color="rgba(0, 51, 141, 0.9)",  # Azul semi-transparente
-                            backdrop_filter="blur(5px)",
-                        ),
-                        align_items="center"
+            rx.vstack(
+                navbar(),
+                rx.box(
+                    rx.heading(
+                        "Resultados",
+                        color="white",
+                        font_family=Font.TITLE.value,
+                        font_size=size.BIG.value,
+                        font_weight="bold",
+                        text_align="center",
+                        width="100%",
+                        padding_top="3rem"
                     ),
+                    width="100%",
+                    position="sticky",
+                    top="0",
+                    z_form1="1",
+                    background_color="rgba(0, 51, 141, 0.9)",  # Azul semi-transparente
+                    backdrop_filter="blur(5px)",
+                ),
+                rx.box(
                     rx.box(
-                        rx.box(
-                            final_results(),
-                            width="100%",
-                            margin="0 auto",  # Centra horizontalmente
-                            margin_top="-3.3rem",
-                            margin_bottom="1.5rem",
-                            padding_x="1rem", 
-                        ),
+                        final_results(),
+                        width="100%",
+                        margin="0 auto",  # Centra horizontalmente
+                        margin_top="-4.3rem",
+                        margin_bottom="2rem",
+                        padding_x="1rem", 
                     ),
+                ),
+                rx.center(
+                    rx.button(
+                        "Atrás", 
+                        on_click=rx.redirect("/form3"), 
+                        color="white",
+                        background_color="transparent",
+                        border="1px solid",
+                        box_shadow="0 .25rem .375rem #0003",
+                        width="20%",
+                        height="auto"
+                    ),
+                    rx.button(
+                        "Imprimir informe",
+                        background_color="white",
+                        color=colors.Color.BACKGROUND.value,
+                        border="1px solid",
+                        box_shadow="0 .25rem .375rem #0003",
+                        width="20%",
+                        height="auto"
+                    ),
+                    width="100%",
+                    margin_top="-8rem",
+                    spacing="2",
+                    align="center",
+                    justify="center",
+                ),
                 display="flex",
                 justify_content="center",
                 align="center",

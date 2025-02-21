@@ -51,7 +51,7 @@ def show_ratio_pie_chart2(ratio_sust_1,ratio_sust_2) -> rx.Component:
                 height=225,
                 margin_top="-1em"
             ),
-            rx.text(f"{ratio_sust_1 + ratio_sust_2:.2f}% de cobertura", color="black", font_size="1.5em", text_align="center",margin="-.5em .05em"),
+            rx.text(f"{redondear(ratio_sust_1 + ratio_sust_2)}% de cobertura", color="black", font_size="1.5em", text_align="center",margin="-.5em .05em"),
             border_radius="md",
             box_shadow="lg",
             background_color="white",
