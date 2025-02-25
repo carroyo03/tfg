@@ -1,4 +1,3 @@
-import reflex_chakra as rc
 import reflex as rx
 
 def info_button(info:str,color:str):
@@ -11,7 +10,6 @@ def info_button(info:str,color:str):
                 stroke=color,
                 stroke_width=2,
                 fill="transparent",
-                _hover={"bg": "gray.100"},
             ),
             rx.el.svg.text(
                 "i",
@@ -25,7 +23,7 @@ def info_button(info:str,color:str):
             ),
             width=16,
             height=16,
-            overflow = "visible",
+            overflow="visible",
         ),
         content=info,
     )

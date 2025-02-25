@@ -98,7 +98,7 @@ class Form3State(rx.State):
 def form3():
     return rx.form(
         rx.vstack(
-            input_text("Aportación anual al plan privado de pensiones","aportacion_empleado_3p", Employee3PState,"number"),
+            input_text("Aportación anual al plan privado de pensiones (€)","aportacion_empleado_3p", Employee3PState,"number"),
             rentabilidad_estimada(3),
             rx.hstack(
                 rx.button(

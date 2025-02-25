@@ -28,7 +28,7 @@ def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
         rx.box(
             rx.hstack(
                 rx.heading("Ratio de Sustitución", size="4", color="black", aria_label="Ratio de Sustitución"),
-                info_button(color="gray",info="El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión pública."),
+                info_button(color="silver",info="El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión pública."),
                 spacing="2",
                 align="center"
             ),
