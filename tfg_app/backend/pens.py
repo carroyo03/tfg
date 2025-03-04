@@ -44,6 +44,20 @@ DIVISOR_BASE_REG = 350
 PENSION_MINIMA = 1033.30
 PENSION_MAXIMA = 3175.04
 
+TRAMOS_IRPF_2025 = [
+    (12450,.19) # Hasta 12450€: 19%
+    (20200,.24) # Hasta 20200€: 24%
+    (35200,.30) # Hasta 35200€: 30%
+    (60000,.37) # Hasta 60000€: 37%
+    (300000,.45) # Hasta 300000€: 45%
+    (float('inf'),.47) # Más de 300000€: 47%
+]
+
+# Mínimos exentos según edad (basados en normativa general de 2025)
+MINIMO_EXENTO_BASE = 5550 # General
+MINIMO_EXENTO_65 = 6700 # Mayores de 65 años
+MINIMO_EXENTO_75 = 8100 # Mayores de 75 años
+
 def annos_a_meses(annos: float):
     return annos * 12
 
@@ -258,7 +272,41 @@ def calcular_complemento_brecha_genero(num_hijos):
     complemento_total = complemento_base * INCREMENTO_COMPLEMENTO
     return complemento_total if num_hijos > 0 else 0
 
-def calcular_primer_pilar(base_reguladora, annos_cotizados, tiene_hijos, num_hijos):
+def calcular_irpf(pension_bruta_anual, edad_pensionista):
+    """Calcula el impuesto IRPF anual aplicado a la pensión bruta, considerando tramos de renta y el mínimo exento según la edad del pensionista.
+
+    Args:
+        pension_bruta_anual (float): Pensión bruta anual a la que aplicar el IRPF.
+        edad_pensionista (int): Edad del pensionista al jubilarse
+    Returns:
+        float: Impuesto IRPF anual aplicado a la pensión bruta.
+    """
+    
+    if edad_pensionista >= 75:
+        minimo_exento = MINIMO_EXENTO_75
+    elif edad_pensionista >= 65:
+        minimo_exento = MINIMO_EXENTO_65
+    else:
+        minimo_exento = MINIMO_EXENTO_BASE
+    
+    base_imponible = max(0, pension_bruta_anual - minimo_exento)
+    
+    
+    # Calcular el impuesto según tramos
+    impuesto = 0
+    base_restante = base_imponible
+    limite_anterior = 0
+    for limite, tasa in TRAMOS_IRPF_2025:
+        if base_restante <= 0:
+            break
+        tramo_gravable = min(base_restante, limite - limite_anterior)
+        impuesto += tramo_gravable * tasa
+        base_restante -= tramo_gravable
+        limite_anterior = limite
+    
+    return impuesto
+
+def calcular_primer_pilar(base_reguladora, annos_cotizados, tiene_hijos, num_hijos, edad_jubilacion_deseada):
     diferencia_annos_porcentaje = 36.5 - 15
     if annos_cotizados <= 15:
         porcentaje = 50  # Se garantiza el mínimo del 50%
@@ -270,19 +318,29 @@ def calcular_primer_pilar(base_reguladora, annos_cotizados, tiene_hijos, num_hij
 
 
     # Calcular la pensión base
-    pension_primer_pilar = base_reguladora * (porcentaje / 100)  # Pensión mensual
+    pension_bruta_mensual = base_reguladora * (porcentaje / 100)  # Pensión mensual
     
 
 
     # Aplicar el complemento por brecha de género si tiene hijos
     if tiene_hijos.lower().startswith("s"):
         complemento = calcular_complemento_brecha_genero(num_hijos) 
-        pension_primer_pilar += complemento
+        pension_bruta_mensual += complemento
 
     # Verificar si la pensión supera los límites de pensión mínima o máxima
-    pension_primer_pilar = max(PENSION_MINIMA, min(pension_primer_pilar, PENSION_MAXIMA))
+    pension_bruta_mensual = max(PENSION_MINIMA, min(pension_bruta_mensual, PENSION_MAXIMA))
+    
+    # Calcular la pensión neta mensual (descontando el IRPF)
+    pension_bruta_anual = pension_bruta_mensual * 12
+    irpf_anual = calcular_irpf(pension_bruta_anual, edad_jubilacion_deseada)
+    pension_neta_anual = pension_bruta_anual - irpf_anual
+    pension_neta_mensual = pension_neta_anual / 12
 
-    return pension_primer_pilar
+    return pension_bruta_mensual, pension_neta_mensual, irpf_anual
+
+
+    
+    
 
 def calcular_ratio_sustitucion(pension_primer_pilar:rx.Var, salario_actual:rx.Var) -> float:
     r_s = (pension_primer_pilar *12 / salario_actual) * 100
