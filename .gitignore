@@ -13,5 +13,6 @@ __azurite_db_table__.json
 .env
 .states/
 git-update.bat
+.fleet/*
 
 
