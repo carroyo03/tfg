@@ -41,11 +41,11 @@ PENSION_MAXIMA = 3175.04
 
 # Según datos estimados de expertos del Santander https://www.bancosantander.es/particulares/cuentas-tarjetas/cuentas-corrientes/calculadora-irpf#:~:text=Hasta%2012.450%20€%2C%20el%20tipo,tipo%20impositivo%20es%20de%2037%25.
 TRAMOS_IRPF_2025 = [
-    (12450.00, .19)  # Hasta 12450€: 19%
-    (20200.00, .24)  # Hasta 20200€: 24%
-    (35200.00, .30)  # Hasta 35200€: 30%
-    (60000.00, .37)  # Hasta 60000€: 37%
-    (300000.00, .45)  # Hasta 300000€: 45%
+    (12450.00, .19),  # Hasta 12450€: 19%
+    (20200.00, .24),  # Hasta 20200€: 24%
+    (35200.00, .30),  # Hasta 35200€: 30%
+    (60000.00, .37),  # Hasta 60000€: 37%
+    (300000.00, .45),  # Hasta 300000€: 45%
     (float('inf'), .47)  # Más de 300000€: 47%
 ]
 
