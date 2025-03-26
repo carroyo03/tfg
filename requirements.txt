@@ -48,7 +48,6 @@ python-engineio
 python-multipart
 python-socketio
 pytz
-pywin32-ctypes
 readme_renderer
 redis
 reflex

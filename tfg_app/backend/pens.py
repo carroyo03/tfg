@@ -3,9 +3,9 @@ import logging
 import math
 import warnings
 
-import pandas as pd
+import pandas as pd #type:ignore
 import reflex as rx
-import requests
+import requests #type:ignore
 from ecbdata import ecbdata as ecb  # type: ignore
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -91,7 +91,7 @@ def calcular_edad_legal_jub(fecha_nacimiento=None, edad_inicio_trabajo=None, eda
     elif ANNO_ACTUAL == 2024:
         return 65 if annos_cotizados >= 38 else 66.5
     elif ANNO_ACTUAL == 2025:
-        return 65 if annos_cotizados >= 38 else 66.75
+        return 65 if annos_cotizados >= 37.75 else 66 + (4 / 12)
     elif ANNO_ACTUAL == 2026:
         return 65 if annos_cotizados >= 38 else 66 + (10 / 12)
 
@@ -109,10 +109,14 @@ def estimar_bases_cotizacion(salario_actual, annos_cotizados, num_pagas=14):
 def calcular_porcentaje_por_meses(meses_cotizados):
     if meses_cotizados < 180:  # Menos de 15 años
         return 0
-    elif meses_cotizados == 180:  # Exactamente 15 años
+    elif meses_cotizados == 180:  # 15 años
         return 50
-    elif meses_cotizados <= 438:  # Hasta 36.5 años
-        return 50 + ((meses_cotizados - 180) * (50 / 258))  # 50% restante distribuido en los meses hasta 36.5 años
+    elif meses_cotizados <= 300:  # 15 a 25 años
+        meses_adicionales = meses_cotizados - 180
+        return 50 + (meses_adicionales * 0.19)
+    elif meses_cotizados <= 438:  # 25 a 36.5 años
+        meses_adicionales = meses_cotizados - 300
+        return 50 + (120 * 0.19) + (meses_adicionales * 0.18)
     else:
         return 100
 
@@ -162,8 +166,10 @@ def calcular_base_reguladora(salario_anual, annos_sin_cotizar: float, tipo_traba
                     factor = 0.5
             suma_bases += base_minima * factor
         elif tipo_trabajador == "autonomo":
-            if mes_en_laguna < 6:
+            if mes_en_laguna < 48:  # Hasta 48 meses
                 suma_bases += base_minima
+            else:  # A partir del mes 49
+                suma_bases += base_minima * 0.5
 
     # Dualidad de cálculo (a partir de 2026)
     if ANNO_ACTUAL >= 2026:
@@ -189,26 +195,26 @@ def ajustar_pension_por_edad(pension_base, edad_deseada, edad_legal, annos_cotiz
         float: Pensión ajustada según la edad.
     """
     meses_diferencia = (edad_deseada - edad_legal) * 12
-
-    if meses_diferencia < 0:  # Jubilación anticipada
-        if abs(meses_diferencia) > 24:  # Máximo 24 meses de anticipación voluntaria
-            return 0  # No permitido anticipar más de 24 meses de forma voluntaria
-
-        # Coeficiente reductor mensual según años cotizados(si se cotizaron menos de 38 años, será 0,5%, sino, 0,4%)
-        # Estos coeficientes son solo una aproximación simplificada a los de tabla completa de la Seguridad Social
-        coef_reductor = abs(meses_diferencia) * 0.005 if annos_cotizados < 38 else abs(meses_diferencia) * 0.004
-
-        pension_ajustada = pension_base * (1 - coef_reductor)
-
-    elif meses_diferencia > 0:  # Jubilación demorada
-        pension_con_bonus = calcular_bonificacion_demora(pension_base, meses_demora=meses_diferencia)
+    if meses_diferencia > 0:  # Demora
+        pension_con_bonus = calcular_bonificacion_demora(pension_base, meses_diferencia)
         pension_ajustada = pension_base + pension_con_bonus
-
-    else:  # Jubilación a la edad legal
+    elif meses_diferencia < 0:  # Anticipación
+        coef_reductor = calcular_coeficiente_reductor(meses_diferencia, annos_cotizados)
+        pension_ajustada = pension_base * (1 - coef_reductor)
+    else:  # Exactamente la edad legal
         pension_ajustada = pension_base
+    return pension_ajustada
 
-    # Aplicamos límites mensuales
-    return max(PENSION_MINIMA, min(pension_ajustada, PENSION_MAXIMA))
+
+def calcular_coeficiente_reductor(meses_anticipacion, annos_cotizados):
+    meses_anticipacion = abs(meses_anticipacion)  # Convertir a positivo
+    if meses_anticipacion > 24:
+        raise ValueError("No se permite anticipar más de 24 meses voluntariamente.")
+    if annos_cotizados < 38:
+        coef_reductor = meses_anticipacion * 0.005  # 0.5% por mes
+    else:
+        coef_reductor = meses_anticipacion * 0.004  # 0.4% por mes
+    return coef_reductor
 
 
 def calcular_bonificacion_demora(pension_base: float, meses_demora: int):
@@ -225,20 +231,10 @@ def calcular_bonificacion_demora(pension_base: float, meses_demora: int):
     Returns:
         float: La mejor bonificación mensual entre las tres opciones
     """
-    # Opción 1: Porcentaje adicional (4% por año completo adicional)
-    bonus_porcentaje = pension_base * (meses_demora * 0.04 / 12)
-
-    # Opción 2: Cantidad a tanto alzado
-    # Se percibe una cantidad equivalente a la pensión mensual por cada año completo
-    # multiplicada por 2
-    cantidad_alzada = pension_base * (meses_demora / 12) * 2
-
-    # Opción 3: Mixta (combina un porcentaje menor con una cantidad alzada)
-    # 2% adicional + la mitad de la cantidad alzada
-    mixta = (pension_base * (meses_demora * 0.02 / 12)) + (pension_base * (meses_demora / 24))
-
-    # Devolvemos la opción más beneficiosa
-    return max(bonus_porcentaje, cantidad_alzada, mixta)
+    # Calcular el porcentaje adicional: 4% por cada año completo de demora
+    annos_demora = meses_demora // 12  # Solo años completos
+    bonus_porcentaje = pension_base * (annos_demora * 0.04)
+    return bonus_porcentaje
 
 
 def calcular_base_reguladora_dual(bases_cotizacion):
@@ -325,13 +321,8 @@ def calcular_primer_pilar(base_reguladora, annos_cotizados, tiene_hijos, num_hij
     if base_reguladora < 0 or annos_cotizados < 0 or edad_deseada < 0:
         raise ValueError("Base reguladora, años cotizados y edad deseada deben ser positivos.")
     diferencia_annos_porcentaje = 36.5 - 15
-    if annos_cotizados <= 15:
-        porcentaje = 50  # Se garantiza el mínimo del 50%
-    elif annos_cotizados < 36.5:
-        incremento_anual = 50 / diferencia_annos_porcentaje  # Aproximadamente 2.33% por año adicional
-        porcentaje = 50 + (annos_cotizados - 15) * incremento_anual
-    else:
-        porcentaje = 100  # Se alcanza el 100% a partir de 36,5 años cotizados
+    meses_cotizados = annos_cotizados * 12
+    porcentaje = calcular_porcentaje_por_meses(meses_cotizados)
 
     # Calcular la pensión base antes de ajustes por edad
     pension_base = base_reguladora * (porcentaje / 100)  # Pensión mensual sin ajustes

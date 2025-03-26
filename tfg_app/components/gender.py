@@ -7,6 +7,9 @@ class GenderState(rx.State):
     def set_value(self, value: str):
         print(f"Estableciendo género: {value}")
         self.value = value
+    @rx.var
+    def empty_value(self) -> bool:
+        return self.value == ""
 
     @rx.event
     async def reset_values(self):

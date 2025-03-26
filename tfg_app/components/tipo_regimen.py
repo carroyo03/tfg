@@ -6,6 +6,10 @@ from tfg_app.styles.styles import Size as size
 
 class RadioGroup1State(rx.State):
     item: str = "None"
+
+    @rx.var
+    def empty_value(self) -> bool:
+        return self.item == "None"
     
     def set_item(self, item: str):
         print(f"Estableciendo item: {item}")
@@ -17,6 +21,10 @@ class RadioGroup1State(rx.State):
 
 class TypeRegState(rx.State):
     value: str = ""
+
+    @rx.var
+    def empty_value(self) -> bool:
+        return self.value == ""
     
     def set_value(self, value: str):
         print(f"Estableciendo número de hijos: {value}")
@@ -29,6 +37,20 @@ class TypeRegState(rx.State):
 
 class LagsCotState(rx.State):
     value: str = ""
+
+    @rx.var
+    def invalid_value(self) -> bool:
+        if not self.empty_value:
+            try:
+                v = int(self.value)
+                return v < 0
+            except:
+                return True
+        return False
+
+    @rx.var
+    def empty_value(self) -> bool:
+        return self.value == ""
     
     def set_value(self, value: str):
         print(f"Estableciendo número de hijos: {value}")

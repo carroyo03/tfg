@@ -14,6 +14,11 @@ class GlobalState(rx.State):
     def get_pension(self, n_pilar: str) -> float:
         if n_pilar in ("primer", "segundo", "tercer"):
             value = getattr(self, f"pension_{n_pilar}_pilar")
-            return round(value.to(float), 2)
+            # Check if value is already a float or needs conversion
+            if isinstance(value, float):
+                return round(value, 2)
+            else:
+                # It's a Var object, convert it to float
+                return round(value.to(float), 2)
         else:
             raise ValueError("El pilar debe ser 'primer', 'segundo' o 'tercer'.")

@@ -2,7 +2,6 @@ import reflex as rx
 
 from tfg_app.views.pilar1.pilar1form import form1
 from tfg_app.views.pilar2.pilar2form import form2
-from tfg_app.components.navbar import navbar
 from tfg_app.styles import styles,colors
 from tfg_app.styles.fonts import Font
 from tfg_app.backend.main import calcular_pension_1p
@@ -12,16 +11,7 @@ from tfg_app.views.pilar1.pilar1results import results_pilar1
 from tfg_app.views.pilar2.pilar2results import results_pilar2
 from tfg_app.styles.styles import Size as size
 from tfg_app.views.login.login_form import AppState,sign_in_v1
-
-
-
-
-from typing import Callable
-from datetime import datetime
-import os
-from reflex_clerk import ClerkState
-import reflex_clerk as clerk
-from dotenv import load_dotenv
+from tfg_app.styles.styles import BASE_STYLE
 
 
 def loading():
@@ -46,7 +36,7 @@ def form_pilar1():
             rx.State.is_hydrated,
             # Contenido principal cuando está cargado
             rx.vstack(
-                navbar(),
+                
                 rx.vstack(
                     rx.vstack(
                         rx.heading(
@@ -68,7 +58,7 @@ def form_pilar1():
                     height="auto",
                     spacing="1",
                     align_items="center",
-                    margin_top="4rem"
+                    #margin_top="4rem"
                 ),
             ),
             # Spinner mientras carga
@@ -80,7 +70,7 @@ def form_pilar1():
 @rx.page("/pilar1")#,on_load=AuthState.on_load)
 def pilar1():
     return rx.vstack(
-        navbar(),
+        
         rx.box(
             rx.heading(
                 "Plan Público de Pensiones",
@@ -167,7 +157,7 @@ def form_pilar2():
                 ),
                 rx.vstack(
                     rx.box(
-                            navbar(),
+                            
                             justify="center",
                 
                     ),
@@ -224,7 +214,7 @@ def form_pilar2():
 @rx.page("/pilar2")#,on_load=AuthState.on_load)
 def pilar2():
     return rx.vstack(
-        navbar(),
+        
         rx.box(
             rx.heading(
                 "Cálculo de pensión pública y de empresa",
@@ -310,7 +300,7 @@ def form_pilar3():
                     ),
                 rx.vstack(
                     rx.box(
-                            navbar(),
+                            
                             justify="center",
                 
                     ),
@@ -369,7 +359,6 @@ def result():
         rx.cond(
             rx.State.is_hydrated,
             rx.vstack(
-                navbar(),
                 rx.box(
                     rx.heading(
                         "Resultados",
@@ -435,10 +424,10 @@ def result():
 
 
 
-app = rx.App(style=styles.BASE_STYLE, stylesheets=[f"https://fonts.googleapis.com/css?family={font.value}" for font in Font if font != Font.TITLE.value])
+app = rx.App(style=BASE_STYLE, stylesheets=[f"https://fonts.googleapis.com/css?family={font.value}" for font in Font if font != Font.TITLE.value])
 app.add_page(sign_in)
 #app.add_page(check_email)
-app.add_page(form_pilar1, on_load=AppState.check_sign_in())
+app.add_page(form_pilar1, on_load=AppState.check_sign_in)
 app.api.add_api_route("/calcular_pension/", calcular_pension_1p, methods=["POST"])
 app.add_page(pilar1,on_load=AppState.check_sign_in("/pilar1"))
 app.add_page(form_pilar2,on_load=AppState.check_sign_in("/form2"))

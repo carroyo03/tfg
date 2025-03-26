@@ -16,8 +16,16 @@ class RadioGroupState(rx.State):
         print("Restableciendo item")
         self.item = "None"
 
+    @rx.var
+    def empty(self) -> bool:
+        return self.item == "None"
+
 class ChildrenNumberState(rx.State):
     value: str = ""
+
+    @rx.var
+    def empty_value(self) -> bool:
+        return self.value == ""
     
     def set_value(self, value: str):
         print(f"Estableciendo número de hijos: {value}")

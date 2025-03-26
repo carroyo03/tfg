@@ -1,4 +1,4 @@
-import reflex as rx
+import reflex as rx #type: ignore
 from tfg_app.styles.colors import TextColor as txcolor, Color as color
 from tfg_app.styles.styles import Size as size
 from tfg_app.styles.fonts import Font
@@ -9,7 +9,7 @@ from tfg_app.global_state import GlobalState
 from tfg_app.components.children import children, RadioGroupState, ChildrenNumberState
 from tfg_app.components.tipo_regimen import tipo_regimen, RadioGroup1State, TypeRegState, LagsCotState
 from tfg_app.styles.styles import BASE_STYLE
-import pandas as pd
+import pandas as pd #type: ignore
 import datetime
 import logging
 
@@ -25,15 +25,91 @@ class FormState(rx.State):
         """Una computed var que maneja los datos del formulario."""
         return self.form_data
 
+    @rx.var
+    async def invalid_form_data(self) -> bool:
+        """Returns True if the form has invalid or empty required fields."""
+        try:
+            # Debug output
+            print("Checking form validation...")
+            
+            # Check each state individually for better debugging
+            gender_state = await self.get_state(GenderState)
+            if gender_state.empty_value:
+                print("Gender is empty")
+                return True
+                
+            date_state = await self.get_state(DateState)
+            if date_state.invalid_value:
+                print("Date is empty")
+                return True
+                
+            salary_state = await self.get_state(AvgSalaryState)
+            if salary_state.empty_value or salary_state.invalid_value:
+                print("Salary is empty or invalid")
+                return True
+                
+            # Check children state
+            radio_group_state = await self.get_state(RadioGroupState)
+            if radio_group_state.empty:
+                print("Children radio is empty")
+                return True
+                
+            # Only check number of children if they have children
+            if radio_group_state.item == "Sí":
+                children_number_state = await self.get_state(ChildrenNumberState)
+                if children_number_state.empty_value:
+                    print("Number of children is empty")
+                    return True
+            
+            # Check start age
+            start_age_state = await self.get_state(StartAgeState)
+            if start_age_state.empty_value or start_age_state.invalid_value:
+                print("Start age is empty or invalid")
+                return True
+                
+            # Check retirement age
+            age_state = await self.get_state(AgeState)
+            if age_state.empty_value or age_state.invalid_value:
+                print("Retirement age is empty or invalid")
+                return True
+                
+            # Check regime type
+            type_reg_state = await self.get_state(TypeRegState)
+            if type_reg_state.empty_value:
+                print("Type reg is empty")
+                return True
+                
+            # Check contribution gaps
+            lags_radio_state = await self.get_state(RadioGroup1State)
+            if lags_radio_state.empty_value:
+                print("Contribution gaps radio is empty")
+                return True
+                
+            # Only check number of gaps if they have gaps
+            if lags_radio_state.item == "Sí":
+                lags_cot_state = await self.get_state(LagsCotState)
+                if lags_cot_state.empty_value:
+                    print("Number of contribution gaps is empty")
+                    return True
+            
+            # If we get here, the form is valid
+            print("Form is valid!")
+            return False
+        except Exception as e:
+            print(f"Error validating form: {e}")
+            return True  # If there's an error, disable the button
+    
     @rx.event
     async def handle_submit(self, form_data: dict):
         try:
+            if self.invalid_form_data:
+                raise ValueError("Datos del formulario inválidos")
             form_data['fecha_nacimiento'] = f"{form_data['day']}/{form_data['month']}/{form_data['year']}"
             del form_data['day']
             del form_data['month']
             del form_data['year']
             self.form_data = form_data
-            
+
             pension = await self.send_data_to_backend(self.form_data)
             state = await self.get_state(GlobalState)
             state.set_pension("primer",pension)
@@ -51,9 +127,8 @@ class FormState(rx.State):
         self.form_data = {}
         
         # Limpia los substates
-        for state_class in [AgeState, GenderState, DateState, RadioGroupState, 
-                            ChildrenNumberState, StartAgeState, 
-                            RadioGroup1State, TypeRegState,
+        for state_class in [AgeState, GenderState, DateState, RadioGroupState, StartAgeState,
+                            ChildrenNumberState,RadioGroup1State, TypeRegState,
                             LagsCotState, AvgSalaryState]:
             state= await self.get_state(state_class)
             await state.reset_values()
@@ -143,50 +218,52 @@ class FormState(rx.State):
 
 def form1():
     return rx.form(
-        rx.vstack(
-            date_picker("Fecha de nacimiento"),
-            gender(),
-            input_text("Salario medio obtenido","salario_medio", AvgSalaryState, "number"),
-            children(),
-            input_text("Edad a la que empezaste a cotizar","edad_inicio_trabajo", StartAgeState, "number"),
-            input_text("Edad deseada de jubilación", "edad_jubilacion",AgeState, "number"),
-            tipo_regimen(),
-            rx.hstack(
-                rx.button(
-                    "Limpiar formulario",
-                    type="button",
-                    on_click=FormState.clear_form,
-                    color="white",
-                    width="50%",
-                    border="1px solid",
-                    box_shadow="0 .25rem .375rem #0003",
-                    background_color=color.BACKGROUND.value,
-                    _hover={"bg": color.SECONDARY.value, "color": "white"}
-                ),
-                rx.button("Siguiente", 
-                        type="submit",
-                        background_color="white",
-                        color=color.BACKGROUND.value,
+            rx.vstack(
+                date_picker("Fecha de nacimiento"),
+                gender(),
+                input_text("Salario medio obtenido","salario_medio", AvgSalaryState, "number"),
+                children(),
+                input_text("Edad a la que empezaste a cotizar","edad_inicio_trabajo", StartAgeState, "number"),
+                input_text("Edad deseada de jubilación", "edad_jubilacion",AgeState, "number"),
+                tipo_regimen(),
+                rx.hstack(
+                    rx.button(
+                        "Limpiar formulario",
+                        type="button",
+                        on_click=FormState.clear_form,
+                        color="white",
                         width="50%",
                         border="1px solid",
                         box_shadow="0 .25rem .375rem #0003",
+                        background_color=color.BACKGROUND.value,
                         _hover={"bg": color.SECONDARY.value, "color": "white"}
+                    ),
+                    rx.button("Siguiente",
+                            type="submit",
+                            background_color="white",
+                            color=color.BACKGROUND.value,
+                            width="50%",
+                            border="1px solid",
+                            box_shadow="0 .25rem .375rem #0003",
+                            _hover={"bg": color.SECONDARY.value, "color": "white"},
+                            disabled=FormState.invalid_form_data
+                    ),
+
+                    width="100%",
+                    spacing="4"
+
                 ),
-                
                 width="100%",
-                spacing="4"
-                
+                height="100vh",
+                spacing="5",
+                padding=["1em", "1.5em", "2em"],
+                max_width="100%",
+                font_weight='bold'
             ),
-            width="100%",
-            height="100vh",
-            spacing="5",
-            padding=["1em", "1.5em", "2em"],
-            max_width="100%",
-            font_weight='bold'
-        ),
-        on_submit=FormState.handle_submit,
-        value=FormState.stored_form_data,
-        margin_top=size.DEFAULT.value,
-        align="center",
-        width="100%"
-    )
+            on_submit=FormState.handle_submit,
+            value=FormState.stored_form_data,
+            margin_top=size.DEFAULT.value,
+            align="center",
+            width="100%"
+        )
+

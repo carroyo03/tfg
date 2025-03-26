@@ -1,3 +1,5 @@
+import datetime
+
 import reflex as rx
 import logging
 
@@ -9,10 +11,15 @@ class DateState(rx.State):
     year_values: list[str] = [str(i) for i in range(2005,1950,-1)]
 
     # Default values for the date
-    day: str = "1"
-    month: str = "1"
-    year: str = "2000"
-    date: str = "01/01/2000"
+    day: str = ""
+    month: str = ""
+    year: str = ""
+    date: str = ""
+
+    @rx.var
+    def invalid_value(self) -> bool:
+        return self.day == "" or self.month == "" or self.year == "" or datetime.datetime.strptime(self.date, "%d/%m/%Y") is None
+
 
     def update_date(self):
         self.date = f"{self.day}/{self.month}/{self.year}"
@@ -42,33 +49,33 @@ def date_picker(text: str) -> rx.Component:
     return rx.vstack(
         rx.text(text, color="white", margin_bottom="0.5em"),
         rx.hstack(
-            rx.select(
-                DateState.day_values,
-                placeholder="Día",
-                on_change=DateState.set_day,
-                name="day",
-                width="29%",
-                color="black"
+                rx.select(
+                    DateState.day_values,
+                    placeholder="Día",
+                    on_change=DateState.set_day,
+                    name="day",
+                    width="29%",
+                    color="black"
+                ),
+                rx.select(
+                    DateState.month_values,
+                    placeholder="Mes",
+                    on_change=DateState.set_month,
+                    name="month",
+                    width="29%",
+                    color="black"
+                ),
+                rx.select(
+                    DateState.year_values,
+                    placeholder="Año",
+                    on_change=DateState.set_year,
+                    name="year",
+                    width="29%",
+                    color="black"
+                ),
+                spacing="7",
+                width="100%"
             ),
-            rx.select(
-                DateState.month_values,
-                placeholder="Mes",
-                on_change=DateState.set_month,
-                name="month",
-                width="29%",
-                color="black"
-            ),
-            rx.select(
-                DateState.year_values,
-                placeholder="Año",
-                on_change=DateState.set_year,
-                name="year",
-                width="29%",
-                color="black"
-            ),
-            spacing="5",
-            width="100%"
-        ),
-        width="100%",
-        align_items="flex-start"
+            width="100%",
+            align_items="flex-start",
     )

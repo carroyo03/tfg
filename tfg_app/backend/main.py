@@ -4,7 +4,7 @@ from tfg_app.backend.pens import calcular_base_reguladora, calcular_primer_pilar
 
 import datetime
 import reflex as rx
-from datetime import datetime
+
 
 
 class FormData(BaseModel):
@@ -38,10 +38,14 @@ def calcular_edad(fecha_nacimiento):
 def annos_por_trabajar(edad_actual,edad_jubilacion_deseada):
     return int(edad_jubilacion_deseada - edad_actual)
 
-async def calcular_pension_1p(data: FormData):
+async def calcular_pension_1p(data: dict):
+    # Accept dictionary input instead of FormData
+    # Convert dictionary to FormData if needed
+    if not isinstance(data, dict):
+        data = data.dict()  # Convert FormData to dict if it's not already a dict
 
     #edad_actual = calcular_edad(fecha_nacimiento)
-    annos_cotizados = estimar_tiempo_cotizado(data['fecha_nacimiento'], data['edad_inicio_trabajo'],data['edad_jubilacion_deseada'])
+    annos_cotizados = estimar_tiempo_cotizado(data['fecha_nacimiento'], data['edad_inicio_trabajo'], data['edad_jubilacion_deseada'])
     #tipo_jubilacion, meses_ajuste = calcular_annos_anticipacion_o_demora(edad_actual, data.edad_jubilacion_deseada, annos_cotizados)
     #anno_jubilacion = datetime.date.today().year + (data.edad_jubilacion_deseada - edad_actual)
     
@@ -68,7 +72,14 @@ async def calcular_pension_1p(data: FormData):
     )
     print(f"Base reguladora: {base_reguladora}")
     
-    pension_primer_pilar = calcular_primer_pilar(base_reguladora, annos_cotizados, data['tiene_hijos'],data['n_hijos'])
+    # Ensure we pass edad_deseada parameter correctly
+    pension_primer_pilar = calcular_primer_pilar(
+        base_reguladora=base_reguladora, 
+        annos_cotizados=annos_cotizados, 
+        tiene_hijos=data['tiene_hijos'],
+        num_hijos=data['n_hijos'],
+        edad_deseada=data['edad_jubilacion_deseada']
+    )
     
     print(f"Pensión primer pilar: {pension_primer_pilar}")
 
@@ -82,7 +93,6 @@ async def calcular_pension_2p(data: dict):
         salario_anual=form_data.prev_form.salario_medio,  # Acceder como un diccionario
         aportacion_empleado_voluntaria=2 if form_data.quiere_aportar.lower().startswith("s") else 0,
         aportacion_empleador=form_data.aportacion_empresa,
-        categoria=2,  # Asumir que la categoría es 2
         edad_jubilacion=form_data.prev_form.edad_jubilacion_deseada,
         periodo_aportacion_annos=annos_por_trabajar(edad_actual, form_data.prev_form.edad_jubilacion_deseada),
         rentabilidad_anual_esperada=form_data.rentabilidad_2/100  # ¡habrá que cambiar esto

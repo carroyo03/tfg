@@ -1,4 +1,9 @@
 .states
+.states/*
+.web/*
+.idea/*
+.idea
+.mypy_cache
 *.db
 *.py[cod]
 .web
