@@ -18,12 +18,14 @@ def redondear(numero):
 
 
 def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
+    
+
     # Prepara los datos del gráfico
     data = [
         {"name": "Pensión pública", "value": redondear(ratio_sustitucion), "fill": "#00FF7F"},
         {"name": "Salario", "value": redondear(100 - ratio_sustitucion), "fill": "#D3D3D3"},
     ]
-    
+
     return rx.vstack(
         rx.box(
             rx.hstack(
@@ -69,30 +71,89 @@ def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
     )
 
 
+def show_pension_salary_comparison(pension_primer_pilar:float, salario_actual:float) -> rx.Component:
+
+    data = [
+        {"name": "Comparación", "Pensión pública": pension_primer_pilar, "Salario": salario_actual},
+    ]
+    return rx.recharts.bar_chart(
+        rx.recharts.cartesian_grid(),
+        rx.recharts.bar(
+            data_key="Pensión pública",
+            stroke=rx.color("accent",9),
+            fill=rx.color("accent", 8),
+        ),
+        rx.recharts.bar(
+            data_key="Salario",
+            stroke=rx.color("blue", 7),
+            fill=rx.color("blue", 6),
+        ),
+        rx.recharts.x_axis(
+            data_key="name",
+        ),
+        rx.recharts.y_axis(),
+        rx.recharts.legend(),
+        rx.recharts.graphing_tooltip(),
+        data=data,
+        width="100%",
+        height=300,
+    )
 
 
 
 def results_pilar1() -> rx.Component:
-    pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
-    pension_1p_anual = redondear(pension_primer_pilar) * 12
-    # (math.ceil(pension_primer_pilar*12*100)/100).to(float)
-    salario_actual = FormState.form_data['salario_medio'].to(float)
-    salario_mensual = redondear(salario_actual/12)
-    ratio_sustitucion = calcular_ratio_sustitucion(pension_primer_pilar, salario_actual)
+
+    pension_primer_pilar = GlobalState.pension_primer_pilar
+    pension_1p_anual = pension_primer_pilar * 12
     
-    return rx.center(
+    # Fix: Use a safer way to access form data with a default value
+    try:
+        salario_actual = FormState.form_data['salario_medio']
+    except (TypeError, ValueError):
+        # Fallback if conversion fails
+        salario_actual = 0
+        
+    salario_mensual = salario_actual / 12
+    ratio_sustitucion = calcular_ratio_sustitucion(pension_primer_pilar, salario_actual)
+
+    ratio_gt_100_component = rx.box(
+        rx.vstack(
+            rx.text("El ratio de sustitución es superior al 100%. Esto significa que tu pensión pública es mayor que tu salario medio.", 
+                   color="black",
+                   text_align="center",
+                   width="90%"),
+            show_pension_salary_comparison(pension_primer_pilar, salario_actual),
+            leyenda1(),
+            width="100%",
+            spacing="5",
+            align_items="center",
+            justify="center",
+            padding="2em",
+            background_color="white",
+            border_radius="md",
+            box_shadow="lg",
+            margin="2em auto",
+        ),
+        width="100%",
+        display="flex",
+        justify_content="center",
+        padding_top= "8em",
+        padding_bottom="4em"
+    )
+
+    ratio_lte_100_component = rx.box(
         rx.vstack(
             rx.flex(
                 rx.vstack(
                     rx.hstack(
                         rx.heading("Pensión mensual:", size="4", color="black"),
-                        rx.text(f"{redondear(pension_primer_pilar)} €/mes", color="black"),
+                        rx.text(f"{pension_primer_pilar} €/mes", color="black"),
                         spacing="1",
                         width="100%",
                     ),
                     rx.hstack(
                         rx.heading("Pensión anual:", size="4", color="black"),
-                        rx.text(f"{redondear(pension_1p_anual)} €/año", color="black"),
+                        rx.text(f"{pension_1p_anual} €/año", color="black"),
                         spacing="1",
                         width="100%",
                     ),
@@ -101,36 +162,44 @@ def results_pilar1() -> rx.Component:
                 rx.vstack(
                     rx.hstack(
                         rx.heading("Salario mensual:", size="4", color="black"),
-                        rx.text(f"{redondear(salario_mensual):.2f} €/mes", color="black"),
+                        rx.text(f"{salario_mensual} €/mes", color="black"),
                         spacing="1",
                         width="100%",
                     ),
                     rx.hstack(
                         rx.heading("Salario anual:", size="4", color="black"),
-                        rx.text(f"{redondear(salario_actual):.2f} €/año", color="black"),
+                        rx.text(f"{salario_actual} €/año", color="black"),
                         spacing="1",
                         width="100%",
                     ),
                     width="50%",
                 ),
                 display="flex",
-                flex_direction="row",
+                flex_direction=["column", "column", "row"],  # Responsive layout
                 justify="between",
                 width="100%",
+                gap="4",
             ),
             show_ratio_pie_chart(ratio_sustitucion),
             leyenda1(),
             align_items="center",
             justify_content="center",
-            padding="1em",
-            border_radius="4%",
+            padding="2em",
+            border_radius="md",
             box_shadow="lg",
             background_color="white",
-            width="80%",
-            margin_top="1em",
-            margin_bottom="1em",
-            height="auto",  # Cambiado de 70% a auto para mejor responsividad
+            width="90%",
+            max_width="1200px",
+            margin="2em auto",
+            spacing="4",
         ),
-        height="100vh",  # Asegura que el contenedor ocupe toda la altura de la pantalla
         width="100%",
+        display="flex",
+        justify_content="center",
+    )
+
+    return rx.cond(
+        ratio_sustitucion > 100,
+        ratio_gt_100_component,
+        ratio_lte_100_component
     )

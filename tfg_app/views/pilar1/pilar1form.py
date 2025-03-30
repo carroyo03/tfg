@@ -9,6 +9,7 @@ from tfg_app.global_state import GlobalState
 from tfg_app.components.children import children, RadioGroupState, ChildrenNumberState
 from tfg_app.components.tipo_regimen import tipo_regimen, RadioGroup1State, TypeRegState, LagsCotState
 from tfg_app.styles.styles import BASE_STYLE
+from tfg_app.components.info_button import info_button
 import pandas as pd #type: ignore
 import datetime
 import logging
@@ -20,7 +21,7 @@ class FormState(rx.State):
     form_data: dict = {}
     is_loading: bool = False
     
-    @rx.var
+    
     def stored_form_data(self) -> dict:
         """Una computed var que maneja los datos del formulario."""
         return self.form_data
@@ -63,15 +64,33 @@ class FormState(rx.State):
             
             # Check start age
             start_age_state = await self.get_state(StartAgeState)
-            if start_age_state.empty_value or start_age_state.invalid_value:
-                print("Start age is empty or invalid")
+            if start_age_state.empty_value:
+                print("Start age is empty")
+                return True
+            elif start_age_state.invalid_value:
+                print("Start age is invalid")
                 return True
                 
             # Check retirement age
             age_state = await self.get_state(AgeState)
-            if age_state.empty_value or age_state.invalid_value:
-                print("Retirement age is empty or invalid")
+            if age_state.empty_value:
+                print("Retirement age is empty")
                 return True
+            elif age_state.invalid_value:  # Changed to elif to avoid double checking
+                print("Retirement age is invalid")
+                return True
+            
+            if not start_age_state.empty_value and not age_state.empty_value:
+                # Check minimum years of contribution only if both values are valid numbers
+                try:
+                    if int(age_state.value) - int(start_age_state.value) < 15:
+                        print("Años insuficientes de cotización")
+                        return True
+                except ValueError:
+                    # If conversion fails, we'll catch it in the individual field validations
+                    pass
+                
+                
                 
             # Check regime type
             type_reg_state = await self.get_state(TypeRegState)
@@ -102,14 +121,17 @@ class FormState(rx.State):
     @rx.event
     async def handle_submit(self, form_data: dict):
         try:
-            if self.invalid_form_data:
+            # Need to await the async computed variable
+            is_invalid = await self.invalid_form_data
+            if is_invalid:
                 raise ValueError("Datos del formulario inválidos")
+                
             form_data['fecha_nacimiento'] = f"{form_data['day']}/{form_data['month']}/{form_data['year']}"
             del form_data['day']
             del form_data['month']
             del form_data['year']
             self.form_data = form_data
-
+    
             pension = await self.send_data_to_backend(self.form_data)
             state = await self.get_state(GlobalState)
             state.set_pension("primer",pension)
@@ -221,7 +243,9 @@ def form1():
             rx.vstack(
                 date_picker("Fecha de nacimiento"),
                 gender(),
-                input_text("Salario medio obtenido","salario_medio", AvgSalaryState, "number"),
+                input_text("Salario medio obtenido","salario_medio", AvgSalaryState, "number", has_info_button=True, 
+                           info="Introduce el salario bruto medio obtenido anualmente",
+                           color_info_button="white"),  
                 children(),
                 input_text("Edad a la que empezaste a cotizar","edad_inicio_trabajo", StartAgeState, "number"),
                 input_text("Edad deseada de jubilación", "edad_jubilacion",AgeState, "number"),
