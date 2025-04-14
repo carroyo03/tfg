@@ -27,6 +27,27 @@ def loading():
 def sign_in():
     return sign_in_v1()
 
+@rx.page("/authorize")
+def authorize():
+    code = AppState.router.page.params.get("code")
+    state = AppState.router.page.params.get("state")
+    return rx.cond(
+        code is None or state is None,
+        sign_in_v1(),
+        rx.vstack(
+            rx.text("Autenticando..."),
+            loading(),
+            on_mount= lambda: AppState.handle_authorize(code, state)
+        ) 
+    )
+
+@rx.page("/logout")
+def logout():
+    return rx.vstack(
+        rx.text("Cerrando sesión..."),
+        loading(),
+        on_mount=AppState.logout()
+    )
 
 @rx.page("/")
 def form_pilar1():
@@ -426,12 +447,14 @@ def result():
 
 app = rx.App(style=BASE_STYLE, stylesheets=[f"https://fonts.googleapis.com/css?family={font.value}" for font in Font if font != Font.TITLE.value])
 app.add_page(sign_in)
+app.add_page(authorize)
+app.add_page(logout)
 #app.add_page(check_email)
-app.add_page(form_pilar1, on_load=AppState.check_sign_in)
+app.add_page(form_pilar1, on_load=AppState.check_session("/"))
 app.api.add_api_route("/calcular_pension/", calcular_pension_1p, methods=["POST"])
-app.add_page(pilar1,on_load=AppState.check_sign_in("/pilar1"))
-app.add_page(form_pilar2,on_load=AppState.check_sign_in("/form2"))
-app.add_page(pilar2,on_load=AppState.check_sign_in("/pilar2"))
-app.add_page(form_pilar3,on_load=AppState.check_sign_in("/form3"))
-app.add_page(result,on_load=AppState.check_sign_in("/results"))
+app.add_page(pilar1,on_load=AppState.check_session("/pilar1"))
+app.add_page(form_pilar2,on_load=AppState.check_session("/form2"))
+app.add_page(pilar2,on_load=AppState.check_session("/pilar2"))
+app.add_page(form_pilar3,on_load=AppState.check_session("/form3"))
+app.add_page(result,on_load=AppState.check_session("/results"))
 
