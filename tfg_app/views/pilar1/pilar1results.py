@@ -106,13 +106,17 @@ def results_pilar1() -> rx.Component:
     pension_primer_pilar = GlobalState.pension_primer_pilar
     pension_1p_anual = pension_primer_pilar * 12
     
-    # Fix: Use a safer way to access form data with a default value
+    # Get salario_medio from form data and properly convert to float
     try:
-        salario_actual = FormState.form_data['salario_medio']
-    except (TypeError, ValueError):
-        # Fallback if conversion fails
-        salario_actual = 0
+        # Extract the value and convert to float
+        salario_actual_value = FormState.form_data.get('salario_medio')
+        # Convert to float - this handles both primitive values and Reflex state objects
+        salario_actual = float(salario_actual_value) if salario_actual_value is not None else 0.0
+    except (TypeError, ValueError, KeyError):
+        # Fallback if conversion fails or key doesn't exist
+        salario_actual = 0.0
         
+    # Now that salario_actual is a proper float, we can safely perform division
     salario_mensual = salario_actual / 12
     ratio_sustitucion = calcular_ratio_sustitucion(pension_primer_pilar, salario_actual)
 

@@ -87,12 +87,12 @@ def input_text(title: str, name:str, state:rx.State, type_: str,has_info_button:
         rx.form.field(
             rx.cond(
                 not has_info_button and info == "" and color_info_button == "",
-                c1 = rx.text(
+                rx.text(
                     title,
                     color="white",
                     margin_bottom="0.5em"
                 ),
-                c2 = rx.hstack(
+                rx.hstack(
                     rx.text(
                         title,
                         color="white",
@@ -105,8 +105,7 @@ def input_text(title: str, name:str, state:rx.State, type_: str,has_info_button:
                     width="100%"
                 )
             ),
-            rx.form.control(
-                rx.input(
+            rx.input(
                     type=type_,
                     on_change=state.set_value,
                     name=name,
@@ -115,8 +114,6 @@ def input_text(title: str, name:str, state:rx.State, type_: str,has_info_button:
                     size="2",
                     border_radius="md",
                     debounce=300
-                ),
-                as_child=True,
             ),
             rx.form.message(
                 f"Introduce {title.lower()} valido.",

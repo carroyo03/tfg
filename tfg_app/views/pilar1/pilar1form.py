@@ -21,7 +21,7 @@ class FormState(rx.State):
     form_data: dict = {}
     is_loading: bool = False
     
-    
+    @rx.var
     def stored_form_data(self) -> dict:
         """Una computed var que maneja los datos del formulario."""
         return self.form_data
