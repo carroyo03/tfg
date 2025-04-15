@@ -6,7 +6,6 @@ from jose import jwk, jwt as jose_jwt
 from authlib.integrations.httpx_client import AsyncOAuth2Client
 import requests
 import jwt
-from time import time
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -33,7 +32,7 @@ class AppState(rx.State):
         name="refresh_token",
         same_site="strict",
         secure=True,
-        max_age=3600, # 1 hour
+        max_age=3600 * 24 * 30, # 1 month
     )
     oauth_state : str = rx.Cookie(
         name = "oauth_state",
@@ -41,6 +40,7 @@ class AppState(rx.State):
         secure=True,
         max_age=3600, # 1 hour
     )
+    error_message: str = ""
 
     # Cognito configuration
     COGNITO_DOMAIN : Optional[str] = os.environ.get("COGNITO_DOMAIN")
@@ -64,7 +64,10 @@ class AppState(rx.State):
         "COGNITO_SCOPE": COGNITO_SCOPE,
         "COGNITO_LOGOUT_URI": COGNITO_LOGOUT_URI,
     }
-
+    for key, value in  COGNITO_VARIABLES.items():
+        if value is None:
+            raise ValueError(f"Environment variable {key} is not set.")
+    
     print("Cognito variables loaded:")
     print(f"{key}: {value}\n" for key, value in COGNITO_VARIABLES.items())
 
@@ -146,6 +149,7 @@ class AppState(rx.State):
     async def refresh_access_token(self):
         if not self.refresh_token:
             print("No refresh token available. Redirecting to sign-in.")
+            self.error_message = "Error: Session finished... Please sign in again."
             self.signed_in = False
             self.guest = False
             return rx.redirect("/sign-in")
