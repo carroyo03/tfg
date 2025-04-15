@@ -1,5 +1,6 @@
 import reflex as rx
 
+from tfg_app.components.logout_button import logout_button
 from tfg_app.views.pilar1.pilar1form import form1
 from tfg_app.views.pilar2.pilar2form import form2
 from tfg_app.styles import styles,colors
@@ -31,6 +32,7 @@ def sign_in():
 def authorize():
     code = AppState.router.page.params.get("code")
     state = AppState.router.page.params.get("state")
+    print(f"Authorize route - Code: {code}, State: {state}")
     return rx.cond(
         code is None or state is None,
         sign_in_v1(),
@@ -57,7 +59,10 @@ def form_pilar1():
             rx.State.is_hydrated,
             # Contenido principal cuando está cargado
             rx.vstack(
-                
+                rx.cond(
+                    AppState.signed_in,
+                    logout_button(),
+                ),
                 rx.vstack(
                     rx.vstack(
                         rx.heading(
@@ -91,7 +96,10 @@ def form_pilar1():
 @rx.page("/pilar1")#,on_load=AuthState.on_load)
 def pilar1():
     return rx.vstack(
-        
+        rx.cond(
+            AppState.signed_in,
+            logout_button(),
+        ),
         rx.box(
             rx.heading(
                 "Plan Público de Pensiones",
@@ -162,6 +170,10 @@ def form_pilar2():
         rx.cond(
             rx.State.is_hydrated,
             rx.vstack(
+                rx.cond(
+                    AppState.signed_in,
+                    logout_button(),
+                ),
                 rx.button(
                     "<- Atrás", 
                     on_click=rx.redirect("/pilar1"), 
@@ -235,7 +247,10 @@ def form_pilar2():
 @rx.page("/pilar2")#,on_load=AuthState.on_load)
 def pilar2():
     return rx.vstack(
-        
+        rx.cond(
+            AppState.signed_in,
+            logout_button(),
+        ),
         rx.box(
             rx.heading(
                 "Cálculo de pensión pública y de empresa",
@@ -305,6 +320,10 @@ def form_pilar3():
         rx.cond(
             rx.State.is_hydrated,
             rx.vstack(
+                    rx.cond(
+                        AppState.signed_in,
+                        logout_button(),
+                    ),
                     rx.button(
                         "<- Atrás", 
                         on_click=rx.redirect("/pilar2"), 
@@ -380,6 +399,10 @@ def result():
         rx.cond(
             rx.State.is_hydrated,
             rx.vstack(
+                rx.cond(
+                    AppState.signed_in,
+                    logout_button(),
+                ),
                 rx.box(
                     rx.heading(
                         "Resultados",

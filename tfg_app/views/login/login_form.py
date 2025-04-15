@@ -17,13 +17,29 @@ class AppState(rx.State):
     signed_in: bool = False
     guest: bool = False
     user_info: dict = {}
-    access_token: str = ""
-    id_token: str = ""
-    refresh_token: str = ""
+    access_token: str = rx.Cookie(
+        name="access_token",
+        same_site="strict",
+        secure=True,
+        max_age=3600,  # 1 hour
+    )
+    id_token: str = rx.Cookie(
+        name="id_token",
+        same_site="strict",
+        secure=True,
+        max_age=3600,  # 1 hour
+    )
+    refresh_token: str = rx.Cookie(
+        name="refresh_token",
+        same_site="strict",
+        secure=True,
+        max_age=3600, # 1 hour
+    )
     oauth_state : str = rx.Cookie(
         name = "oauth_state",
         same_site="strict",
         secure=True,
+        max_age=3600, # 1 hour
     )
 
     # Cognito configuration
@@ -37,6 +53,21 @@ class AppState(rx.State):
     COGNITO_SCOPE : Optional[str] = os.environ.get("COGNITO_SCOPE")
     COGNITO_LOGOUT_URI : Optional[str] = os.environ.get("COGNITO_LOGOUT_URI")
 
+    COGNITO_VARIABLES = {
+        "COGNITO_DOMAIN": COGNITO_DOMAIN,
+        "COGNITO_CLIENT_ID": COGNITO_CLIENT_ID,
+        "COGNITO_CLIENT_SECRET": COGNITO_CLIENT_SECRET,
+        "COGNITO_REDIRECT_URI": COGNITO_REDIRECT_URI,
+        "COGNITO_REGION": COGNITO_REGION,
+        "COGNITO_USER_POOL_ID": COGNITO_USER_POOL_ID,
+        "COGNITO_RESPONSE_TYPE": COGNITO_RESPONSE_TYPE,
+        "COGNITO_SCOPE": COGNITO_SCOPE,
+        "COGNITO_LOGOUT_URI": COGNITO_LOGOUT_URI,
+    }
+
+    print("Cognito variables loaded:")
+    print(f"{key}: {value}\n" for key, value in COGNITO_VARIABLES.items())
+
     @rx.event
     def sign_in(self):
         client = AsyncOAuth2Client(
@@ -47,13 +78,24 @@ class AppState(rx.State):
         )
         authorization_endpoint = f"{self.COGNITO_DOMAIN}/oauth2/authorize"
         uri, state = client.create_authorization_url(authorization_endpoint)
-        self.oauth_state = state
+        print(f"Generating state: {state}")
+        print(f"Redirecting to: {uri}")
+        self.oauth_state = state # Store the state in the cookie
         return rx.redirect(uri)
     
     @rx.event
-    async def handle_authorize(self,code:str, state:str):
+    async def handle_authorize(self):
+        code = self.router.page.params.get("code")
+        state = self.router.page.params.get("state")
+        print(f"Handling authorization with code: {code} and state: {state}")
+        if not code or not state:
+            print("Missing code or state in /authorize request.")
+            self.signed_in = False
+            self.guest = False
+            return rx.redirect("/sign-in")
         try:
             if self.oauth_state != state:
+                print("State mismatch. Possible CSRF attack.")
                 self.signed_in = False
                 return rx.redirect("/sign-in")
             client = AsyncOAuth2Client(
@@ -69,6 +111,8 @@ class AppState(rx.State):
                 code=code,
                 redirect_uri=self.COGNITO_REDIRECT_URI
             )
+
+            print(f"Token received: {token}")
             self.access_token = token.get("access_token","")
             self.id_token = token.get("id_token","")
             self.refresh_token = token.get("refresh_token","")
@@ -83,11 +127,13 @@ class AppState(rx.State):
                 public_key,
                 algorithms=["RS256"],
                 audience=self.COGNITO_CLIENT_ID,
-                issuer=f"https://cognito-idp.{self.COGNITO_REGION}.amazonaws.com/{self.COGNITO_USER_POOL_ID}"
+                issuer=f"https://cognito-idp.{self.COGNITO_REGION}.amazonaws.com/{self.COGNITO_USER_POOL_ID}",
+                access_token=self.access_token,
             )
             self.user_info = claims
             self.signed_in = True
             self.guest = False
+            print("Authentication successful. Redirecting to home page.")
             return rx.redirect("/")
         
         except Exception as e:
@@ -154,33 +200,12 @@ class AppState(rx.State):
     @rx.event
     async def check_session(self, redirect_url: Optional[str] = None):
         if self.guest:
-            return  # Allow guest access
-        if not self.signed_in or not self.id_token:
-            if redirect_url:
-                return rx.redirect("/sign-in")
             return
-
-        try:
-            # Decode id_token to check expiration
-            claims = jose_jwt.decode(
-                self.id_token,
-                None,  # Skip signature verification for expiration check
-                options={"verify_signature": False, "verify_aud": False, "verify_iss": False}
-            )
-            from time import time
-            if claims.get("exp", 0) < int(time()):
-                print("Token expired. Attempting to refresh.")
-                await self.refresh_access_token()
-                if not self.signed_in:  # Refresh failed
-                    if redirect_url:
-                        return rx.redirect("/sign-in")
-            print("Token is valid")
-        except Exception as e:
-            print(f"Session check error: {e}")
-            self.signed_in = False
+        if not self.signed_in or not self.access_token or not self.id_token:
             if redirect_url:
                 return rx.redirect("/sign-in")
-            
+        return
+    
 def continue_as_guest():
 
     return rx.dialog.root(
