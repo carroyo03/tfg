@@ -243,51 +243,60 @@ def form1():
             rx.vstack(
                 date_picker("Fecha de nacimiento"),
                 gender(),
-                input_text("Salario medio obtenido","salario_medio", AvgSalaryState, "number", has_info_button=True, 
+                input_text(title="Salario medio obtenido",name="salario_medio", state=AvgSalaryState, type_="number", has_info_button=True, 
                            info="Introduce el salario bruto medio obtenido anualmente",
                            color_info_button="white"),  
                 children(),
                 input_text("Edad a la que empezaste a cotizar","edad_inicio_trabajo", StartAgeState, "number"),
                 input_text("Edad deseada de jubilación", "edad_jubilacion",AgeState, "number"),
                 tipo_regimen(),
-                rx.hstack(
+                rx.stack(
                     rx.button(
                         "Limpiar formulario",
-                        type="button",
-                        on_click=FormState.clear_form,
+                        type="reset",
+                        background_color=color.BACKGROUND.value,
                         color="white",
-                        width="50%",
+                        width=rx.breakpoints(initial="100%", sm="48%"),
                         border="1px solid",
                         box_shadow="0 .25rem .375rem #0003",
-                        background_color=color.BACKGROUND.value,
-                        _hover={"bg": color.SECONDARY.value, "color": "white"}
+                        border_radius="0.5em",
+                        padding=rx.breakpoints(initial="1em", sm="1.2em"),
+                        font_size=rx.breakpoints(initial="1em", sm="1.1em"),
+                        _hover={"bg": color.SECONDARY.value, "color": "white"},
                     ),
-                    rx.button("Siguiente",
-                            type="submit",
-                            background_color="white",
-                            color=color.BACKGROUND.value,
-                            width="50%",
-                            border="1px solid",
-                            box_shadow="0 .25rem .375rem #0003",
-                            _hover={"bg": color.SECONDARY.value, "color": "white"},
-                            disabled=FormState.invalid_form_data
+                    rx.button(
+                        "Siguiente",
+                        type="submit",
+                        background_color="white",
+                        color=color.BACKGROUND.value,
+                        width=rx.breakpoints(initial="100%", sm="48%"),
+                        border="1px solid",
+                        box_shadow="0 .25rem .375rem #0003",
+                        border_radius="0.5em",
+                        padding=rx.breakpoints(initial="1em", sm="1.2em"),
+                        font_size=rx.breakpoints(initial="1em", sm="1.1em"),
+                        _hover={"bg": color.SECONDARY.value, "color": "white"},
+                        disabled=FormState.invalid_form_data,
                     ),
-
+                    direction=rx.breakpoints(initial="column", sm="row"),
+                    spacing="3",
                     width="100%",
-                    spacing="4"
-
+                    align_items="stretch",
+                    justify_content="center",
+                    margin_bottom="30%",
+                    margin_top="-2em"
                 ),
                 width="100%",
                 height="100vh",
-                spacing="5",
-                padding=["1em", "1.5em", "2em"],
+                spacing="8",
+                padding=rx.breakpoints(initial="1em", sm="1.5em", md="2em"),
                 max_width="100%",
                 font_weight='bold'
             ),
             on_submit=FormState.handle_submit,
             value=FormState.stored_form_data,
-            margin_top=size.DEFAULT.value,
             align="center",
+            padding=rx.breakpoints(initial='1em',sm='1.1em'),
             width="100%"
         )
 

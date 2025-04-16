@@ -2,6 +2,7 @@ import datetime
 
 import reflex as rx
 import logging
+from tfg_app.styles.styles import Size as size
 
 class DateState(rx.State):
 
@@ -47,7 +48,7 @@ class DateState(rx.State):
 
 def date_picker(text: str) -> rx.Component:
     return rx.vstack(
-        rx.text(text, color="white", margin_bottom="0.5em"),
+        rx.text(text, color="white", margin_bottom="0.5em", font_size=rx.breakpoints(initial=size.DEFAULT.value, sm=size.LARGE.value, md=size.BIG.value)),
         rx.hstack(
                 rx.select(
                     DateState.day_values,
@@ -73,7 +74,7 @@ def date_picker(text: str) -> rx.Component:
                     width="29%",
                     color="black"
                 ),
-                spacing="7",
+                spacing="5",
                 width="100%"
             ),
             width="100%",

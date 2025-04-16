@@ -113,5 +113,6 @@ def tipo_regimen() -> rx.Component:
                 ),
         ),
         color="white",
-        width="100%"
+        width="100%",
+        spacing="8"
     )

@@ -10,11 +10,11 @@ MAX_WIDTH = "37em"
 # Sizes
 class Size(Enum):
     ZERO = "0px !important"
-    SMALL = ["0.7em", "0.85em", "1em"]
-    DEFAULT = ["1em", "1.2em", "1.4em"]
-    LARGE = ["1.3em", "1.6em", "1.9em"]
-    BIG = ["2em", "3em", "4em"]
-    REALLY_BIG = ["3.5em", "4.5em", "5.5em"]
+    SMALL = rx.breakpoints(initial="0.7em", sm="0.85em", md="1em")
+    DEFAULT = rx.breakpoints(initial="1em", sm="1.2em", md="1.4em")
+    LARGE = rx.breakpoints(initial="1.3em", sm="1.6em", md="1.9em")
+    BIG = rx.breakpoints(initial="2em", sm="3em", md="4em")
+    REALLY_BIG = rx.breakpoints(initial="3.5em", sm="4.5em", md="5.5em")
 
 # Styles
 

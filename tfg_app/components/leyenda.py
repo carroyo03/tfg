@@ -1,4 +1,5 @@
 import reflex as rx
+from tfg_app.styles.colors import LegendColor as legcolor
 
 def elem_leyenda(color:str,text:str):
     return rx.hstack(
@@ -12,17 +13,17 @@ def elem_leyenda(color:str,text:str):
 def leyenda1():
     return rx.card(
                     rx.text("Leyenda:", color="black",font_size="1em", font_weight="bold", margin_bottom=".1em"),
-                    elem_leyenda("#00FF7F","Pensión pública"),
-                    elem_leyenda("#D3D3D3","Salario por cubrir"),
+                    elem_leyenda(legcolor.LEGEND_1.value,"Pensión pública"),
+                    elem_leyenda(legcolor.LEGEND_2.value,"Salario por cubrir"),
                     width="100%",
                     margin_top=".01%"
                 )
 def leyenda2():
     return rx.card(
                     rx.text("Leyenda:", color="black",font_size="1em", font_weight="bold", margin_bottom=".1em"),
-                    elem_leyenda("#00FF7F","Pensión pública"),
-                    elem_leyenda("#FFA500","Pensión de empresa"),
-                    elem_leyenda("#D3D3D3","Salario por cubrir"),
+                    elem_leyenda(legcolor.LEGEND_1.value,"Pensión pública"),
+                    elem_leyenda(legcolor.LEGEND_1_1.value,"Pensión de empresa"),
+                    elem_leyenda(legcolor.LEGEND_2.value,"Salario por cubrir"),
                     width="100%",
                     margin_top=".01%"
                 )
@@ -30,10 +31,10 @@ def leyenda2():
 def leyenda3():
     return rx.card(
                     rx.text("Leyenda:", color="black",font_size="1em", font_weight="bold", margin_bottom=".1em"),
-                    elem_leyenda("#00FF7F","Pensión pública"),
-                    elem_leyenda("#FFA500","Pensión de empresa"),
-                    elem_leyenda("#00D0FF","Pensión privada"),
-                    elem_leyenda("#D3D3D3","Salario por cubrir"),
+                    elem_leyenda(legcolor.LEGEND_1.value,"Pensión pública"),
+                    elem_leyenda(legcolor.LEGEND_1_1.value,"Pensión de empresa"),
+                    elem_leyenda(legcolor.LEGEND_1_2.value,"Pensión privada"),
+                    elem_leyenda(legcolor.LEGEND_2.value,"Salario por cubrir"),
                     width="100%",
                     margin_top=".01%"
                 )

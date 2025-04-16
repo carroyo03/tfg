@@ -18,8 +18,8 @@ from tfg_app.styles.styles import BASE_STYLE
 def loading():
     return rx.center(
         rx.spinner(size="3"),
-        padding="10em",
-        height="100vh"
+        padding=["5em","8em","10em"],
+        height="auto"
     )
 
 
@@ -37,18 +37,34 @@ def authorize():
         code is None or state is None,
         sign_in_v1(),
         rx.vstack(
-            rx.text("Autenticando..."),
+            rx.text(
+                "Autenticando...",
+                font_size=["1em","1.2em","1.5em"]
+            ),
             loading(),
-            on_mount= lambda: AppState.handle_authorize(code, state)
+            on_mount= lambda: AppState.handle_authorize(code, state),
+            width="100%",
+            height="auto",
+            align="center",
+            justify="center",
+            padding=["2em","3em","4em"]
         ) 
     )
 
 @rx.page("/logout")
 def logout():
     return rx.vstack(
-        rx.text("Cerrando sesión..."),
+        rx.text(
+            "Cerrando sesión...",
+            font_size=["1em","1.2em","1.5em"]
+        ),
         loading(),
-        on_mount=AppState.logout()
+        on_mount=AppState.logout(),
+        width="100%",
+        height="auto",
+        align="center",
+        justify="center",
+        padding=["2em","3em","4em"]
     )
 
 @rx.page("/")
@@ -61,7 +77,8 @@ def form_pilar1():
             rx.vstack(
                 rx.cond(
                     AppState.signed_in,
-                    logout_button(),
+                    logout_button()
+
                 ),
                 rx.vstack(
                     rx.vstack(
@@ -69,15 +86,17 @@ def form_pilar1():
                             "Simulador de pensiones",
                             color="white",
                             font_family=Font.TITLE.value,
-                            font_size=size.BIG.value,
+                            font_size=rx.breakpoints(initial=size.LARGE.value, sm=size.BIG.value, md=size.REALLY_BIG.value),
                             font_weight="bold",
                             margin_top=size.SMALL.value,
+                            margin_left=rx.breakpoints(initial='1em',sm='1.1em'),
+                            width="100%",
                         ),
                         form1(),
                         overflow="hidden",
                         align="center",
-                        padding_bottom="14em",
-                        height="auto",
+                        padding_bottom=rx.breakpoints(initial='8em',sm='10em',md='14em'),
+                        height="auto",  
                     ),
                     width="100%",
                     max_width=["100%", "90%", "80%", "70%"],
@@ -86,6 +105,9 @@ def form_pilar1():
                     align_items="center",
                     #margin_top="4rem"
                 ),
+                width="100%",
+                height="auto",
+                min_height=["auto","80vh","100vh"]
             ),
             # Spinner mientras carga
             loading()
@@ -105,61 +127,102 @@ def pilar1():
                 "Plan Público de Pensiones",
                 color="white",
                 font_family=Font.TITLE.value,
-                font_size=size.BIG.value,
+                font_size=rx.breakpoints(initial=size.BIG.value, sm=size.REALLY_BIG.value, md=size.SMALL.value),
                 font_weight="bold",
                 text_align="center",
                 width="100%",
-                padding_top="3rem"
+                padding_top=["1rem","2rem","3rem"]
             ),
-            width="100%",
             position="sticky",
             top="0",
-            z_form1="1",
-            background_color="rgba(0, 51, 141, 0.9)",  # Azul semi-transparente
-            backdrop_filter="blur(5px)",
+            z_index="1",
+            align="center"
+            #ackground_color="rgba(0, 51, 141, 0.9)",  # Azul semi-transparente
+            #backdrop_filter="blur(5px)",
         ),
         rx.box(
             results_pilar1(),
             width="100%",
-            max_width="800px",  # Limita el ancho máximo del contenido
+            max_width=["100%","90%","85%","800px"],  # Limita el ancho máximo del contenido
             margin="0 auto",  # Centra horizontalmente
-            margin_top="-5.3rem",
+            margin_top=["-3rem","-4rem","-5.3rem"],
             margin_bottom="1.5rem",
-            padding_x="1rem",  # Añade un poco de padding horizontal
+            padding_x=[".5rem",".8rem","1rem"],  # Añade un poco de padding horizontal
         ),
-        rx.center(
-            rx.button(
-                "Atrás", 
-                on_click=rx.redirect("/"), 
-                color="white",
-                background_color="transparent",
-                border="1px solid",
-                box_shadow="0 .25rem .375rem #0003",
-                width="20%",
-                height="auto"
+        rx.mobile_only(  # Sticky footer para botones en móvil
+            rx.box(
+                rx.center(
+                    rx.button(
+                        "Atrás",
+                        on_click=rx.redirect("/"),
+                        color="white",
+                        background_color="transparent",
+                        border="1px solid",
+                        box_shadow="0 .25rem .375rem #0003",
+                        width=["40%", "30%", "20%"],
+                        height="auto",
+                        font_size=["0.9em", "1em", "1.1em"],  # Responsive font size
+                    ),
+                    rx.button(
+                        "Siguiente",
+                        on_click=rx.redirect("/form2"),
+                        background_color="white",
+                        color=colors.Color.BACKGROUND.value,
+                        border="1px solid",
+                        box_shadow="0 .25rem .375rem #0003",
+                        width=["40%", "30%", "20%"],
+                        height="auto",
+                        font_size=["0.9em", "1em", "1.1em"],  # Responsive font size
+                    ),
+                    width="100%",
+                    spacing="2",
+                    align="center",
+                    justify="center",
+                ),
+                position="sticky",
+                bottom="0",
+                width="100%",
+                background_color="rgba(0, 51, 141, 0.9)",
+                padding_y="1rem",
+                z_index="10",
             ),
-            rx.button(
-                "Siguiente",
-                on_click=rx.redirect("/form2"),
-                background_color="white",
-                color=colors.Color.BACKGROUND.value,
-                border="1px solid",
-                box_shadow="0 .25rem .375rem #0003",
-                width="20%",
-                height="auto"
-            ),
-            width="100%",
-            margin_top="-8rem",
-            spacing="2",
-            align="center",
-            justify="center",
         ),
-
+        rx.tablet_and_desktop(  # Botones en su lugar original para tablet/escritorio
+            rx.center(
+                rx.button(
+                    "Atrás",
+                    on_click=rx.redirect("/"),
+                    color="white",
+                    background_color="transparent",
+                    border="1px solid",
+                    box_shadow="0 .25rem .375rem #0003",
+                    width=["40%", "30%", "20%"],
+                    height="auto",
+                    font_size=["0.9em", "1em", "1.1em"],
+                ),
+                rx.button(
+                    "Siguiente",
+                    on_click=rx.redirect("/form2"),
+                    background_color="white",
+                    color=colors.Color.BACKGROUND.value,
+                    border="1px solid",
+                    box_shadow="0 .25rem .375rem #0003",
+                    width=["40%", "30%", "20%"],
+                    height="auto",
+                    font_size=["0.9em", "1em", "1.1em"],
+                ),
+                width="100%",
+                margin_top=["-6rem", "-7rem", "-8rem"],  # Responsive margin
+                spacing="2",
+                align="center",
+                justify="center",
+            ),
+        ),
         width="100%",
-        min_height="100vh",
+        min_height=["auto", "80vh", "100vh"],  # Responsive min-height
         spacing="1",
         align_items="stretch",
-        background_color="#00338D",  # Fondo azul
+        background_color="#00338D",
     )
 
 
@@ -174,77 +237,96 @@ def form_pilar2():
                     AppState.signed_in,
                     logout_button(),
                 ),
-                rx.button(
-                    "<- Atrás", 
-                    on_click=rx.redirect("/pilar1"), 
-                    color="white",
-                    background_color="transparent",
-                    border="1px solid",
-                    box_shadow="0 .25rem .375rem #0003",
-                    width="auto",
-                    height="auto",
-                    position="absolute",
-                    top="1rem",
-                    left="1rem",
-                    _hover={"bg": colors.Color.SECONDARY.value, "color": "white"}
-                ),
-                rx.vstack(
-                    rx.box(
-                            
-                            justify="center",
-                
+                rx.mobile_only(  # Botón Atrás sticky en móvil
+                    rx.button(
+                        "<- Atrás",
+                        on_click=rx.redirect("/pilar1"),
+                        color="white",
+                        background_color="transparent",
+                        border="1px solid",
+                        box_shadow="0 .25rem .375rem #0003",
+                        width="auto",
+                        height="auto",
+                        position="fixed",
+                        top="1rem",
+                        left="1rem",
+                        font_size=["0.9em", "1em", "1.1em"],
+                        _hover={"bg": colors.Color.SECONDARY.value, "color": "white"},
+                        z_index="10",
                     ),
-                    rx.hstack(
+                ),
+                rx.tablet_and_desktop(  # Botón Atrás en su lugar original
+                    rx.button(
+                        "<- Atrás",
+                        on_click=rx.redirect("/pilar1"),
+                        color="white",
+                        background_color="transparent",
+                        border="1px solid",
+                        box_shadow="0 .25rem .375rem #0003",
+                        width="auto",
+                        height="auto",
+                        position="absolute",
+                        top="1rem",
+                        left="1rem",
+                        font_size=["0.9em", "1em", "1.1em"],
+                        _hover={"bg": colors.Color.SECONDARY.value, "color": "white"},
+                    ),
+                ),
+                rx.stack(
+                    rx.mobile_only(  # Resultados simplificados en móvil
                         rx.box(
                             results_pilar1(),
                             width="100%",
-                            align_items="center",
-                            padding_x="-1rem", 
-                            margin_top="2em" 
+                            padding_x="0.5rem",
+                            margin_top="1em",
                         ),
+                    ),
+                    rx.tablet_and_desktop(
+                        rx.box(
+                            results_pilar1(),
+                            width=["100%", "50%", "50%"],  # Reducir ancho en tablet/escritorio
+                            padding_x=["0.5rem", "0.8rem", "1rem"],
+                            margin_top="2em",
+                        ),
+                    ),
+                    rx.vstack(
                         rx.vstack(
-                            rx.vstack(
-                                rx.vstack(
-                                    rx.heading(
-                                        "Simulador de pensiones: Pensión de empresa",
-                                        color="white",
-                                        font_family=Font.TITLE.value,
-                                        font_size=size.LARGE.value,
-                                        font_weight="bold",
-                                        margin_top=size.SMALL.value,
-                                    ),
-                                    form2(),
-                                    overflow="hidden",
-                                    align="center",
-                                    padding="1em",
-                                    height="100%",
-                                ),
-                                align="center"
+                            rx.heading(
+                                "Simulador de pensiones: Pensión de empresa",
+                                color="white",
+                                font_family=Font.TITLE.value,
+                                font_size=rx.breakpoints(initial="1.2em", sm="1.5em", md="1.8em"),
+                                font_weight="bold",
+                                margin_top=size.SMALL.value,
                             ),
-                            width="100%",
-                            max_width=["100%", "90%", "80%", "70%"],
-                            height="100vh",
-                            spacing="1",
-                            align_items="center",
-                            justify_content="center",
-                            ),
+                            form2(),  # Asumo que form2 puede necesitar acordeones en móvil
+                            overflow="hidden",
+                            align="center",
+                            padding=["0.5em", "0.8em", "1em"],
+                            height="auto",
                         ),
+                        width=["100%", "90%", "50%"],
+                        max_width=["100%", "90%", "80%", "70%"],
+                        height="auto",
+                        spacing="1",
+                        align_items="center",
+                        justify_content="center",
+                    ),
+                    width="100%",
+                    spacing="2",  
+                    flex_direction=["column", "column", "row"],  # Cambiar a columna en móvil
                 ),
-                spacing="5",
-                display="flex",
-                align_items="center",
-                justify_content="center",
-                align_content="baseline"
+                width="100%",
+                max_width=["100%", "90%", "80%", "70%"],
+                height="auto",
             ),
-            loading()
-            
+            loading(),
         ),
-        
-        sign_in_v1()
+        sign_in_v1(),
     )
 
 
-@rx.page("/pilar2")#,on_load=AuthState.on_load)
+@rx.page("/pilar2")
 def pilar2():
     return rx.vstack(
         rx.cond(
@@ -256,62 +338,104 @@ def pilar2():
                 "Cálculo de pensión pública y de empresa",
                 color="white",
                 font_family=Font.TITLE.value,
-                font_size=size.BIG.value,
+                font_size=rx.breakpoints(initial="1.5em", sm="2em", md="2.5em"),  # Responsive font size
                 font_weight="bold",
                 text_align="center",
                 width="100%",
-                padding_top="3rem"
+                padding_top=["1.5rem", "2rem", "3rem"],
             ),
             width="100%",
             position="sticky",
             top="0",
-            z_form1="1",
-            background_color="rgba(0, 51, 141, 0.9)",  # Azul semi-transparente
+            z_index="1",
+            background_color="rgba(0, 51, 141, 0.9)",
             backdrop_filter="blur(5px)",
         ),
         rx.box(
             results_pilar2(),
             width="100%",
-            max_width="800px",  # Limita el ancho máximo del contenido
-            margin="0 auto",  # Centra horizontalmente
-            margin_top="-4.3rem",
+            max_width=["100%", "90%", "85%", "800px"],
+            margin="0 auto",
+            margin_top=["-2.3rem", "-3.3rem", "-4.3rem"],
             margin_bottom="1.5rem",
-            padding_x="1rem",     # Añade un poco de padding horizontal
+            padding_x=["0.5rem", "0.8rem", "1rem"],
         ),
-        rx.center(
-            rx.button(
-                "Atrás", 
-                on_click=rx.redirect("/form2"), 
-                color="white",
-                background_color="transparent",
-                border="1px solid",
-                box_shadow="0 .25rem .375rem #0003",
-                width="20%",
-                height="auto"
+        rx.mobile_only(
+            rx.box(
+                rx.center(
+                    rx.button(
+                        "Atrás",
+                        on_click=rx.redirect("/form2"),
+                        color="white",
+                        background_color="transparent",
+                        border="1px solid",
+                        box_shadow="0 .25rem .375rem #0003",
+                        width=["40%", "30%", "20%"],
+                        height="auto",
+                        font_size=["0.9em", "1em", "1.1em"],
+                    ),
+                    rx.button(
+                        "Siguiente",
+                        on_click=rx.redirect("/form3"),
+                        background_color="white",
+                        color=colors.Color.BACKGROUND.value,
+                        border="1px solid",
+                        box_shadow="0 .25rem .375rem #0003",
+                        width=["40%", "30%", "20%"],
+                        height="auto",
+                        font_size=["0.9em", "1em", "1.1em"],
+                    ),
+                    width="100%",
+                    spacing="2",
+                    align="center",
+                    justify="center",
+                ),
+                position="sticky",
+                bottom="0",
+                width="100%",
+                background_color="rgba(0, 51, 141, 0.9)",
+                padding_y="1rem",
+                z_index="10",
             ),
-            rx.button(
-                "Siguiente",
-                on_click=rx.redirect("/form3"),
-                background_color="white",
-                color=colors.Color.BACKGROUND.value,
-                border="1px solid",
-                box_shadow="0 .25rem .375rem #0003",
-                width="20%",
-                height="auto"
-            ),
-            width="100%",
-            margin_top="-7rem",
-            spacing="2",
-            align="center",
-            justify="center",
         ),
-
+        rx.tablet_and_desktop(
+            rx.center(
+                rx.button(
+                    "Atrás",
+                    on_click=rx.redirect("/form2"),
+                    color="white",
+                    background_color="transparent",
+                    border="1px solid",
+                    box_shadow="0 .25rem .375rem #0003",
+                    width=["40%", "30%", "20%"],
+                    height="auto",
+                    font_size=["0.9em", "1em", "1.1em"],
+                ),
+                rx.button(
+                    "Siguiente",
+                    on_click=rx.redirect("/form3"),
+                    background_color="white",
+                    color=colors.Color.BACKGROUND.value,
+                    border="1px solid",
+                    box_shadow="0 .25rem .375rem #0003",
+                    width=["40%", "30%", "20%"],
+                    height="auto",
+                    font_size=["0.9em", "1em", "1.1em"],
+                ),
+                width="100%",
+                margin_top=["-5rem", "-6rem", "-7rem"],
+                spacing="2",
+                align="center",
+                justify="center",
+            ),
+        ),
         width="100%",
-        min_height="100vh",
+        min_height=["auto", "80vh", "100vh"],
         spacing="0",
         align_items="stretch",
-        background_color="#00338D",  # Fondo azul
+        background_color="#00338D",
     )
+
 
 @rx.page("/form3")
 def form_pilar3():
@@ -320,13 +444,32 @@ def form_pilar3():
         rx.cond(
             rx.State.is_hydrated,
             rx.vstack(
-                    rx.cond(
-                        AppState.signed_in,
-                        logout_button(),
-                    ),
+                rx.cond(
+                    AppState.signed_in,
+                    logout_button(),
+                ),
+                rx.mobile_only(
                     rx.button(
-                        "<- Atrás", 
-                        on_click=rx.redirect("/pilar2"), 
+                        "<- Atrás",
+                        on_click=rx.redirect("/pilar2"),
+                        color="white",
+                        background_color="transparent",
+                        border="1px solid",
+                        box_shadow="0 .25rem .375rem #0003",
+                        width="auto",
+                        height="auto",
+                        position="fixed",
+                        top="1rem",
+                        left="1rem",
+                        font_size=["0.9em", "1em", "1.1em"],
+                        _hover={"bg": colors.Color.SECONDARY.value, "color": "white"},
+                        z_index="10",
+                    ),
+                ),
+                rx.tablet_and_desktop(
+                    rx.button(
+                        "<- Atrás",
+                        on_click=rx.redirect("/pilar2"),
                         color="white",
                         background_color="transparent",
                         border="1px solid",
@@ -336,63 +479,65 @@ def form_pilar3():
                         position="absolute",
                         top="1rem",
                         left="1rem",
-                        _hover={"bg": colors.Color.SECONDARY.value, "color": "white"}
+                        font_size=["0.9em", "1em", "1.1em"],
+                        _hover={"bg": colors.Color.SECONDARY.value, "color": "white"},
                     ),
-                rx.vstack(
-                    rx.box(
-                            
-                            justify="center",
-                
-                    ),
-                    rx.hstack(
+                ),
+                rx.stack(
+                    rx.mobile_only(
                         rx.box(
                             results_pilar2(),
                             width="100%",
-                            align_items="center",
-                            padding_x="-1rem", 
+                            padding_x="0.5rem",
+                            margin_top="1em",
+                        ),
+                    ),
+                    rx.tablet_and_desktop(
+                        rx.box(
+                            results_pilar2(),
+                            width=["100%", "50%", "50%"],
+                            padding_x=["0.5rem", "0.8rem", "1rem"],
                             margin_top="2em",
                         ),
+                    ),
+                    rx.vstack(
                         rx.vstack(
-                            rx.vstack(
-                                    rx.vstack(
-                                        rx.heading(
-                                            "Simulador de pensiones: Pensión privada",
-                                            color="white",
-                                            font_family=Font.TITLE.value,
-                                            font_size=size.LARGE.value,
-                                            font_weight="bold",
-                                            margin_top=size.SMALL.value,
-                                        ),
-                                        form3(),
-                                        overflow="hidden",
-                                        align="center",
-                                        padding="1em",
-                                        height="100%",
-                                    ),
+                            rx.heading(
+                                "Simulador de pensiones: Pensión privada",
+                                color="white",
+                                font_family=Font.TITLE.value,
+                                font_size=rx.breakpoints(initial="1.2em", sm="1.5em", md="1.8em"),
+                                font_weight="bold",
+                                margin_top=size.SMALL.value,
                             ),
-                            width="100%",
-                            max_width=["100%", "90%", "80%", "70%"],
-                            height="100vh",
-                            spacing="1",
-                            align_items="center",
-                            justify_content="center",
-                            ),
+                            form3(),
+                            overflow="hidden",
+                            align="center",
+                            padding=["0.5em", "0.8em", "1em"],
+                            height="auto",
                         ),
+                        width=["100%", "90%", "50%"],
+                        max_width=["100%", "90%", "80%", "70%"],
+                        height="auto",
+                        spacing="1",
+                        align_items="center",
+                        justify_content="center",
+                    ),
+                    width="100%",
+                    spacing="2",
+                    flex_direction=["column", "column", "row"],
                 ),
-                spacing="5",
-                display="flex",
-                align_items="center",
-                justify_content="center",
-                align_content="baseline"
+                width="100%",
+                max_width=["100%", "90%", "80%", "70%"],
+                height="auto",
             ),
-            loading()
+            loading(),
         ),
-        sign_in_v1()
+        sign_in_v1(),
     )
 
 
-
-@rx.page("/results")#,on_load=AuthState.on_load) 
+@rx.page("/results")
 def result():
     return rx.cond(
         AppState.signed_in | AppState.guest,
@@ -408,64 +553,108 @@ def result():
                         "Resultados",
                         color="white",
                         font_family=Font.TITLE.value,
-                        font_size=size.BIG.value,
+                        font_size=rx.breakpoints(initial="1.5em", sm="2em", md="2.5em"),
                         font_weight="bold",
                         text_align="center",
                         width="100%",
-                        padding_top="3rem"
+                        padding_top=["1.5rem", "2rem", "3rem"],
                     ),
                     width="100%",
                     position="sticky",
                     top="0",
-                    z_form1="1",
-                    background_color="rgba(0, 51, 141, 0.9)",  # Azul semi-transparente
+                    z_index="1",
+                    background_color="rgba(0, 51, 141, 0.9)",
                     backdrop_filter="blur(5px)",
                 ),
                 rx.box(
                     rx.box(
                         final_results(),
                         width="100%",
-                        margin="0 auto",  # Centra horizontalmente
-                        margin_top="-4.3rem",
+                        margin="0 auto",
+                        margin_top=["-2.3rem", "-3.3rem", "-4.3rem"],
                         margin_bottom="2rem",
-                        padding_x="1rem", 
+                        padding_x=["0.5rem", "0.8rem", "1rem"],
                     ),
                 ),
-                rx.center(
-                    rx.button(
-                        "Atrás", 
-                        on_click=rx.redirect("/form3"), 
-                        color="white",
-                        background_color="transparent",
-                        border="1px solid",
-                        box_shadow="0 .25rem .375rem #0003",
-                        width="20%",
-                        height="auto"
+                rx.mobile_only(
+                    rx.box(
+                        rx.center(
+                            rx.button(
+                                "Atrás",
+                                on_click=rx.redirect("/form3"),
+                                color="white",
+                                background_color="transparent",
+                                border="1px solid",
+                                box_shadow="0 .25rem .375rem #0003",
+                                width=["40%", "30%", "20%"],
+                                height="auto",
+                                font_size=["0.9em", "1em", "1.1em"],
+                            ),
+                            rx.button(
+                                "Imprimir informe",
+                                background_color="white",
+                                color=colors.Color.BACKGROUND.value,
+                                border="1px solid",
+                                box_shadow="0 .25rem .375rem #0003",
+                                width=["40%", "30%", "20%"],
+                                height="auto",
+                                font_size=["0.9em", "1em", "1.1em"],
+                                # TODO: Añadir on_click para imprimir
+                            ),
+                            width="100%",
+                            spacing="2",
+                            align="center",
+                            justify="center",
+                        ),
+                        position="sticky",
+                        bottom="0",
+                        width="100%",
+                        background_color="rgba(0, 51, 141, 0.9)",
+                        padding_y="1rem",
+                        z_index="10",
                     ),
-                    rx.button(
-                        "Imprimir informe",
-                        background_color="white",
-                        color=colors.Color.BACKGROUND.value,
-                        border="1px solid",
-                        box_shadow="0 .25rem .375rem #0003",
-                        width="20%",
-                        height="auto"
-                    ),
-                    width="100%",
-                    margin_top="-8rem",
-                    spacing="2",
-                    align="center",
-                    justify="center",
                 ),
-                display="flex",
-                justify_content="center",
-                align="center",
+                rx.tablet_and_desktop(
+                    rx.center(
+                        rx.button(
+                            "Atrás",
+                            on_click=rx.redirect("/form3"),
+                            color="white",
+                            background_color="transparent",
+                            border="1px solid",
+                            box_shadow="0 .25rem .375rem #0003",
+                            width=["40%", "30%", "20%"],
+                            height="auto",
+                            font_size=["0.9em", "1em", "1.1em"],
+                        ),
+                        rx.button(
+                            "Imprimir informe",
+                            background_color="white",
+                            color=colors.Color.BACKGROUND.value,
+                            border="1px solid",
+                            box_shadow="0 .25rem .375rem #0003",
+                            width=["40%", "30%", "20%"],
+                            height="auto",
+                            font_size=["0.9em", "1em", "1.1em"],
+                            # TODO: Añadir on_click para imprimir
+                        ),
+                        width="100%",
+                        margin_top=["-6rem", "-7rem", "-8rem"],
+                        spacing="2",
+                        align="center",
+                        justify="center",
+                    ),
+                ),
+                width="100%",
+                min_height=["auto", "80vh", "100vh"],
+                spacing="0",
+                align_items="stretch",
+                background_color="#00338D",
             ),
-            loading()
+            loading(),
         ),
-        sign_in_v1()
+        sign_in_v1(),
     )
-
 
 
 app = rx.App(style=BASE_STYLE, stylesheets=[f"https://fonts.googleapis.com/css?family={font.value}" for font in Font if font != Font.TITLE.value])
@@ -480,4 +669,3 @@ app.add_page(form_pilar2,on_load=AppState.check_session("/form2"))
 app.add_page(pilar2,on_load=AppState.check_session("/pilar2"))
 app.add_page(form_pilar3,on_load=AppState.check_session("/form3"))
 app.add_page(result,on_load=AppState.check_session("/results"))
-

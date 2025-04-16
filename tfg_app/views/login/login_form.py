@@ -218,8 +218,8 @@ def continue_as_guest():
                 "Continuar como invitado",
                 type="submit",
                 size="3",
-                padding=["1em", "1.5em", "2em"],
-                width=["100%", "50%", "20%"],  # Responsive widths
+                padding=rx.breakpoints(initial="1em", sm="1.5em", md="2em"),
+                width=rx.breakpoints(initial="100%", sm="50%", md="20%"),  # Responsive widths
                 max_width="100%",
                 bg=color.BACKGROUND.value,
                 border=".0625rem solid", 
@@ -227,7 +227,8 @@ def continue_as_guest():
                 box_shadow="0 .25rem .375rem #0003",
                 _hover={"transform":"scale(1.02)"},
                 display="flex",
-                justify_content="center"
+                justify_content="center",
+                font_size=["0.9em", "1em", "1.1em"]
                 ),
             ),
             rx.dialog.content(
@@ -275,7 +276,7 @@ def sign_in_v1() -> rx.Component:
                 "Iniciar sesión con AWS Cognito",
                 type="submit",
                 size="3",
-                width=["100%", "50%", "20%"],  # Responsive widths
+                width=rx.breakpoints(initial="100%", sm="50%", md="20%"),  # Responsive widths
                 margin_x="1em",
                 bg="white",
                 color=color.BACKGROUND.value,
@@ -283,6 +284,15 @@ def sign_in_v1() -> rx.Component:
                 box_shadow="0 .25rem .375rem #0003",
                 _hover={"transform":"scale(1.02)"},
                 on_click=AppState.sign_in,
+                display="flex",
+                align_items="center",
+                justify_content="center",
+                text_align="center",
+                text_justify="center",
+                font_size=["0.9em", "1em", "1.1em"],
+                padding=rx.breakpoints(initial="1em", sm="1.5em", md="2em"),
+                max_width="100%",
+                line_height="normal"
             ),
             continue_as_guest(),
             width="100%",

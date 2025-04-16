@@ -8,6 +8,7 @@ from tfg_app.styles.styles import Size as size
 from tfg_app.backend.pens import calcular_ratio_sustitucion
 from tfg_app.views.pilar1.pilar1form import FormState
 from tfg_app.components.info_button import info_button
+from tfg_app.styles.colors import LegendColor as legcolor
 
 
 import math
@@ -80,19 +81,19 @@ def show_pension_salary_comparison(pension_primer_pilar:float, salario_actual:fl
         rx.recharts.cartesian_grid(),
         rx.recharts.bar(
             data_key="Pensión pública",
-            stroke=rx.color("accent",9),
-            fill=rx.color("accent", 8),
+            stroke=legcolor.LEGEND_1.value,
+            fill=legcolor.LEGEND_1.value,
+
         ),
         rx.recharts.bar(
             data_key="Salario",
-            stroke=rx.color("blue", 7),
-            fill=rx.color("blue", 6),
+            stroke=legcolor.LEGEND_2.value,
+            fill=legcolor.LEGEND_2.value,
         ),
         rx.recharts.x_axis(
             data_key="name",
         ),
         rx.recharts.y_axis(),
-        rx.recharts.legend(),
         rx.recharts.graphing_tooltip(),
         data=data,
         width="100%",
@@ -114,11 +115,13 @@ def results_pilar1() -> rx.Component:
         salario_actual = float(salario_actual_value) if salario_actual_value is not None else 0.0
     except (TypeError, ValueError, KeyError):
         # Fallback if conversion fails or key doesn't exist
+        print(f"Error converting salario_medio: {salario_actual_value}")
+        print(f"Type of salario_medio: {type(salario_actual_value)}")
         salario_actual = 0.0
         
     # Now that salario_actual is a proper float, we can safely perform division
     salario_mensual = salario_actual / 12
-    ratio_sustitucion = calcular_ratio_sustitucion(pension_primer_pilar, salario_actual)
+    ratio_sustitucion = calcular_ratio_sustitucion(pension_primer_pilar, salario_mensual)
 
     ratio_gt_100_component = rx.box(
         rx.vstack(
@@ -126,7 +129,7 @@ def results_pilar1() -> rx.Component:
                    color="black",
                    text_align="center",
                    width="90%"),
-            show_pension_salary_comparison(pension_primer_pilar, salario_actual),
+            show_pension_salary_comparison(pension_primer_pilar, salario_mensual),
             leyenda1(),
             width="100%",
             spacing="5",
