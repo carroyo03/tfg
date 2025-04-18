@@ -20,5 +20,6 @@ __azurite_db_table__.json
 git-update.bat
 .fleet/*
 .venv/
+.DS_Store
 
 
