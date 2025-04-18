@@ -1,4 +1,4 @@
-FROM python:latest
+FROM python:alpine
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --upgrade pip
