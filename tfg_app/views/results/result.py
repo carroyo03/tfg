@@ -4,9 +4,10 @@ import reflex as rx
 from tfg_app.components.leyenda import leyenda3
 from tfg_app.global_state import GlobalState
 from tfg_app.backend.pens import RatioSust1, RatioSust2, RatioSust3
-from tfg_app.views.pilar3.pilar3form import Form3State as FormState
+from tfg_app.views.pilar1.pilar1form import FormState
+from tfg_app.views.pilar3.pilar3form import Form3State
 from tfg_app.components.info_button import info_button
-
+from tfg_app.styles.colors import LegendColor as legcolor
 
 
 
@@ -74,14 +75,52 @@ def show_ratio_pie_chart(ratio_sust_1,ratio_sust_2,ratio_sust_3) -> rx.Component
 
     )
 
+def show_pension_salary_comparison3(pension_primer_pilar:float, pension_segundo_pilar:float,pension_tercer_pilar:float,salario_actual:float) -> rx.Component:
 
+    data = [
+        {"name": "Comparación", "Pensión pública": pension_primer_pilar, "Pensión de empresa": pension_segundo_pilar, "Salario": salario_actual},
+    ]
+    return rx.recharts.bar_chart(
+        rx.recharts.cartesian_grid(),
+        rx.recharts.bar(
+            data_key="Pensión pública",
+            stroke=legcolor.LEGEND_1.value,
+            fill=legcolor.LEGEND_1.value,
+            stack_id="pension"
+        ),
+        rx.recharts.bar(
+            data_key="Pensión de empresa",
+            stroke=legcolor.LEGEND_1_1.value,
+            fill=legcolor.LEGEND_1_1.value,
+            stack_id="pension"
+        ),
+        rx.recharts.bar(
+            data_key="Pensión privada",
+            stroke=legcolor.LEGEND_1_2.value,
+            fill=legcolor.LEGEND_1_2.value,
+            stack_id="pension"
+        ),
+        rx.recharts.bar(
+            data_key="Salario",
+            stroke=legcolor.LEGEND_2.value,
+            fill=legcolor.LEGEND_2.value,
+        ),
+        rx.recharts.x_axis(
+            data_key="name",
+        ),
+        rx.recharts.y_axis(),
+        rx.recharts.graphing_tooltip(),
+        data=data,
+        width="100%",
+        height=300,
+    )
 
 
 
 def final_results() -> rx.Component:
 
     # Salario
-    salario_actual = FormState.form_data['salario_medio'].to(float)
+    salario_actual = FormState.salario_medio
     salario_mensual = redondear(salario_actual/12)
 
     # 1er pilar
@@ -108,7 +147,32 @@ def final_results() -> rx.Component:
     else:
         ratio_sust_3 = (pension_tercer_pilar / salario_mensual * 100)
     
-    return rx.center(
+    ratio_gt_100_component = rx.box(
+        rx.vstack(
+            rx.text("Tu pensión es superior al 100% de tu salario medio.",
+                   color="black",
+                   text_align="center",
+                   width="90%"),
+            show_pension_salary_comparison3(pension_primer_pilar, pension_segundo_pilar, pension_tercer_pilar, salario_mensual),
+            leyenda3(),
+            width="100%",
+            spacing="5",
+            align_items="center",
+            justify="center",
+            padding="2em",
+            background_color="white",
+            border_radius="md",
+            box_shadow="lg",
+            margin="2em auto",
+        ),
+        width="100%",
+        display="flex",
+        justify_content="center",
+        padding_top="8em",
+        padding_bottom="4em"
+    )
+
+    ratio_lte_100_component = rx.box(
         rx.vstack(
             rx.flex(
                 rx.vstack(
@@ -120,7 +184,7 @@ def final_results() -> rx.Component:
                     ),
                     rx.hstack(
                         rx.heading("Pensión anual:", size="4", color="black"),
-                        rx.text(f"{redondear(pension_1p_anual + pension_2p_anual +pension_3p_anual)} € / año", color="black"),
+                        rx.text(f"{redondear(pension_1p_anual + pension_2p_anual + pension_3p_anual)} € / año", color="black"),
                         spacing="1",
                         width="100%",
                     ),
@@ -142,24 +206,34 @@ def final_results() -> rx.Component:
                     width="50%",
                 ),
                 display="flex",
-                flex_direction="row",
+                flex_direction=["column", "row"],
                 justify="between",
                 width="100%",
+                gap="4",
             ),
             show_ratio_pie_chart(ratio_sust_1, ratio_sust_2,ratio_sust_3),
             leyenda3(),
             align_items="center",
             justify_content="center",
-            padding="1em",
-            border_radius="4%",
+            padding="2em",
+            border_radius="md",
             box_shadow="lg",
             background_color="white",
-            width="100%",
-            margin_top="1em",
-            margin_bottom="1em",
-            height="auto",  # Cambiado de 70% a auto para mejor responsividad
+            width="90%",
+            max_width="1200px",
+            margin="2em auto",
+            spacing="4"
         ),
-        height="100vh",  # Asegura que el contenedor ocupe toda la altura de la pantalla
         width="100%",
+        display="flex",
+        justify_content="center",
+        margin_bottom="4em",
+    )
 
+    ratio_sustitucion = ratio_sust_1 + ratio_sust_2 + ratio_sust_3
+    
+    return rx.cond(
+        ratio_sustitucion > 100,
+        ratio_gt_100_component,
+        ratio_lte_100_component
     )

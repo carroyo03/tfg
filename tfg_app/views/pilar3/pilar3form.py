@@ -27,12 +27,14 @@ class Form3State(rx.State):
         try:
             prev_form_state = await self.get_state(Form2State)
             prev_form_data = prev_form_state.stored_form_data
+            print(f"Datos del formulario anterior: {prev_form_data}")
             self.form_data['prev_form'] = {
                 'first_form':prev_form_data.get('prev_form', {}),
                 'aportacion_empresa': prev_form_state.stored_form_data.get('aportacion_empresa',0),
                 'quiere_aportar': prev_form_state.stored_form_data.get('quiere_aportar','No'),
                 'aportacion_empleado_2p': prev_form_state.stored_form_data.get('aportacion_empleado',0)
             }
+            print(f"Datos del formulario actual: {self.form_data}")
 
             self.form_data['aportacion_empleado_3p'] = form_data.get('aportacion_empleado_3p',0)
 
@@ -40,7 +42,7 @@ class Form3State(rx.State):
 
             pension = await self.send_data_to_backend(form_data)
             ratio_state = await self.get_state(RatioSust3)
-            ratio_state.calcular_ratio(salario=self.form_data['prev_form']['first_form']['salario_medio'], pension=pension)
+            ratio_state.calcular_ratio(salario=self.form_data['prev_form']['prev_form']['salario_medio'], pension=pension)
             state = await self.get_state(GlobalState)
             state.set_pension("tercer",pension)
             return rx.redirect("/results")

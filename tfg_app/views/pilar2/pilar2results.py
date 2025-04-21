@@ -164,13 +164,13 @@ def results_pilar2() -> rx.Component:
                 rx.vstack(
                     rx.hstack(
                         rx.heading("Pensión mensual:", size="4", color="black"),
-                        rx.text(f"{pension_primer_pilar + pension_segundo_pilar} €/mes", color="black"),
+                        rx.text(f"{(pension_primer_pilar + pension_segundo_pilar):.2f} €/mes", color="black"),
                         spacing="1",
                         width="100%",
                     ),
                     rx.hstack(
                         rx.heading("Pensión anual:", size="4", color="black"),
-                        rx.text(f"{pension_1p_anual + pension_2p_anual} €/año", color="black"),
+                        rx.text(f"{(pension_1p_anual + pension_2p_anual):.2f} €/año", color="black"),
                         spacing="1",
                         width="100%",
                     ),
@@ -179,13 +179,13 @@ def results_pilar2() -> rx.Component:
                 rx.vstack(
                     rx.hstack(
                         rx.heading("Salario mensual:", size="4", color="black"),
-                        rx.text(f"{salario_mensual} €/mes", color="black"),
+                        rx.text(f"{salario_mensual:.2f} €/mes", color="black"),
                         spacing="1",
                         width="100%",
                     ),
                     rx.hstack(
                         rx.heading("Salario anual:", size="4", color="black"),
-                        rx.text(f"{salario_actual} €/año", color="black"),
+                        rx.text(f"{salario_actual:.2f} €/año", color="black"),
                         spacing="1",
                         width="100%",
                     ),
