@@ -28,7 +28,7 @@ class Form3State(rx.State):
             prev_form_state = await self.get_state(Form2State)
             prev_form_data = prev_form_state.stored_form_data
             self.form_data['prev_form'] = {
-                'first_form':prev_form_data['prev_form'],
+                'first_form':prev_form_data.get('prev_form', {}),
                 'aportacion_empresa': prev_form_state.stored_form_data.get('aportacion_empresa',0),
                 'quiere_aportar': prev_form_state.stored_form_data.get('quiere_aportar','No'),
                 'aportacion_empleado_2p': prev_form_state.stored_form_data.get('aportacion_empleado',0)

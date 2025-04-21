@@ -10,10 +10,7 @@ from tfg_app.views.pilar1.pilar1form import FormState
 from tfg_app.components.info_button import info_button
 from tfg_app.styles.colors import LegendColor as legcolor
 
-try:
-    RATIO_SUSTITUCION = RatioSust1.ratio
-except Exception as e:
-    print(f"Error al obtener el ratio de sustitución: {e}")
+
 
 
 
@@ -122,7 +119,7 @@ def results_pilar1() -> rx.Component:
     #    raise ValueError("El salario medio no puede ser nulo o cero.") 
         
 
-    ratio_sustitucion = RATIO_SUSTITUCION
+    ratio_sustitucion = RatioSust1.ratio
 
     ratio_gt_100_component = rx.box(
         rx.vstack(

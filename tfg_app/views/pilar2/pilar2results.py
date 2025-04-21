@@ -1,18 +1,14 @@
 import reflex as rx
 from tfg_app.components.leyenda import leyenda2
 from tfg_app.global_state import GlobalState
-from tfg_app.backend.pens import RatioSust2
+from tfg_app.backend.pens import RatioSust1, RatioSust2
 from tfg_app.views.pilar1.pilar1form import FormState
 from tfg_app.components.info_button import info_button
-from tfg_app.views.pilar1.pilar1results import RATIO_SUSTITUCION as RATIO_SUS_1
 from tfg_app.styles.colors import LegendColor as legcolor
 
 import math
 
-try:
-    RATIO_SUS_2 = RatioSust2.ratio
-except Exception as e:
-    print(f"Error al obtener el ratio de sustitución: {e}")
+
 
 
 def redondear(numero):
@@ -118,12 +114,20 @@ def results_pilar2() -> rx.Component:
     # 1er pilar
     pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
     pension_1p_anual = redondear(pension_primer_pilar) * 12
-    ratio_sust_1 = RATIO_SUS_1
+
+    if RatioSust1.ratio.to(float) is None | RatioSust1.ratio.to(float) == (pension_primer_pilar / salario_mensual * 100):
+        ratio_sust_1 = RatioSust1.ratio.to(float)
+    else:
+        ratio_sust_1 = (pension_primer_pilar / salario_mensual * 100)
+    
 
     # 2o pilar
     pension_segundo_pilar = GlobalState.pension_segundo_pilar.to(float)
     pension_2p_anual = redondear(pension_segundo_pilar) * 12
-    ratio_sust_2 = RATIO_SUS_2
+    if RatioSust2.ratio.to(float) is None | RatioSust2.ratio.to(float) == (pension_segundo_pilar / salario_mensual * 100):
+        ratio_sust_2 = RatioSust2.ratio.to(float)
+    else:
+        ratio_sust_2 = (pension_segundo_pilar / salario_mensual * 100)
 
     print(f"salario_mensual: {salario_mensual}")
     print(f"pension_mensual: {pension_primer_pilar + pension_segundo_pilar} €/mes")
