@@ -201,7 +201,7 @@ def results_pilar1() -> rx.Component:
         width="100%",
         display="flex",
         justify_content="center",
-        margin_bottom="4em",
+        margin_bottom=rx.breakpoints(initial="1em", sm="1.5em",md="2em"),
     )
 
     return rx.cond(
