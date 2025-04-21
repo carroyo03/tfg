@@ -1,21 +1,13 @@
 import reflex as rx
-from tfg_app.backend.pens import calcular_pension_tercer_pilar
+from tfg_app.backend.pens import RatioSust3
 from tfg_app.components.slider import rentabilidad_estimada
-from tfg_app.styles.colors import TextColor as txcolor, Color as color
+from tfg_app.styles.colors import Color as color
 from tfg_app.styles.styles import Size as size
-from tfg_app.styles.fonts import Font
-from tfg_app.components.input_text import input_text, AgeState, StartAgeState, AvgSalaryState
-from tfg_app.components.date_input_text import date_picker, DateState
-from tfg_app.components.gender import gender, GenderState
+from tfg_app.components.input_text import input_text
 from tfg_app.global_state import GlobalState
-from tfg_app.components.children import children, RadioGroupState, ChildrenNumberState
-from tfg_app.components.tipo_regimen import tipo_regimen, RadioGroup1State, TypeRegState, LagsCotState
-from tfg_app.styles.styles import BASE_STYLE
 from tfg_app.views.pilar2.pilar2form import Form2State
 from tfg_app.components.terc_pilar.aportaciones import Employee3PState
 
-import pandas as pd
-import datetime
 import logging
 
 # Configurar el logging
@@ -47,6 +39,8 @@ class Form3State(rx.State):
             self.form_data.update(form_data)
 
             pension = await self.send_data_to_backend(form_data)
+            ratio_state = await self.get_state(RatioSust3)
+            ratio_state.calcular_ratio(salario=self.form_data['prev_form']['first_form']['salario_medio'], pension=pension)
             state = await self.get_state(GlobalState)
             state.set_pension("tercer",pension)
             return rx.redirect("/results")

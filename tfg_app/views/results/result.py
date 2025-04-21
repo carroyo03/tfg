@@ -3,13 +3,17 @@ import reflex as rx
 
 from tfg_app.components.leyenda import leyenda3
 from tfg_app.global_state import GlobalState
-from tfg_app.styles.fonts import Font
-from tfg_app.styles.styles import Size as size
-from tfg_app.backend.pens import calcular_ratio_sustitucion
+from tfg_app.backend.pens import RatioSust3
 from tfg_app.views.pilar1.pilar1form import FormState
 from tfg_app.components.info_button import info_button
+from tfg_app.views.pilar1.pilar1results import RATIO_SUSTITUCION as RATIO_SUS_1
+from tfg_app.views.pilar2.pilar2results import RATIO_SUS_2
 
 
+try:
+    RATIO_SUS_3 = RatioSust3.ratio
+except Exception as e:
+    print(f"Error al obtener el ratio de sustitución: {e}")
 
 
 
@@ -87,18 +91,17 @@ def final_results() -> rx.Component:
     # 1er pilar
     pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
     pension_1p_anual = redondear(pension_primer_pilar) * 12
-    ratio_sust_1 = calcular_ratio_sustitucion(pension_primer_pilar, salario_actual)
+    ratio_sust_1 = RATIO_SUS_1
 
     # 2o pilar
     pension_segundo_pilar = GlobalState.pension_segundo_pilar.to(float)
     pension_2p_anual = redondear(pension_segundo_pilar) * 12
-    ratio_sust_2 = calcular_ratio_sustitucion(pension_segundo_pilar, salario_actual)
+    ratio_sust_2 = RATIO_SUS_2
     
     # 3er pilar
     pension_tercer_pilar = GlobalState.pension_tercer_pilar.to(float)
     pension_3p_anual = redondear(pension_tercer_pilar) * 12
-    ratio_sust_3 = calcular_ratio_sustitucion(pension_tercer_pilar, salario_actual)
-    
+    ratio_sust_3 = RATIO_SUS_3
     
     return rx.center(
         rx.vstack(

@@ -1,27 +1,18 @@
 import reflex as rx
+from tfg_app.backend.pens import RatioSust2
 from tfg_app.components.slider import SliderState, rentabilidad_estimada
 from tfg_app.styles.colors import Color as color
-from tfg_app.styles.styles import Size as size
-from tfg_app.styles.fonts import Font
 from tfg_app.components.seg_pilar.aportaciones import Employee2PState, aportar
 from tfg_app.views.pilar1.pilar1results import FormState
-from tfg_app.components.input_text import input_text, AgeState, StartAgeState, AvgSalaryState
-from tfg_app.components.date_input_text import date_picker, DateState
-from tfg_app.components.gender import gender, GenderState
+from tfg_app.components.input_text import input_text
 from tfg_app.global_state import GlobalState
-from tfg_app.components.children import children, RadioGroupState, ChildrenNumberState
-from tfg_app.components.tipo_regimen import tipo_regimen, RadioGroup1State, TypeRegState, LagsCotState
 from tfg_app.components.seg_pilar.aportaciones import Company2PState
-from tfg_app.styles.styles import BASE_STYLE
-from tfg_app.views.pilar1.pilar1results import results_pilar1
 
 
 
 
 
 
-import pandas as pd
-import datetime
 import logging
 
 # Configurar el logging
@@ -41,6 +32,8 @@ class Form2State(rx.State):
     async def handle_submit(self, form_data: dict):
         try:
             prev_form_state = await self.get_state(FormState)
+
+            print(f"Hay fecha?: {hasattr(prev_form_state.stored_form_data, 'fecha_nacimiento')}")
             
             # Convertir fecha_nacimiento a string
             fecha_nacimiento = prev_form_state.stored_form_data['fecha_nacimiento'].strftime("%d/%m/%Y")  # Convertir a string
@@ -71,6 +64,8 @@ class Form2State(rx.State):
             self.form_data.update(form_data)
             
             pension = await self.send_data_to_backend(self.form_data)
+            ratio_state = await self.get_state(RatioSust2)
+            ratio_state.calcular_ratio(salario=prev_form_state.salario_mensual, pension=pension)
             state = await self.get_state(GlobalState)
             state.set_pension("segundo",pension)
             return rx.redirect("/pilar2")

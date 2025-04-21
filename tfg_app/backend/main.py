@@ -32,8 +32,8 @@ class FormData3(BaseModel):
     rentabilidad_3: int
 
 def calcular_edad(fecha_nacimiento):
-    fecha_nacimiento = datetime.strptime(fecha_nacimiento, "%d/%m/%Y")
-    return int(datetime.today().year - fecha_nacimiento.year)
+    fecha_nacimiento = datetime.datetime.strptime(fecha_nacimiento, "%d/%m/%Y")
+    return int(datetime.datetime.today().year - fecha_nacimiento.year)
 
 def annos_por_trabajar(edad_actual,edad_jubilacion_deseada):
     return int(edad_jubilacion_deseada - edad_actual)

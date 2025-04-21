@@ -1,12 +1,54 @@
 import datetime
 import logging
-import math
 import warnings
 
 import pandas as pd #type:ignore
 import reflex as rx
 import requests #type:ignore
 from ecbdata import ecbdata as ecb  # type: ignore
+
+class RatioSustitucion(rx.State):
+
+    ratio: float = 0.0
+
+    @rx.event
+    def calcular_ratio(self, salario:float, pension:float)-> float:
+        """
+        Método para calcular el ratio de sustitución.
+        Este método debe ser implementado en las subclases.
+        """
+        raise NotImplementedError("Este método debe ser implementado en la subclase.")
+
+    
+
+class RatioSust1(RatioSustitucion):
+    type: str = "1er Pilar"
+
+    @rx.event
+    def calcular_ratio(self, salario:float, pension:float)-> float:
+        print(f"Salario: {salario}, Pension: {pension}")
+        self.ratio = float(pension / salario) * 100
+        print(f"Ratio 1er Pilar: {self.ratio}")
+
+
+class RatioSust2(RatioSustitucion):
+    type: str = "2o Pilar"
+
+    @rx.event
+    def calcular_ratio(self, salario:float, pension:float)-> float:
+        print(f"Salario: {salario}, Pension: {pension}")
+        self.ratio = float(pension / salario) * 100
+        print(f"Ratio 2o Pilar: {self.ratio}")
+class RatioSust3(RatioSustitucion):
+    type: str = "3er Pilar"
+    
+    @rx.event
+    def calcular_ratio(self, salario:float, pension:float)-> float:
+        print(f"Salario: {salario}, Pension: {pension}")
+        self.ratio = float(pension / salario) * 100
+        print(f"Ratio 3er Pilar: {self.ratio}")
+
+    
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -344,17 +386,6 @@ def calcular_primer_pilar(base_reguladora, annos_cotizados, tiene_hijos, num_hij
 
     return pension_bruta_mensual
 
-
-def calcular_ratio_sustitucion(pension: rx.Var, salario: rx.Var) -> float:
-    """Calcular porcentaje de representación de la pensión sobre el salario.
-    Args:
-        pension (rx.Var): Pensión obtenida.
-        salario (rx.Var): Salario medio obtenido.
-    Returns:
-        float: Ratio de sustitución de la pensión sobre el salario.
-    """
-    r_s = (pension * 12 / salario) * 100
-    return (math.ceil(r_s * 100) / 100).to(float)  # Resultado redondeado y convertido a float
 
 
 def obtener_esperanza_vida_jub(edad_jubilacion):

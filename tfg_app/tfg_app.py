@@ -3,7 +3,7 @@ import reflex as rx
 from tfg_app.components.logout_button import logout_button
 from tfg_app.views.pilar1.pilar1form import form1
 from tfg_app.views.pilar2.pilar2form import form2
-from tfg_app.styles import styles,colors
+from tfg_app.styles import colors
 from tfg_app.styles.fonts import Font
 from tfg_app.backend.main import calcular_pension_1p
 from tfg_app.views.pilar3.pilar3form import form3
@@ -19,7 +19,8 @@ def loading():
     return rx.center(
         rx.spinner(size="3"),
         padding=["5em","8em","10em"],
-        height="auto"
+        height="auto",
+        color="white"
     )
 
 
@@ -39,7 +40,8 @@ def authorize():
         rx.vstack(
             rx.text(
                 "Autenticando...",
-                font_size=["1em","1.2em","1.5em"]
+                font_size=["1em","1.2em","1.5em"],
+                color="white",
             ),
             loading(),
             on_mount= lambda: AppState.handle_authorize(code, state),
@@ -131,7 +133,8 @@ def pilar1():
                 font_weight="bold",
                 text_align="center",
                 width="100%",
-                padding_top=["1rem","2rem","3rem"]
+                padding_top=rx.breakpoints(initial="1.5rem", sm="2rem", md="3rem"),
+                margin_bottom=rx.breakpoints(initial="2rem", sm="3rem", md="4rem")
             ),
             position="sticky",
             top="0",

@@ -1,15 +1,12 @@
 import reflex as rx #type: ignore
-from tfg_app.styles.colors import TextColor as txcolor, Color as color
-from tfg_app.styles.styles import Size as size
-from tfg_app.styles.fonts import Font
+from tfg_app.backend.pens import RatioSust1
+from tfg_app.styles.colors import Color as color
 from tfg_app.components.input_text import input_text, AgeState, StartAgeState, AvgSalaryState
 from tfg_app.components.date_input_text import date_picker, DateState
 from tfg_app.components.gender import gender, GenderState
 from tfg_app.global_state import GlobalState
 from tfg_app.components.children import children, RadioGroupState, ChildrenNumberState
 from tfg_app.components.tipo_regimen import tipo_regimen, RadioGroup1State, TypeRegState, LagsCotState
-from tfg_app.styles.styles import BASE_STYLE
-from tfg_app.components.info_button import info_button
 import pandas as pd #type: ignore
 import datetime
 import logging
@@ -20,6 +17,18 @@ logging.basicConfig(level=logging.INFO)
 class FormState(rx.State):
     form_data: dict = {}
     is_loading: bool = False
+    salario_medio: float = 0.0
+    salario_mensual: float = 0.0
+
+    def update_salario_mensual(self):
+        print(f"Updating average salary to {self.form_data.get('salario_medio')} or {self.form_data['salario_medio']}")
+        self.salario_medio = float(self.form_data.get("salario_medio"))
+        self.form_data["salario_medio"] = self.salario_medio
+        print(f"Current average salary: {self.salario_medio}")
+        self.salario_mensual = self.salario_medio / 12
+        self.form_data["salario_mensual"] = self.salario_mensual
+        print(f"Monthly average salary updated: {self.salario_mensual}")
+
     
     @rx.var
     def stored_form_data(self) -> dict:
@@ -121,18 +130,24 @@ class FormState(rx.State):
     @rx.event
     async def handle_submit(self, form_data: dict):
         try:
+            print("Handling form submission...")
             # Need to await the async computed variable
             is_invalid = await self.invalid_form_data
             if is_invalid:
                 raise ValueError("Datos del formulario inválidos")
-                
+            
             form_data['fecha_nacimiento'] = f"{form_data['day']}/{form_data['month']}/{form_data['year']}"
             del form_data['day']
             del form_data['month']
             del form_data['year']
             self.form_data = form_data
+
+            self.update_salario_mensual()
     
             pension = await self.send_data_to_backend(self.form_data)
+            ratio_state = await self.get_state(RatioSust1)
+            ratio_state.calcular_ratio(salario=self.salario_mensual, pension=pension)
+            print(f"1st ratio: {ratio_state.ratio}")
             state = await self.get_state(GlobalState)
             state.set_pension("primer",pension)
             return rx.redirect("/pilar1")
@@ -263,6 +278,7 @@ def form1():
                         padding=rx.breakpoints(initial="1em", sm="1.2em"),
                         font_size=rx.breakpoints(initial="1em", sm="1.1em"),
                         _hover={"bg": color.SECONDARY.value, "color": "white"},
+                        on_click=FormState.clear_form,
                     ),
                     rx.button(
                         "Siguiente",

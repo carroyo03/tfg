@@ -5,10 +5,16 @@ from tfg_app.components.leyenda import leyenda1
 from tfg_app.global_state import GlobalState
 from tfg_app.styles.fonts import Font
 from tfg_app.styles.styles import Size as size
-from tfg_app.backend.pens import calcular_ratio_sustitucion
+from tfg_app.backend.pens import RatioSust1
 from tfg_app.views.pilar1.pilar1form import FormState
 from tfg_app.components.info_button import info_button
 from tfg_app.styles.colors import LegendColor as legcolor
+
+try:
+    RATIO_SUSTITUCION = RatioSust1.ratio
+except Exception as e:
+    print(f"Error al obtener el ratio de sustitución: {e}")
+
 
 
 import math
@@ -31,7 +37,7 @@ def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
         rx.box(
             rx.hstack(
                 rx.heading("Ratio de Sustitución", size="4", color="black", aria_label="Ratio de Sustitución"),
-                info_button(color="silver",info="El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión pública."),
+                info_button(color="black",info="El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión pública."),
                 spacing="2",
                 align="center"
             ),
@@ -107,21 +113,16 @@ def results_pilar1() -> rx.Component:
     pension_primer_pilar = GlobalState.pension_primer_pilar
     pension_1p_anual = pension_primer_pilar * 12
     
+    salario_actual = FormState.salario_medio
+    salario_mensual = redondear(salario_actual/12)
+
     # Get salario_medio from form data and properly convert to float
-    try:
-        # Extract the value and convert to float
-        salario_actual_value = FormState.form_data.get('salario_medio')
-        # Convert to float - this handles both primitive values and Reflex state objects
-        salario_actual = float(salario_actual_value) if salario_actual_value is not None else 0.0
-    except (TypeError, ValueError, KeyError):
-        # Fallback if conversion fails or key doesn't exist
-        print(f"Error converting salario_medio: {salario_actual_value}")
-        print(f"Type of salario_medio: {type(salario_actual_value)}")
-        salario_actual = 0.0
+    print(f"salario_medio: {salario_actual}")
+    #if salario_actual is None or salario_actual == 0:
+    #    raise ValueError("El salario medio no puede ser nulo o cero.") 
         
-    # Now that salario_actual is a proper float, we can safely perform division
-    salario_mensual = salario_actual / 12
-    ratio_sustitucion = calcular_ratio_sustitucion(pension_primer_pilar, salario_mensual)
+
+    ratio_sustitucion = RATIO_SUSTITUCION
 
     ratio_gt_100_component = rx.box(
         rx.vstack(
@@ -203,6 +204,7 @@ def results_pilar1() -> rx.Component:
         width="100%",
         display="flex",
         justify_content="center",
+        margin_bottom="4em",
     )
 
     return rx.cond(
