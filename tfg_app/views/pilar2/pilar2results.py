@@ -125,6 +125,10 @@ def results_pilar2() -> rx.Component:
     pension_2p_anual = redondear(pension_segundo_pilar) * 12
     ratio_sust_2 = RATIO_SUS_2
 
+    print(f"salario_mensual: {salario_mensual}")
+    print(f"pension_mensual: {pension_primer_pilar + pension_segundo_pilar} €/mes")
+    print(f"Ratio sustitucion total: {ratio_sust_1} (Ratio 1er pilar) + {ratio_sust_2} (Ratio 2o pilar) = {ratio_sust_1 + ratio_sust_2} %")
+
     ratio_gt_100_component = rx.box(
         rx.vstack(
             rx.text("El ratio de sustitución es superior al 100%. Esto significa que tu pensión pública es mayor que tu salario medio.", 
@@ -156,13 +160,13 @@ def results_pilar2() -> rx.Component:
                 rx.vstack(
                     rx.hstack(
                         rx.heading("Pensión mensual:", size="4", color="black"),
-                        rx.text(f"{pension_primer_pilar} €/mes", color="black"),
+                        rx.text(f"{pension_primer_pilar + pension_segundo_pilar} €/mes", color="black"),
                         spacing="1",
                         width="100%",
                     ),
                     rx.hstack(
                         rx.heading("Pensión anual:", size="4", color="black"),
-                        rx.text(f"{pension_1p_anual} €/año", color="black"),
+                        rx.text(f"{pension_1p_anual + pension_2p_anual} €/año", color="black"),
                         spacing="1",
                         width="100%",
                     ),
