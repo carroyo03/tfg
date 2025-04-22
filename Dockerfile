@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y unzip curl && rm -rf /var/lib/apt/lists
 RUN pip install --upgrade pip
 RUN pip install uv
 RUN python -m uv pip install --no-cache-dir -r requirements.txt
+RUN python -m uv pip install --upgrade reflex
 COPY . .
 EXPOSE 3000
 EXPOSE 8000

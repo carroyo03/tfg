@@ -146,11 +146,11 @@ def pilar1():
         rx.box(
             results_pilar1(),
             width="100%",
-            max_width=["100%","90%","85%","800px"],  # Limita el ancho máximo del contenido
-            margin="0 auto",  # Centra horizontalmente
-            margin_top=["-3rem","-4rem","-5.3rem"],
-            margin_bottom="1.5rem",
-            padding_x=[".5rem",".8rem","1rem"],  # Añade un poco de padding horizontal
+            max_width=["95%","90%","85%","800px"],  # Más anchura en móvil
+            margin="0 auto",  # Centrar horizontalmente
+            margin_top=["0rem","-2rem","-3rem"],  # Reducir márgenes negativos en móvil
+            margin_bottom=rx.breakpoints(initial="5rem", sm="6rem", md="7rem"),  
+            padding_x=rx.breakpoints(initial="1em",sm="1em",md="1em"),  # Mantener padding consistente
         ),
         rx.mobile_only(  # Sticky footer para botones en móvil
             rx.box(
