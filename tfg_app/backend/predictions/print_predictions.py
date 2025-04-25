@@ -21,7 +21,7 @@ class ResultState(rx.State):
         pdf = canvas.Canvas(buffer)
         pdf.drawString(100, 800, "Resultados de la simulación")
         pdf.drawString(100,780, f"Pensión total: {self.pension_total}")
-        pdf.drawString(100, 780, f"Recomendación: {self.recomendacion}")
+        pdf.drawString(100, 760, f"Recomendación: {self.recomendacion}")
         # Añadir más contenido al PDF según sea necesario
         pdf.showPage()
         pdf.save()
