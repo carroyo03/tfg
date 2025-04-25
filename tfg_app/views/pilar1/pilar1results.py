@@ -106,44 +106,37 @@ def show_pension_salary_comparison(pension_primer_pilar:float, salario_actual:fl
 
 
 def results_pilar1() -> rx.Component:
-
     pension_primer_pilar = GlobalState.pension_primer_pilar
     pension_1p_anual = pension_primer_pilar * 12
-    
     salario_actual = FormState.salario_medio
-    salario_mensual = redondear(salario_actual/12)
-
-    # Get salario_medio from form data and properly convert to float
-    print(f"salario_medio: {salario_actual}")
-    #if salario_actual is None or salario_actual == 0:
-    #    raise ValueError("El salario medio no puede ser nulo o cero.") 
-        
-
+    salario_mensual = redondear(salario_actual / 12)
     ratio_sustitucion = RatioSust1.ratio
 
     ratio_gt_100_component = rx.box(
         rx.vstack(
-            rx.text("El ratio de sustitución es superior al 100%. Esto significa que tu pensión pública es mayor que tu salario medio.", 
-                   color="black",
-                   text_align="center",
-                   width="90%"),
+            rx.text(
+                "El ratio de sustitución es superior al 100%. Esto significa que tu pensión pública es mayor que tu salario medio.",
+                color="black",
+                text_align="center",
+                width=["100%", "90%"],  # Responsive width
+            ),
             show_pension_salary_comparison(pension_primer_pilar, salario_mensual),
             leyenda1(),
             width="100%",
             spacing="5",
             align_items="center",
             justify="center",
-            padding="2em",
+            padding=rx.breakpoints(initial="1em", sm="2em", md="2em"),
             background_color="white",
             border_radius="md",
             box_shadow="lg",
-            margin="2em auto",
+            margin=rx.breakpoints(initial="1em auto", sm="2em auto"),
         ),
         width="100%",
         display="flex",
         justify_content="center",
-        padding_top= "8em",
-        padding_bottom="4em"
+        padding_top=rx.breakpoints(initial="2em", md="8em"),
+        padding_bottom=rx.breakpoints(initial="1em", md="4em"),
     )
 
     ratio_lte_100_component = rx.box(
@@ -152,60 +145,60 @@ def results_pilar1() -> rx.Component:
                 rx.vstack(
                     rx.hstack(
                         rx.heading("Pensión mensual:", size="4", color="black"),
-                        rx.text(f"{pension_primer_pilar:.2f} €/mes", color="black"),
+                        rx.text(f"{pension_primer_pilar:.2f} €/ mes", color="black"),
                         spacing="1",
                         width="100%",
                     ),
                     rx.hstack(
                         rx.heading("Pensión anual:", size="4", color="black"),
-                        rx.text(f"{pension_1p_anual:.2f} €/año", color="black"),
+                        rx.text(f"{pension_1p_anual:.2f} €/ año", color="black"),
                         spacing="1",
                         width="100%",
                     ),
-                    width="50%",
+                    width="100%",
                 ),
                 rx.vstack(
                     rx.hstack(
                         rx.heading("Salario mensual:", size="4", color="black"),
-                        rx.text(f"{salario_mensual:.2f} €/mes", color="black"),
+                        rx.text(f"{salario_mensual:.2f} €/ mes", color="black"),
                         spacing="1",
                         width="100%",
                     ),
                     rx.hstack(
                         rx.heading("Salario anual:", size="4", color="black"),
-                        rx.text(f"{salario_actual:.2f} €/año", color="black"),
+                        rx.text(f"{salario_actual:.2f} €/ año", color="black"),
                         spacing="1",
                         width="100%",
                     ),
-                    width="50%",
+                    width="100%",
                 ),
-                display="flex",
-                flex_direction=["column", "column", "row"],  # Responsive layout
-                justify="between",
+                direction=rx.breakpoints(initial="column", md="row"),  # Responsive direction
+                justify_content="space-around",
                 width="100%",
-                gap="4",
+                spacing="2",
+
             ),
             show_ratio_pie_chart(ratio_sustitucion),
             leyenda1(),
             align_items="center",
             justify_content="center",
-            padding="2em",
+            padding=rx.breakpoints(initial="1em", sm="2em"),
             border_radius="md",
             box_shadow="lg",
             background_color="white",
-            width="90%",
+            width=rx.breakpoints(initial="100%", sm="90%", lg="80%"),
             max_width="1200px",
-            margin="2em auto",
+            margin=rx.breakpoints(initial="1em auto", sm="2em auto"),
             spacing="4",
         ),
         width="100%",
         display="flex",
         justify_content="center",
-        margin_bottom=rx.breakpoints(initial="1em", sm="1.5em",md="2em"),
+        margin_bottom="15%",
     )
 
     return rx.cond(
         ratio_sustitucion > 100,
         ratio_gt_100_component,
-        ratio_lte_100_component
+        ratio_lte_100_component,
     )

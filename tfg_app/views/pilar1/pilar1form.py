@@ -255,18 +255,25 @@ class FormState(rx.State):
 
 def form1():
     return rx.form(
-            rx.vstack(
-                date_picker("Fecha de nacimiento"),
-                gender(),
-                input_text(title="Salario medio obtenido",name="salario_medio", state=AvgSalaryState, type_="number", has_info_button=True, 
-                           info="Introduce el salario bruto medio obtenido anualmente",
-                           color_info_button="white"),  
-                children(),
-                input_text("Edad a la que empezaste a cotizar","edad_inicio_trabajo", StartAgeState, "number"),
-                input_text("Edad deseada de jubilación", "edad_jubilacion",AgeState, "number"),
-                tipo_regimen(),
-                rx.stack(
-                    rx.button(
+        rx.vstack(
+            date_picker("Fecha de nacimiento"),
+            gender(),
+            input_text(
+                title="Salario medio obtenido",
+                name="salario_medio",
+                state=AvgSalaryState,
+                type_="number",
+                has_info_button=True,
+                info="Introduce el salario bruto medio obtenido anualmente",
+                color_info_button="white",
+            ),
+            children(),
+            input_text("Edad a la que empezaste a cotizar", "edad_inicio_trabajo", StartAgeState, "number"),
+            input_text("Edad deseada de jubilación", "edad_jubilacion", AgeState, "number"),
+            tipo_regimen(),
+            # Botones con position: sticky
+            rx.stack(
+                rx.button(
                         "Limpiar formulario",
                         type="reset",
                         background_color=color.BACKGROUND.value,
@@ -279,40 +286,43 @@ def form1():
                         font_size=rx.breakpoints(initial="1em", sm="1.1em"),
                         _hover={"bg": color.SECONDARY.value, "color": "white"},
                         on_click=FormState.clear_form,
-                    ),
-                    rx.button(
-                        "Siguiente",
-                        type="submit",
-                        background_color="white",
-                        color=color.BACKGROUND.value,
-                        width=rx.breakpoints(initial="100%", sm="48%"),
-                        border="1px solid",
-                        box_shadow="0 .25rem .375rem #0003",
-                        border_radius="0.5em",
-                        padding=rx.breakpoints(initial="1em", sm="1.2em"),
-                        font_size=rx.breakpoints(initial="1em", sm="1.1em"),
-                        _hover={"bg": color.SECONDARY.value, "color": "white"},
-                        disabled=FormState.invalid_form_data,
-                    ),
-                    direction=rx.breakpoints(initial="column", sm="row"),
-                    spacing="3",
-                    width="100%",
-                    align_items="stretch",
-                    justify_content="center",
-                    margin_bottom="30%",
-                    margin_top="-2em"
                 ),
+                rx.button(
+                    "Siguiente",
+                    type="submit",
+                    background_color="white",
+                    color=color.BACKGROUND.value,
+                    width=rx.breakpoints(initial="100%", sm="48%"),
+                    border="1px solid",
+                    box_shadow="0 .25rem .375rem #0003",
+                    border_radius="0.5em",
+                    padding=rx.breakpoints(initial="1em", sm="1.2em"),
+                    font_size=rx.breakpoints(initial="1em", sm="1.1em"),
+                    _hover={"bg": color.SECONDARY.value, "color": "white"},
+                    disabled=FormState.invalid_form_data,
+                ),
+                direction=rx.breakpoints(initial="column", sm="row"),
+                spacing="3",
                 width="100%",
-                height="100vh",
-                spacing="8",
-                padding=rx.breakpoints(initial="1em", sm="1.5em", md="2em"),
-                max_width="100%",
-                font_weight='bold'
+                align_items="stretch",
+                justify_content="center",
+                position="sticky",
+                bottom="1rem",
+                z_index="10",
+                padding="1rem",
             ),
-            on_submit=FormState.handle_submit,
-            value=FormState.stored_form_data,
-            align="center",
-            padding=rx.breakpoints(initial='1em',sm='1.1em'),
-            width="100%"
-        )
-
+            spacing="8",
+            padding=rx.breakpoints(initial="1em", sm="1.5em", md="2em"),
+            padding_bottom="5rem",  # Espacio extra para los botones
+            width="100%",
+            height="auto",  # Permitir que el formulario crezca según el contenido
+            min_height="100vh",  # Asegurar que ocupe al menos la pantalla
+            overflow_y="auto",  # Permitir desplazamiento vertical
+        ),
+        on_submit=FormState.handle_submit,
+        value=FormState.stored_form_data,
+        align="center",
+        padding=rx.breakpoints(initial='1em', sm='1.1em'),
+        width="100%",
+        font_weight="bold"
+    )

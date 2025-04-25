@@ -164,12 +164,13 @@ def form2():
             ),
             width="100%",
             spacing="5",
-            padding=["1em", "1.5em", "2em"],
+            #padding=["1em", "1.5em", "2em"],
             max_width="100%",
-            font_weight='bold'
+            font_weight='bold',
+            justify="center"
         ),
         on_submit=Form2State.handle_submit,
         value=Form2State.stored_form_data,
-        align="center",
+        width="100%",
+        height="auto",
     )
-

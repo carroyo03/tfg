@@ -6,8 +6,12 @@ from jose import jwk, jwt as jose_jwt
 from authlib.integrations.httpx_client import AsyncOAuth2Client
 import requests
 import jwt
+import httpx
+import certifi
 from dotenv import load_dotenv
 load_dotenv()
+
+import logging
 
 
 
@@ -18,27 +22,31 @@ class AppState(rx.State):
     user_info: dict = {}
     access_token: str = rx.Cookie(
         name="access_token",
-        same_site="strict",
-        secure=True,
-        max_age=3600,  # 1 hour
+        same_site="lax",  # Cambiado a lax para redirecciones externas
+        secure=True,  
+        max_age=3600,
+
     )
     id_token: str = rx.Cookie(
         name="id_token",
-        same_site="strict",
+        same_site="lax",
         secure=True,
-        max_age=3600,  # 1 hour
+        max_age=3600,
+
     )
     refresh_token: str = rx.Cookie(
         name="refresh_token",
-        same_site="strict",
+        same_site="lax",
         secure=True,
-        max_age=3600 * 24 * 30, # 1 month
+        max_age=3600 * 24 * 30,
+
     )
-    oauth_state : str = rx.Cookie(
-        name = "oauth_state",
-        same_site="strict",
+    oauth_state: str = rx.Cookie(
+        name="oauth_state",
+        same_site="lax",
         secure=True,
-        max_age=3600, # 1 hour
+        max_age=3600,
+
     )
     error_message: str = ""
 
@@ -83,30 +91,37 @@ class AppState(rx.State):
         uri, state = client.create_authorization_url(authorization_endpoint)
         print(f"Generating state: {state}")
         print(f"Redirecting to: {uri}")
-        self.oauth_state = state # Store the state in the cookie
+        self.oauth_state = state
         return rx.redirect(uri)
-    
+
     @rx.event
     async def handle_authorize(self):
         code = self.router.page.params.get("code")
         state = self.router.page.params.get("state")
         print(f"Handling authorization with code: {code} and state: {state}")
+        print(f"Stored oauth_state: {self.oauth_state}")
         if not code or not state:
             print("Missing code or state in /authorize request.")
             self.signed_in = False
             self.guest = False
             return rx.redirect("/sign-in")
+        
+        if self.oauth_state != state:
+            print("State mismatch. Possible CSRF attack.")
+            self.signed_in = False
+            return rx.redirect("/sign-in")
+        
         try:
-            if self.oauth_state != state:
-                print("State mismatch. Possible CSRF attack.")
-                self.signed_in = False
-                return rx.redirect("/sign-in")
+            async with httpx.AsyncClient(verify=certifi.where()) as client:
+                test_response = await client.get(f"{self.COGNITO_DOMAIN}/oauth2/token")
+                print(f"Test connection status: {test_response.status_code}")
             client = AsyncOAuth2Client(
                 client_id=self.COGNITO_CLIENT_ID,
                 client_secret=self.COGNITO_CLIENT_SECRET,
-                redirect_uri=self.COGNITO_REDIRECT_URI
+                redirect_uri=self.COGNITO_REDIRECT_URI,
+                verify=certifi.where(),
+                limits=httpx.Limits(max_connections=100)
             )
-
             token_endpoint = f"{self.COGNITO_DOMAIN}/oauth2/token"
             token = await client.fetch_token(
                 token_endpoint,
@@ -114,12 +129,13 @@ class AppState(rx.State):
                 code=code,
                 redirect_uri=self.COGNITO_REDIRECT_URI
             )
-
             print(f"Token received: {token}")
-            self.access_token = token.get("access_token","")
-            self.id_token = token.get("id_token","")
-            self.refresh_token = token.get("refresh_token","")
-
+            
+            self.access_token = token.get("access_token", "")
+            self.id_token = token.get("id_token", "")
+            self.refresh_token = token.get("refresh_token", "")
+            print(f"Tokens set - access_token: {self.access_token[:10]}..., id_token: {self.id_token[:10]}..., refresh_token: {self.refresh_token[:10]}...")
+            
             jwks_url = f"https://cognito-idp.{self.COGNITO_REGION}.amazonaws.com/{self.COGNITO_USER_POOL_ID}/.well-known/jwks.json"
             jwks = requests.get(jwks_url).json()
             header = jwt.get_unverified_header(self.id_token)
@@ -133,6 +149,7 @@ class AppState(rx.State):
                 issuer=f"https://cognito-idp.{self.COGNITO_REGION}.amazonaws.com/{self.COGNITO_USER_POOL_ID}",
                 access_token=self.access_token,
             )
+            print(f"JWT claims: {claims}")
             self.user_info = claims
             self.signed_in = True
             self.guest = False
@@ -140,11 +157,12 @@ class AppState(rx.State):
             return rx.redirect("/")
         
         except Exception as e:
-            print(f"Authorization error: {e}")
+            logging.error(f"Authorization error occurred: {str(e)}", exc_info=True)
             self.signed_in = False
             self.guest = False
             return rx.redirect("/sign-in")
-    
+
+        
     @rx.event
     async def refresh_access_token(self):
         if not self.refresh_token:

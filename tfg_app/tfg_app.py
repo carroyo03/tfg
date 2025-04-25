@@ -75,15 +75,9 @@ def form_pilar1():
         AppState.signed_in | AppState.guest,
         rx.cond(
             rx.State.is_hydrated,
-            # Contenido principal cuando está cargado
             rx.vstack(
-                rx.cond(
-                    AppState.signed_in,
-                    logout_button()
-
-                ),
                 rx.vstack(
-                    rx.vstack(
+                    rx.hstack(
                         rx.heading(
                             "Simulador de pensiones",
                             color="white",
@@ -91,50 +85,53 @@ def form_pilar1():
                             font_size=rx.breakpoints(initial=size.LARGE.value, sm=size.BIG.value, md=size.REALLY_BIG.value),
                             font_weight="bold",
                             margin_top=size.SMALL.value,
-                            margin_left=rx.breakpoints(initial='1em',sm='1.1em'),
+                            align="center",
                             width="100%",
                         ),
-                        form1(),
-                        overflow="hidden",
-                        align="center",
-                        padding_bottom=rx.breakpoints(initial='8em',sm='10em',md='14em'),
-                        height="auto",  
+                        rx.cond(
+                            AppState.signed_in,
+                            logout_button(),
+                        ),
+                        align_items="center",
                     ),
-                    width="100%",
-                    max_width=["100%", "90%", "80%", "70%"],
+                    form1(),
+                    align="center",
+                    padding_bottom="2rem",
                     height="auto",
-                    spacing="1",
-                    align_items="center",
-                    #margin_top="4rem"
+                    overflow_y="auto",  # Permitir desplazamiento en el contenedor padre
                 ),
                 width="100%",
+                max_width=["100%", "90%", "80%", "70%"],
                 height="auto",
-                min_height=["auto","80vh","100vh"]
+                spacing="1",
+                align_items="center",
             ),
-            # Spinner mientras carga
-            loading()
+            loading(),
         ),
-        sign_in_v1()
+        sign_in_v1(),
     )
 
 @rx.page("/pilar1")#,on_load=AuthState.on_load)
 def pilar1():
     return rx.vstack(
-        rx.cond(
-            AppState.signed_in,
-            logout_button(),
-        ),
         rx.box(
-            rx.heading(
-                "Plan Público de Pensiones",
-                color="white",
-                font_family=Font.TITLE.value,
-                font_size=rx.breakpoints(initial=size.BIG.value, sm=size.REALLY_BIG.value, md=size.SMALL.value),
-                font_weight="bold",
-                text_align="center",
-                width="100%",
-                padding_top=rx.breakpoints(initial="1.5rem", sm="2rem", md="3rem"),
-                margin_bottom=rx.breakpoints(initial="2rem", sm="3rem", md="4rem")
+            rx.hstack(
+                rx.heading(
+                    "Plan Público de Pensiones",
+                    color="white",
+                    font_family=Font.TITLE.value,
+                    font_size=rx.breakpoints(initial=size.BIG.value, sm=size.REALLY_BIG.value, md=size.SMALL.value),
+                    font_weight="bold",
+                    text_align="center",
+                    width="100%",
+                    padding_top=rx.breakpoints(initial="1.5rem", sm="2rem", md="3rem"),
+                    margin_bottom=rx.breakpoints(initial="2rem", sm="3rem", md="4rem")
+                ),
+                rx.cond(
+                    AppState.signed_in,
+                    logout_button(),
+                ),
+                align="center"
             ),
             position="sticky",
             top="0",
@@ -149,7 +146,7 @@ def pilar1():
             max_width=["95%","90%","85%","800px"],  # Más anchura en móvil
             margin="0 auto",  # Centrar horizontalmente
             margin_top=["0rem","-2rem","-3rem"],  # Reducir márgenes negativos en móvil
-            margin_bottom=rx.breakpoints(initial="5rem", sm="6rem", md="7rem"),  
+            margin_bottom=rx.breakpoints(initial=".5rem", xs= "2rem",sm="2rem", md="2rem", lg="4rem"),  
             padding_x=rx.breakpoints(initial="1em",sm="1em",md="1em"),  # Mantener padding consistente
         ),
         rx.mobile_only(  # Sticky footer para botones en móvil
@@ -162,7 +159,7 @@ def pilar1():
                         background_color="transparent",
                         border="1px solid",
                         box_shadow="0 .25rem .375rem #0003",
-                        width=["40%", "30%", "20%"],
+                        width=rx.breakpoints(initial="80%",sm="70%",md="60%"),
                         height="auto",
                         font_size=["0.9em", "1em", "1.1em"],  # Responsive font size
                     ),
@@ -173,20 +170,23 @@ def pilar1():
                         color=colors.Color.BACKGROUND.value,
                         border="1px solid",
                         box_shadow="0 .25rem .375rem #0003",
-                        width=["40%", "30%", "20%"],
+                        width=rx.breakpoints(initial="80%",sm="70%",md="60%"),
                         height="auto",
                         font_size=["0.9em", "1em", "1.1em"],  # Responsive font size
+                        margin_bottom="5%"
                     ),
                     width="100%",
                     spacing="2",
                     align="center",
                     justify="center",
+                    display="flex",
+                    direction="column",
                 ),
-                position="sticky",
+                position="fixed",
                 bottom="0",
                 width="100%",
                 background_color="rgba(0, 51, 141, 0.9)",
-                padding_y="1rem",
+                #padding_y="1rem",
                 z_index="10",
             ),
         ),
@@ -226,8 +226,8 @@ def pilar1():
         spacing="1",
         align_items="stretch",
         background_color="#00338D",
+        overflow_y="auto"
     )
-
 
 @rx.page("/form2")
 def form_pilar2():
@@ -236,98 +236,159 @@ def form_pilar2():
         rx.cond(
             rx.State.is_hydrated,
             rx.vstack(
-                rx.cond(
-                    AppState.signed_in,
-                    logout_button(),
-                ),
-                rx.mobile_only(  # Botón Atrás sticky en móvil
-                    rx.button(
-                        "<- Atrás",
-                        on_click=rx.redirect("/pilar1"),
-                        color="white",
-                        background_color="transparent",
-                        border="1px solid",
-                        box_shadow="0 .25rem .375rem #0003",
-                        width="auto",
-                        height="auto",
-                        position="fixed",
-                        top="1rem",
-                        left="1rem",
-                        font_size=["0.9em", "1em", "1.1em"],
-                        _hover={"bg": colors.Color.SECONDARY.value, "color": "white"},
-                        z_index="10",
-                    ),
-                ),
-                rx.tablet_and_desktop(  # Botón Atrás en su lugar original
-                    rx.button(
-                        "<- Atrás",
-                        on_click=rx.redirect("/pilar1"),
-                        color="white",
-                        background_color="transparent",
-                        border="1px solid",
-                        box_shadow="0 .25rem .375rem #0003",
-                        width="auto",
-                        height="auto",
-                        position="absolute",
-                        top="1rem",
-                        left="1rem",
-                        font_size=["0.9em", "1em", "1.1em"],
-                        _hover={"bg": colors.Color.SECONDARY.value, "color": "white"},
-                    ),
-                ),
-                rx.stack(
-                    rx.mobile_only(  # Resultados simplificados en móvil
-                        rx.box(
-                            results_pilar1(),
-                            width="100%",
-                            padding_x="0.5rem",
-                            margin_top="1em",
-                        ),
-                    ),
-                    rx.tablet_and_desktop(
-                        rx.box(
-                            results_pilar1(),
-                            width=["100%", "50%", "50%"],  # Reducir ancho en tablet/escritorio
-                            padding_x=["0.5rem", "0.8rem", "1rem"],
-                            margin_top="2em",
-                        ),
-                    ),
-                    rx.vstack(
-                        rx.vstack(
-                            rx.heading(
-                                "Simulador de pensiones: Pensión de empresa",
-                                color="white",
-                                font_family=Font.TITLE.value,
-                                font_size=rx.breakpoints(initial="1.2em", sm="1.5em", md="1.8em"),
-                                font_weight="bold",
-                                margin_top=size.SMALL.value,
+                rx.mobile_only(
+                    rx.hstack(
+                        rx.button(
+                            rx.hstack(
+                                rx.icon("arrow-left", color="white", size=16),
+                                "Atrás",
+                                spacing="2"
                             ),
-                            form2(),  # Asumo que form2 puede necesitar acordeones en móvil
-                            overflow="hidden",
-                            align="center",
-                            padding=["0.5em", "0.8em", "1em"],
+                            on_click=rx.redirect("/pilar1"),
+                            color="white",
+                            background_color="transparent",
+                            border="1px solid",
+                            box_shadow="0 .25rem .375rem #0003",
+                            width="auto",
                             height="auto",
+                            position="sticky",
+                            top="1rem",
+                            left="1rem",
+                            font_size=["0.9em", "1em", "1.1em"],
+                            _hover={"bg": colors.Color.SECONDARY.value, "color": "white"},
+                            z_index="10",
                         ),
-                        width=["100%", "90%", "50%"],
-                        max_width=["100%", "90%", "80%", "70%"],
+                        rx.center(
+                    rx.vstack(
+                        
+                        rx.mobile_only(
+                            rx.box(
+                                rx.heading(
+                            "Simulador de pensiones: Pensión de empresa",
+                            color="white",
+                            font_family=Font.TITLE.value,
+                            font_size=rx.breakpoints(initial="1.2em", sm="1.5em", md="1.8em"),
+                            font_weight="bold",
+                            margin_top=size.SMALL.value,
+                            margin_bottom=size.SMALL.value,
+                            text_align="center",  # Centra el texto
+                        ),
+                                rx.accordion.root(
+                                    rx.accordion.item(
+                                        header=rx.text(
+                                            "Resultados de la pensión pública",
+                                            color="white",
+                                            font_weight="bold"),
+                                        content=results_pilar1(),
+                                    ),
+                                    collapsible=True,
+                                ),
+                                width="100%",
+                                padding_x="0.5rem",
+                                margin_top="1em",
+                                justify="center"
+                            ),
+                        ),
+                        
+                        overflow="hidden",
+                        align="end",
+                        padding=["0.5em", "0.8em", "1em"],
                         height="auto",
-                        spacing="1",
-                        align_items="center",
-                        justify_content="center",
+                        width="100%",
                     ),
-                    width="100%",
-                    spacing="2",  
-                    flex_direction=["column", "column", "row"],  # Cambiar a columna en móvil
+                    width=["100%", "90%", "50%"],
+                    max_width=["100%", "90%", "80%", "70%"],
+                    height="auto",
+                    spacing="1",
+                    align_items="flex-end",
+                    justify_content="center",
                 ),
+                        rx.cond(AppState.signed_in, logout_button()),
+                        align_items="center",
+                    ),
+                ),
+                rx.tablet_and_desktop(
+                    rx.hstack(
+                        rx.button(
+                            rx.hstack(
+                                rx.icon("arrow-left", color="white", size=16),
+                                "Atrás",
+                                spacing="2"
+                            ),
+                            on_click=rx.redirect("/pilar1"),
+                            color="white",
+                            background_color="transparent",
+                            border="1px solid",
+                            box_shadow="0 .25rem .375rem #0003",
+                            width="auto",
+                            height="auto",
+                            position="absolute",
+                            top="1rem",
+                            left="1rem",
+                            font_size=["0.9em", "1em", "1.1em"],
+                            _hover={"bg": colors.Color.SECONDARY.value, "color": "white"},
+                        ),
+                        rx.center(
+                            rx.vstack(
+                                rx.heading(
+                                    "Simulador de pensiones: Pensión de empresa",
+                                    color="white",
+                                    font_family=Font.TITLE.value,
+                                    font_size=rx.breakpoints(initial="1.2em", sm="1.5em", md="1.8em"),
+                                    font_weight="bold",
+                                    margin_top=size.SMALL.value,
+                                    margin_bottom=size.SMALL.value,
+                                    text_align="center",
+                                    width="100%",
+                                ),
+                                rx.hstack(
+                                    form2(),
+                                    rx.accordion.root(
+                                        rx.accordion.item(
+                                            header=rx.text(
+                                                "Resultados de la pensión pública",
+                                                color="white",
+                                                font_weight="bold"
+                                            ),
+                                            content=results_pilar1(),
+                                        ),
+                                        collapsible=True,
+                                        width="100%",
+                                        min_width="300px",
+                                        height="auto"
+                                    ),
+                                    width="100%",
+                                    max_width="1500px",
+                                    spacing="8",
+                                    display="flex",
+                                    align_items="flex-start",
+                                    padding=["1rem", "1.5rem", "2rem"],
+                                ),
+                                width="100%",
+                                align_items="center",
+                                margin_left=["0%", "10%", "20%"],  # Desplaza a la derecha según el tamaño de pantalla
+                            ),
+                        ),
+                        rx.cond(
+                            AppState.signed_in,
+                            rx.box(logout_button(), margin_right="1rem"),
+                        ),
+                        align_items="center",
+                        width="100%",
+                        justify_content="center",
+
+                    )
+                ),
+                
                 width="100%",
                 max_width=["100%", "90%", "80%", "70%"],
                 height="auto",
+                justify="center"
             ),
             loading(),
         ),
         sign_in_v1(),
     )
-
 
 @rx.page("/pilar2")
 def pilar2():

@@ -31,14 +31,14 @@ def logout_button() -> rx.Component:
                 background_color="white",
                 border="1px solid",
                 box_shadow="0 .25rem .375rem #0003",
-                width="10%",
+                width="8%",
                 height="auto",
                 position="absolute",
                 top="1rem",
                 right="1rem",
                 _hover={"background-color":"red", "color":"white"},
                 flex_direction="column",
-                justify="flex-end"
+                justify="flex-end",
             )
         )
     )
