@@ -4,6 +4,9 @@ from tfg_app.backend.pens import calcular_base_reguladora, calcular_primer_pilar
 
 import datetime
 import reflex as rx
+import torch #type:ignore
+import torch.nn as nn #type:ignore
+from predictions.neural_network import PensionPredictor, preprocess_input, get_recommendations #type:ignore
 
 
 
@@ -113,3 +116,13 @@ async def calcular_pension_3p(data:dict):
     )
 
     return round(pension_tercer_pilar, 2)
+
+async def get_pension_recommendations(data:dict):
+    model = PensionPredictor()
+    model.load_state_dict(torch.load("pension_model.pth"))
+    model.eval()
+    with torch.no_grad():
+        inputs = preprocess_input(data)
+        scores = model(inputs)
+        recommendations = get_recommendations(scores)
+        return recommendations
