@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 from tfg_app.backend.predictions.neural_network import PensionPredictor, preprocess_input
+from torch.nn import MSELoss
 
 def generate_synthetic_data(num_samples: int = 1000) -> list:
     data = []
