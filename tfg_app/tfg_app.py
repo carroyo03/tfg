@@ -6,13 +6,14 @@ from tfg_app.views.pilar2.pilar2form import form2
 from tfg_app.styles import colors
 from tfg_app.styles.fonts import Font
 from tfg_app.backend.main import calcular_pension_1p
-from tfg_app.views.pilar3.pilar3form import form3
+from tfg_app.views.pilar3.pilar3form import form3, Form3State
 from tfg_app.views.results.result import final_results
 from tfg_app.views.pilar1.pilar1results import results_pilar1
 from tfg_app.views.pilar2.pilar2results import results_pilar2
 from tfg_app.styles.styles import Size as size
 from tfg_app.views.login.login_form import AppState,sign_in_v1
 from tfg_app.styles.styles import BASE_STYLE
+from tfg_app.backend.predictions.print_predictions import ResultState
 
 
 def loading():
@@ -663,7 +664,7 @@ def result():
                                 width=["40%", "30%", "20%"],
                                 height="auto",
                                 font_size=["0.9em", "1em", "1.1em"],
-                                # TODO: Añadir on_click para imprimir
+                                on_click=ResultState.generate_pdf(Form3State.form_data),
                             ),
                             width="100%",
                             spacing="2",
@@ -700,7 +701,7 @@ def result():
                             width=["40%", "30%", "20%"],
                             height="auto",
                             font_size=["0.9em", "1em", "1.1em"],
-                            # TODO: Añadir on_click para imprimir
+                            on_click=ResultState.generate_pdf(Form3State.form_data),
                         ),
                         width="100%",
                         margin_top=["-6rem", "-7rem", "-8rem"],

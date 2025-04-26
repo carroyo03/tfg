@@ -1,12 +1,9 @@
-import torch #type:ignore
-import torch.nn as nn #type:ignore
-import numpy as np #type:ignore
-from tfg_app.backend.predictions.neural_network import PensionPredictor, preprocess_input #type:ignore
-from torch.nn import MSELoss #type:ignore
+import torch
+import torch.nn as nn
+import numpy as np
+from tfg_app.backend.predictions.neural_network import PensionPredictor, preprocess_input
 
-
-def generate_synthetic_data(num_samples:int=1000) -> list:
-    
+def generate_synthetic_data(num_samples: int = 1000) -> list:
     data = []
     for _ in range(num_samples):
         sample = {
@@ -22,21 +19,19 @@ def generate_synthetic_data(num_samples:int=1000) -> list:
             'rentabilidad_2': np.random.uniform(1, 5),
             'rentabilidad_3': np.random.uniform(1, 5)
         }
-        # Heuristic recommendation scores
         if all([type(sample.get(key)) in [int, float] for key in ['salario_medio', 'edad_jubilacion_deseada', 'aportacion_empresa', 'aportacion_empleado_3p']]):
-            # Values are already numeric, no need to convert
             scores = [
-                0.8 if sample['aportacion_empresa'] < 2 else 0.2,  # Low 2nd pillar
-                0.7 if sample['aportacion_empleado_3p'] < 1000 else 0.3,  # Low 3rd pillar
-                0.9 if sample['edad_jubilacion_deseada'] < 65 else 0.4,  # Early retirement
-                0.6 if sample['salario_medio'] > 50000 else 0.3  # High salary, tax optimization
+                0.8 if sample['aportacion_empresa'] < 2 else 0.2,
+                0.7 if sample['aportacion_empleado_3p'] < 1000 else 0.3,
+                0.9 if sample['edad_jubilacion_deseada'] < 65 else 0.4,
+                0.6 if sample['salario_medio'] > 50000 else 0.3
             ]
             data.append((sample, scores))
     return data
 
-
 def train_model():
-    model = PensionPredictor()
+    # Instanciamos el modelo con los mismos tamaños que en la definición
+    model = PensionPredictor(input_size=10, hidden_size=64, output_size=4)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     criterion = nn.MSELoss()
     
@@ -46,6 +41,8 @@ def train_model():
         total_loss = 0
         for sample, target in data:
             inputs = preprocess_input(sample)
+            if inputs is None:
+                continue  # Saltar muestras inválidas
             target = torch.tensor(target, dtype=torch.float32)
             
             optimizer.zero_grad()
@@ -54,12 +51,12 @@ def train_model():
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
-        if epoch + 1 % 10 == 0:
-            # Print loss every 10 epochs
+        if (epoch + 1) % 10 == 0:
             print(f"Epoch {epoch + 1}, Loss: {total_loss/len(data)}")
+    
+    # Guardar el modelo
     torch.save(model.state_dict(), "pension_model.pth")
     print("Model trained and saved as pension_model.pth")
-    
+
 if __name__ == "__main__":
     train_model()
-    
