@@ -1,18 +1,19 @@
 import torch #type:ignore
 import torch.nn as nn #type:ignore
 from tfg_app.backend.pens import estimar_tiempo_cotizado #type:ignore
+import datetime #type:ignore
 
 class PensionPredictor(nn.Module):
-    def __init__(self):
+    def __init__(self, input_size: int = 10, hidden_size: int = 64, output_size: int = 4):
         super().__init__()
         self.network = nn.Sequential(
-            nn.Linear(input_size, hidden_size), #input_size = 3, hidden_size = 5
+            nn.Linear(in_features= input_size, out_features = hidden_size), #input_size = 3, hidden_size = 5
             nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(hidden_size, hidden_size//2),
+            nn.Dropout(p = 0.2),
+            nn.Linear(in_features = hidden_size, out_features = hidden_size//2),
             nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(hidden_size//2, output_size), #output_size = 1
+            nn.Dropout(p = 0.2),
+            nn.Linear(in_features = hidden_size//2, out_features = output_size), #output_size = 1
             nn.Sigmoid() # Output scores between 0 and 1
         )
         
@@ -45,6 +46,8 @@ def preprocess_input(data : dict) -> torch.Tensor | None:
     return torch.tensor(features, dtype=torch.float32)
 
 def get_recommendations(scores: torch.Tensor) -> list:
+    
+    scores = scores.flatten()
     
     recommendations = [
         "Deberías aumentar aportaciones al 2º pilar",

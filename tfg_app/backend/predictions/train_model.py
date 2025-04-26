@@ -1,13 +1,15 @@
 import torch #type:ignore
 import torch.nn as nn #type:ignore
 import numpy as np #type:ignore
-from neural_network import PensionPredictor #type:ignore
+from tfg_app.backend.predictions.neural_network import PensionPredictor, preprocess_input #type:ignore
+from torch.nn import MSELoss #type:ignore
+
 
 def generate_synthetic_data(num_samples:int=1000) -> list:
     
     data = []
     for _ in range(num_samples):
-       sample = {
+        sample = {
             'salario_medio': np.random.uniform(20000, 100000),
             'edad_jubilacion_deseada': np.random.randint(60, 70),
             'fecha_nacimiento': '01/01/' + str(2025 - np.random.randint(35, 65)),
@@ -21,13 +23,15 @@ def generate_synthetic_data(num_samples:int=1000) -> list:
             'rentabilidad_3': np.random.uniform(1, 5)
         }
         # Heuristic recommendation scores
-        scores = [
-            0.8 if sample['aportacion_empresa'] < 2 else 0.2,  # Low 2nd pillar
-            0.7 if sample['aportacion_empleado_3p'] < 1000 else 0.3,  # Low 3rd pillar
-            0.9 if sample['edad_jubilacion_deseada'] < 65 else 0.4,  # Early retirement
-            0.6 if sample['salario_medio'] > 50000 else 0.3  # High salary, tax optimization
-        ]
-        data.append((sample, scores))
+        if all([type(sample.get(key)) in [int, float] for key in ['salario_medio', 'edad_jubilacion_deseada', 'aportacion_empresa', 'aportacion_empleado_3p']]):
+            # Values are already numeric, no need to convert
+            scores = [
+                0.8 if sample['aportacion_empresa'] < 2 else 0.2,  # Low 2nd pillar
+                0.7 if sample['aportacion_empleado_3p'] < 1000 else 0.3,  # Low 3rd pillar
+                0.9 if sample['edad_jubilacion_deseada'] < 65 else 0.4,  # Early retirement
+                0.6 if sample['salario_medio'] > 50000 else 0.3  # High salary, tax optimization
+            ]
+            data.append((sample, scores))
     return data
 
 
@@ -50,9 +54,9 @@ def train_model():
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
-        if epoch % 10 == 0:
+        if epoch + 1 % 10 == 0:
             # Print loss every 10 epochs
-            print(f"Epoch {epoch+1}, Loss: {total_loss/len(data)}")
+            print(f"Epoch {epoch + 1}, Loss: {total_loss/len(data)}")
     torch.save(model.state_dict(), "pension_model.pth")
     print("Model trained and saved as pension_model.pth")
     

@@ -6,7 +6,7 @@ import datetime
 import reflex as rx
 import torch #type:ignore
 import torch.nn as nn #type:ignore
-from predictions.neural_network import PensionPredictor, preprocess_input, get_recommendations #type:ignore
+from tfg_app.backend.predictions.neural_network import PensionPredictor, preprocess_input, get_recommendations #type:ignore
 
 
 
