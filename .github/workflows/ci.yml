@@ -10,4 +10,4 @@ jobs:
       - run: pip install --upgrade pip
       - run: pip install uv
       - run: uv pip install -r requirements.txt
-      - run: python -m unittest discover tests
+      - run: python -m unittest discover tfg_app/tests
