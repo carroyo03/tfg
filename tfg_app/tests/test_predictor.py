@@ -139,7 +139,7 @@ class TestSimulator(unittest.TestCase):
                     pdf.showPage()
                     pdf.save()
                     buffer.seek(0)
-                    mock_download = rx.download(str(buffer), filename="Informe Pensión.pdf")
+                    mock_download = rx.download(data=buffer.getvalue(), filename="Informe Pensión.pdf")
                     return mock_download
         
         
