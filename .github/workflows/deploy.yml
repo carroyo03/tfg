@@ -23,6 +23,9 @@ jobs:
           pip install uv
           python -m uv pip install reflex
           python -m uv pip install -r requirements.txt
+      - name: Create .env file from secret
+        run: echo "${{ secrets.REFLEX_ENV_FILE }}" > .env
+          
 
       - name: Deploy to Reflex Cloud
         uses: reflex-dev/reflex-deploy-action@v1
