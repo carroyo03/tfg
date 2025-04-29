@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
-try:
-    from tfg_app.backend.pens import estimar_tiempo_cotizado
-except ImportError:
+from tfg_app.backend.pens import estimar_tiempo_cotizado
+
 
 import datetime
 
