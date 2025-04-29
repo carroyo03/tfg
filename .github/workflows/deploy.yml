@@ -24,9 +24,17 @@ jobs:
           python -m uv pip install reflex
           python -m uv pip install -r requirements.txt
       - name: Create .env file from secret
+        run: echo "${{ secrets.REFLEX_ENV_FILE }}" > .env
+      
+      - name: Build extra args with multiple env variables
+        id: build_env_args
         run: |
-          echo "${{ secrets.REFLEX_ENV_FILE }}" > .env
-          export $(grep -v '^#' .env | xargs)
+          ENV_ARGS=""
+          while IFS='=' read -r key value; do
+            [[ -z "$key" || "$key" =~ ^# ]] && continue
+            ENV_ARGS+="--env $key=$value "
+          done < .env
+          echo "env_args=$ENV_ARGS" >> $GITHUB_OUTPUT
           
 
       - name: Deploy to Reflex Cloud
@@ -34,4 +42,4 @@ jobs:
         with:
           auth_token: ${{ secrets.REFLEX_AUTH_TOKEN }}
           project_id: ${{ secrets.REFLEX_PROJECT_ID }}
-          extra_args: "--env $(cat .env | xargs)"
+          extra_args: "${{ steps.build_env_args.outputs.env_args }}"
