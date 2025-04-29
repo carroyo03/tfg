@@ -1,5 +1,4 @@
-name: Deploy Reflex App
-
+name: Deploy project to Reflex Cloud
 on:
   push:
     branches:
@@ -9,11 +8,23 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+        
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.12"
+
       - name: Install dependencies
-        run:
+        run: |
+          python -m pip cache clean
           python -m pip install --upgrade pip
           pip install uv
-          uv pip install -r requirements.txt
+          python -m uv pip install reflex
+          python -m uv pip install -r requirements.txt
+
       - name: Deploy to Reflex Cloud
         uses: reflex-dev/reflex-deploy-action@v1
         with:
