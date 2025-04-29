@@ -37,8 +37,17 @@ jobs:
           # Comandos para empaquetar el proyecto (depende del servicio específico de AWS)
           zip -r deploy.zip . -x "*.git*"
 
-      - name: Deploy to Elastic Beanstalk
-        run:
-            aws elasticbeanstalk create-application-version --application-name PensionSimulator --version-label "${{github.sha}}" --source-bundle S3Bucket="elasticbeanstalk-us-east-1-862408199680",S3Key="deploy.zip"
-            aws elasticbeanstalk update-environment --environment-name PensionSimulator-env --version-label "${{github.sha}}"
+      - name: Upload package to S3 bucket
+        run: aws s3 cp deploy.zip s3://elasticbeanstalk-us-east-1-862408199680/
+
+      - name: Create new ElasticBeanstalk Application Version
+        run: |
+          aws elasticbeanstalk create-application-version \
+          --application-name PensionSimulator \
+          --source-bundle S3Bucket="elasticbeanstalk-us-east-1-862408199680",S3Key="deploy.zip" \
+          --version-label "${{ github.sha }}" \
+          --description "commit-sha-${{ github.sha }}"
+
+      - name: Deploy new ElasticBeanstalk Application Version
+        run: aws elasticbeanstalk update-environment --environment-name PensionSimulator-env --version-label "${{github.sha}}"
 
