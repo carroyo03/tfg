@@ -30,3 +30,4 @@ jobs:
           auth_token: ${{ secrets.REFLEX_AUTH_TOKEN }}
           project_id: ${{ secrets.REFLEX_PROJECT_ID }}
           python_version: "3.12" 
+          extra_args: "--envfile .env"
