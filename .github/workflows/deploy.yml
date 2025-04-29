@@ -1,4 +1,5 @@
-name: Deploy Reflex to AWS
+name: Deploy Reflex App
+
 on:
   push:
     branches:
@@ -7,51 +8,12 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-        id-token: write
-        contents: read
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-        
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - name: Deploy to Reflex Cloud
+        uses: reflex-dev/reflex-deploy-action@v1
         with:
-          python-version: "3.12"
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-            role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-            aws-region: us-east-1
-      - name: Install dependencies
-        run: |
-          rm -rf /tmp/*
-          rm -rf /var/tmp/*
-          rm -rf /root/.cache/pip
-          python -m pip cache clean
-          python -m pip install --upgrade pip
-          pip install uv
-          python -m uv pip install reflex
-          python -m uv pip install -r requirements.txt
-
-      - name: Build Reflex project
-        run: |
-          reflex init
-          # Comandos para empaquetar el proyecto (depende del servicio específico de AWS)
-          zip -r deploy.zip . -x "*.git*"
-
-      - name: Upload package to S3 bucket
-        run: aws s3 cp deploy.zip s3://elasticbeanstalk-us-east-1-862408199680/
-
-      - name: Create new ElasticBeanstalk Application Version
-        run: |
-          aws elasticbeanstalk create-application-version \
-          --application-name PensionSimulator \
-          --source-bundle S3Bucket="elasticbeanstalk-us-east-1-862408199680",S3Key="deploy.zip" \
-          --version-label "${{ github.sha }}" \
-          --description "commit-sha-${{ github.sha }}"
-
-      - name: Deploy new ElasticBeanstalk Application Version
-        run: aws elasticbeanstalk update-environment --environment-name PensionSimulator-env --version-label "${{github.sha}}"
-
+          auth_token: ${{ secrets.REFLEX_AUTH_TOKEN }}
+          project_id: ${{ secrets.REFLEX_PROJECT_ID }}
+          app_directory: "my-app-folder" # Optional, defaults to root
+          extra_args: "--env THIRD_PARTY_APIKEY=***" # Optional
+          python_version: "3.12" 
