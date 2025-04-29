@@ -24,7 +24,7 @@ jobs:
 
       - name: Build Reflex project
         run: |
-          reflex build
+          reflex init
           # Comandos para empaquetar el proyecto (depende del servicio específico de AWS)
           zip -r deploy.zip . -x "*.git*"
 
