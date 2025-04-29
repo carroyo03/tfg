@@ -1,0 +1,1 @@
+reflex deploy --env .env

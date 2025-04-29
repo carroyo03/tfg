@@ -5,31 +5,36 @@ from tfg_app.backend.pens import RatioSust1, RatioSust2
 from tfg_app.views.pilar1.pilar1form import FormState
 from tfg_app.components.info_button import info_button
 from tfg_app.styles.colors import LegendColor as legcolor
-
 import math
 
-
-
-
 def redondear(numero):
-    return math.ceil(numero*100)/100
+    try:
+        return math.ceil(float(numero)*100)/100
+    except Exception:
+        return 0.0
 
+def safe_float(val, default=0.0):
+    try:
+        if val is None:
+            return default
+        return float(val)
+    except Exception:
+        return default
 
-def show_ratio_pie_chart2(ratio_sust_1,ratio_sust_2) -> rx.Component:
-
-
-    # Prepara los datos del gráfico
+def show_ratio_pie_chart2(ratio_sust_1, ratio_sust_2) -> rx.Component:
+    val1 = redondear(safe_float(ratio_sust_1))
+    val2 = redondear(safe_float(ratio_sust_2))
+    val3 = redondear(100 - val1 - val2)
     data = [
-        {"name": "Pensión pública", "value": redondear(ratio_sust_1), "fill": "#00FF7F"},
-        {"name":"Pensión de empresa","value":redondear(ratio_sust_2),"fill":"#FFA500"},
-        {"name": "Salario", "value": redondear(100 - ratio_sust_1 - ratio_sust_2), "fill": "#D3D3D3"},
+        {"name": "Pensión pública", "value": val1, "fill": "#00FF7F"},
+        {"name": "Pensión de empresa", "value": val2, "fill": "#FFA500"},
+        {"name": "Salario", "value": val3, "fill": "#D3D3D3"},
     ]
-    
     return rx.vstack(
         rx.box(
             rx.hstack(
                 rx.heading("Ratio de Sustitución", size="4", color="black", aria_label="Ratio de Sustitución"),
-                info_button(color="silver",info="El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión."),
+                info_button(color="silver", info="El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión."),
                 spacing="2",
                 align="center"
             ),
@@ -40,7 +45,7 @@ def show_ratio_pie_chart2(ratio_sust_1,ratio_sust_2) -> rx.Component:
                     name_key="name",
                     stroke="0",
                     start_angle=180,
-                    end_angle=180+360,
+                    end_angle=540,
                     inner_radius="60%",
                     active_index=0,
                     aria_label="Gráfico de tarta con el ratio de sustitución",
@@ -53,7 +58,7 @@ def show_ratio_pie_chart2(ratio_sust_1,ratio_sust_2) -> rx.Component:
                 height=225,
                 margin_top="-1em"
             ),
-            rx.text(f"{redondear(ratio_sust_1 + ratio_sust_2)}% de cobertura", color="black", font_size="1.5em", text_align="center",margin="-.5em .05em"),
+            rx.text(f"{redondear(val1 + val2)}% de cobertura", color="black", font_size="1.5em", text_align="center", margin="-.5em .05em"),
             border_radius="md",
             box_shadow="lg",
             background_color="white",
@@ -66,13 +71,14 @@ def show_ratio_pie_chart2(ratio_sust_1,ratio_sust_2) -> rx.Component:
         align_items="center",
         justify_content="center",
         padding="1em 0em",
-
     )
 
-def show_pension_salary_comparison2(pension_primer_pilar:float, pension_segundo_pilar:float,salario_actual:float) -> rx.Component:
-
+def show_pension_salary_comparison2(pension_primer_pilar: float, pension_segundo_pilar: float, salario_actual: float) -> rx.Component:
+    v1 = safe_float(pension_primer_pilar)
+    v2 = safe_float(pension_segundo_pilar)
+    v3 = safe_float(salario_actual)
     data = [
-        {"name": "Comparación", "Pensión pública": pension_primer_pilar, "Pensión de empresa": pension_segundo_pilar, "Salario": salario_actual},
+        {"name": "Comparación", "Pensión pública": v1, "Pensión de empresa": v2, "Salario": v3},
     ]
     return rx.recharts.bar_chart(
         rx.recharts.cartesian_grid(),
@@ -103,39 +109,39 @@ def show_pension_salary_comparison2(pension_primer_pilar:float, pension_segundo_
         height=300,
     )
 
-
-
-
 def results_pilar2() -> rx.Component:
     # Salario
-    salario_actual = FormState.form_data['salario_medio'].to(float)
-    salario_mensual = redondear(salario_actual/12)
+    salario_actual = safe_float(FormState.form_data.get('salario_medio', 0))
+    salario_mensual = redondear(salario_actual / 12) if salario_actual else 0
 
     # 1er pilar
-    pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
+    pension_primer_pilar = safe_float(GlobalState.pension_primer_pilar)
     pension_1p_anual = redondear(pension_primer_pilar) * 12
 
-    if RatioSust1.ratio.to(float) is None | RatioSust1.ratio.to(float) == (pension_primer_pilar / salario_mensual * 100):
-        ratio_sust_1 = RatioSust1.ratio.to(float)
+    ratio_1_val = safe_float(RatioSust1.ratio)
+    if ratio_1_val is None or ratio_1_val == (pension_primer_pilar / salario_mensual * 100 if salario_mensual else 0):
+        ratio_sust_1 = ratio_1_val if ratio_1_val is not None else (pension_primer_pilar / salario_mensual * 100 if salario_mensual else 0)
     else:
-        ratio_sust_1 = (pension_primer_pilar / salario_mensual * 100)
-    
+        ratio_sust_1 = (pension_primer_pilar / salario_mensual * 100) if salario_mensual else 0
 
     # 2o pilar
-    pension_segundo_pilar = GlobalState.pension_segundo_pilar.to(float)
+    pension_segundo_pilar = safe_float(GlobalState.pension_segundo_pilar)
     pension_2p_anual = redondear(pension_segundo_pilar) * 12
-    if RatioSust2.ratio.to(float) is None | RatioSust2.ratio.to(float) == (pension_segundo_pilar / salario_mensual * 100):
-        ratio_sust_2 = RatioSust2.ratio.to(float)
-    else:
-        ratio_sust_2 = (pension_segundo_pilar / salario_mensual * 100)
 
+    ratio_2_val = safe_float(RatioSust2.ratio)
+    if ratio_2_val is None or ratio_2_val == (pension_segundo_pilar / salario_mensual * 100 if salario_mensual else 0):
+        ratio_sust_2 = ratio_2_val if ratio_2_val is not None else (pension_segundo_pilar / salario_mensual * 100 if salario_mensual else 0)
+    else:
+        ratio_sust_2 = (pension_segundo_pilar / salario_mensual * 100) if salario_mensual else 0
+
+    # PRINTS para debug (puedes quitarlos en producción)
     print(f"salario_mensual: {salario_mensual}")
     print(f"pension_mensual: {pension_primer_pilar + pension_segundo_pilar} €/mes")
     print(f"Ratio sustitucion total: {ratio_sust_1} (Ratio 1er pilar) + {ratio_sust_2} (Ratio 2o pilar) = {ratio_sust_1 + ratio_sust_2} %")
 
     ratio_gt_100_component = rx.box(
         rx.vstack(
-            rx.text("El ratio de sustitución es superior al 100%. Esto significa que tu pensión pública es mayor que tu salario medio.", 
+            rx.text("El ratio de sustitución es superior al 100%. Esto significa que tu pensión pública es mayor que tu salario medio.",
                    color="black",
                    text_align="center",
                    width="90%"),
@@ -154,7 +160,7 @@ def results_pilar2() -> rx.Component:
         width="100%",
         display="flex",
         justify_content="center",
-        padding_top= "8em",
+        padding_top="8em",
         padding_bottom="4em"
     )
 
@@ -192,7 +198,7 @@ def results_pilar2() -> rx.Component:
                     width="50%",
                 ),
                 display="flex",
-                flex_direction=["column", "column", "row"],  # Responsive layout
+                flex_direction=["column", "column", "row"],
                 justify="between",
                 width="100%",
                 gap="4",
@@ -215,11 +221,10 @@ def results_pilar2() -> rx.Component:
         justify_content="center",
         margin_bottom="4em",
     )
-    
-    ratio_sustitucion = ratio_sust_1 + ratio_sust_2
+
+    ratio_sustitucion = safe_float(ratio_sust_1) + safe_float(ratio_sust_2)
     return rx.cond(
         ratio_sustitucion > 100,
         ratio_gt_100_component,
         ratio_lte_100_component
     )
-    
