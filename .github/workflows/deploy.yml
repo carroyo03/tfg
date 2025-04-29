@@ -24,7 +24,9 @@ jobs:
           python -m uv pip install reflex
           python -m uv pip install -r requirements.txt
       - name: Create .env file from secret
-        run: echo "${{ secrets.REFLEX_ENV_FILE }}" > .env
+        run: |
+          echo "${{ secrets.REFLEX_ENV_FILE }}" > .env
+          export $(grep -v '^#' .env | xargs)
           
 
       - name: Deploy to Reflex Cloud
@@ -32,4 +34,4 @@ jobs:
         with:
           auth_token: ${{ secrets.REFLEX_AUTH_TOKEN }}
           project_id: ${{ secrets.REFLEX_PROJECT_ID }}
-          extra_args: "--env ${{ secrets.REFLEX_ENV_FILE}}"
+          extra_args: "--env $(cat .env | xargs)"
