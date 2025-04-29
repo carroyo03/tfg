@@ -38,11 +38,6 @@ jobs:
           zip -r deploy.zip . -x "*.git*"
 
       - name: Deploy to Elastic Beanstalk
-        uses: einaregilsson/beanstalk-deploy@v20
-        with:
-          application_name: PensionSimulator
-          environment_name: PensionSimulator-env
-          version_label: "reflex-${{ github.sha }}"
-          region: us-east-1
-          deployment_package: deploy.zip
+        run:
+            aws elasticbeanstalk update-environment --environment-name PensionSimulator-env --version-label "ver-${{github.sha}}"
 
