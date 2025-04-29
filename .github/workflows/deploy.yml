@@ -26,26 +26,15 @@ jobs:
       - name: Create .env file from secret
         run: echo "${{ secrets.REFLEX_ENV_FILE }}" > .env
       
-      - name: Build extra_args with multiple env variables
+      - name: Build extra args with multiple env variables
         id: build_env_args
         run: |
           ENV_ARGS=""
-          while IFS= read -r line; do
-            # Ignorar comentarios y líneas vacías
-            [[ -z "$line" || "$line" =~ ^# ]] && continue
-            
-            key="${line%%=*}"
-            value="${line#*=}"
-      
-            # Remove quotes from the value
-            value_escaped="${value//\"/\\\"}"
-      
-            # Add the key-value pair to the env_args string
-            ENV_ARGS+="--env $key=\"$value_escaped\" "
-            done < .env
-        
-            echo "env_args=$ENV_ARGS" >> $GITHUB_OUTPUT
-      
+          while IFS='=' read -r key value; do
+            [[ -z "$key" || "$key" =~ ^# ]] && continue
+            ENV_ARGS+="--env $key=$value "
+          done < .env
+          echo "env_args=$ENV_ARGS" >> $GITHUB_OUTPUT
           
 
       - name: Deploy to Reflex Cloud
