@@ -39,5 +39,6 @@ jobs:
 
       - name: Deploy to Elastic Beanstalk
         run:
-            aws elasticbeanstalk update-environment --environment-name PensionSimulator-env --version-label "ver-${{github.sha}}"
+            aws elasticbeanstalk create-application-version --application-name PensionSimulator --version-label "${{github.sha}}" --source-bundle S3Bucket="elasticbeanstalk-us-east-1-862408199680",S3Key="deploy.zip"
+            aws elasticbeanstalk update-environment --environment-name PensionSimulator-env --version-label "${{github.sha}}"
 
