@@ -2,14 +2,21 @@ from typing import Optional
 import reflex as rx
 from tfg_app.styles.styles import color
 import os
-from jose import jwk, jwt as jose_jwt
-from authlib.integrations.httpx_client import AsyncOAuth2Client
-import requests
+from jose import jwk, jwt as jose_jwt #type:ignore
+from authlib.integrations.httpx_client import AsyncOAuth2Client #type:ignore
+import requests #type:ignore
 import jwt
 import httpx
 import certifi
-from dotenv import load_dotenv
-load_dotenv()
+from dotenv import load_dotenv, dotenv_values
+
+if os.path.exists('.env') and os.path.exists('production.env'):
+    config = dotenv_values('.env')
+    for key, value in config.items():
+        if value is not None:
+            os.environ[key] = value
+else:
+    load_dotenv()
 
 import logging
 

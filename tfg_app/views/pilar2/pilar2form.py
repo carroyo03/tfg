@@ -31,32 +31,22 @@ class Form2State(rx.State):
     @rx.event
     async def handle_submit(self, form_data: dict):
         try:
-            prev_form_state = await self.get_state(FormState)
+            global_state = await self.get_state(GlobalState)
+            prev_form_data = global_state.form_data_primer_pilar if hasattr(global_state, 'form_data_primer_pilar') else {}
 
-            print(f"Hay fecha?: {hasattr(prev_form_state.stored_form_data, 'fecha_nacimiento')}")
             
             # Convertir fecha_nacimiento a string
-            fecha_nacimiento = prev_form_state.stored_form_data['fecha_nacimiento'].strftime("%d/%m/%Y")  # Convertir a string
+            prev_form_data['fecha_nacimiento'] = prev_form_data['fecha_nacimiento'].strftime("%d/%m/%Y")  if isinstance(prev_form_data['fecha_nacimiento'], datetime.datetime) else prev_form_data['fecha_nacimiento']
             
             # Asegurarse de que n_hijos tenga un valor válido
-            n_hijos = str(prev_form_state.stored_form_data.get('n_hijos', '0'))  # Usar '0' si es None
+            if prev_form_data['tiene_hijos'].lower().startswith('s'):
+                prev_form_data['n_hijos'] = str(prev_form_data.get('n_hijos'))
             
             # Asegurarse de que edad_jubilacion sea una cadena
-            edad_jubilacion = str(prev_form_state.stored_form_data['edad_jubilacion_deseada'])  # Convertir a string
+            prev_form_data['edad_jubilacion_deseada'] = str(prev_form_data['edad_jubilacion_deseada']) 
             
             # Crear el nuevo diccionario con los datos requeridos
-            self.form_data['prev_form'] = {
-                'fecha_nacimiento': fecha_nacimiento,
-                'tiene_hijos': prev_form_state.stored_form_data['tiene_hijos'],
-                'n_hijos': n_hijos,
-                'edad_jubilacion_deseada': edad_jubilacion,  # Asegúrate de que este campo esté presente
-                'gender': prev_form_state.stored_form_data['gender'],
-                'salario_medio': prev_form_state.stored_form_data['salario_medio'],
-                'edad_inicio_trabajo': prev_form_state.stored_form_data['edad_inicio_trabajo'],
-                'r_cotizacion': prev_form_state.stored_form_data['r_cotizacion'],
-                'lagunas_cotizacion': prev_form_state.stored_form_data.get('lagunas_cotizacion', ''),  # Asegúrate de que este campo esté presente
-                'n_lagunas': prev_form_state.stored_form_data.get('n_lagunas', 0)  # Asegúrate de que este campo esté presente
-            }
+            self.form_data['prev_form'] = prev_form_data
             
             # Asegúrate de que aportacion_empleado esté presente
             self.form_data['aportacion_empleado'] = form_data.get('aportacion_empleado', 0)  # Usar 0 si no está presente
@@ -66,8 +56,7 @@ class Form2State(rx.State):
             pension = await self.send_data_to_backend(self.form_data)
             ratio_state = await self.get_state(RatioSust2)
             ratio_state.calcular_ratio(salario=prev_form_state.salario_mensual, pension=pension)
-            state = await self.get_state(GlobalState)
-            state.set_pension("segundo",pension)
+            global_state.set_pension("segundo",pension)
             return rx.redirect("/pilar2")
         except Exception as e:
             logging.error(f"Error en handle_submit: {e}")

@@ -12,7 +12,7 @@ class RatioSustitucion(rx.State):
     ratio: float = 0.0
 
     @rx.event
-    def calcular_ratio(self, salario:float, pension:float)-> float:
+    def calcular_ratio(self, salario:float, pension:float):
         """
         Método para calcular el ratio de sustitución.
         Este método debe ser implementado en las subclases.
@@ -25,7 +25,7 @@ class RatioSust1(RatioSustitucion):
     type: str = "1er Pilar"
 
     @rx.event
-    def calcular_ratio(self, salario:float, pension:float)-> float:
+    def calcular_ratio(self, salario:float, pension:float):
         print(f"Salario: {salario}, Pension: {pension}")
         self.ratio = float(pension / salario) * 100
         print(f"Ratio 1er Pilar: {self.ratio}")
@@ -35,7 +35,7 @@ class RatioSust2(RatioSustitucion):
     type: str = "2o Pilar"
 
     @rx.event
-    def calcular_ratio(self, salario:float, pension:float)-> float:
+    def calcular_ratio(self, salario:float, pension:float):
         print(f"Salario: {salario}, Pension: {pension}")
         self.ratio = float(pension / salario) * 100
         print(f"Ratio 2o Pilar: {self.ratio}")
@@ -43,7 +43,7 @@ class RatioSust3(RatioSustitucion):
     type: str = "3er Pilar"
     
     @rx.event
-    def calcular_ratio(self, salario:float, pension:float)-> float:
+    def calcular_ratio(self, salario:float, pension:float):
         print(f"Salario: {salario}, Pension: {pension}")
         self.ratio = float(pension / salario) * 100
         print(f"Ratio 3er Pilar: {self.ratio}")

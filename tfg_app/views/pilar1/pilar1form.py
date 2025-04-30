@@ -149,6 +149,7 @@ class FormState(rx.State):
             ratio_state.calcular_ratio(salario=self.salario_mensual, pension=pension)
             print(f"1st ratio: {ratio_state.ratio}")
             state = await self.get_state(GlobalState)
+            state.set_form_data("primer", self.form_data)
             state.set_pension("primer",pension)
             return rx.redirect("/pilar1")
         except Exception as e:
@@ -245,7 +246,7 @@ class FormState(rx.State):
                 return
 
             logging.info("Datos filtrados: %s", form_data)
-            pension = await calcular_pension_1p(form_data)
+            pension = calcular_pension_1p(form_data)
             self.form_data = form_data
             logging.info(f"Pensión calculada: {pension}")
             return pension

@@ -111,28 +111,20 @@ def show_pension_salary_comparison2(pension_primer_pilar: float, pension_segundo
 
 def results_pilar2() -> rx.Component:
     # Salario
-    salario_actual = safe_float(FormState.form_data.get('salario_medio', 0))
-    salario_mensual = redondear(salario_actual / 12) if salario_actual else 0
+    salario_mensual = safe_float(FormState.form_data.get('salario_medio', 0)) / 12 if FormState.form_data.get('salario_medio') is not None else 0
 
     # 1er pilar
     pension_primer_pilar = safe_float(GlobalState.pension_primer_pilar)
     pension_1p_anual = redondear(pension_primer_pilar) * 12
 
-    ratio_1_val = safe_float(RatioSust1.ratio)
-    if ratio_1_val is None or ratio_1_val == (pension_primer_pilar / salario_mensual * 100 if salario_mensual else 0):
-        ratio_sust_1 = ratio_1_val if ratio_1_val is not None else (pension_primer_pilar / salario_mensual * 100 if salario_mensual else 0)
-    else:
-        ratio_sust_1 = (pension_primer_pilar / salario_mensual * 100) if salario_mensual else 0
+    ratio_sust_1 = safe_float(RatioSust1.ratio) if RatioSust1.ratio is not None else \
+        (pension_primer_pilar / salario_mensual * 100 if salario_mensual else 0)
 
     # 2o pilar
     pension_segundo_pilar = safe_float(GlobalState.pension_segundo_pilar)
     pension_2p_anual = redondear(pension_segundo_pilar) * 12
 
-    ratio_2_val = safe_float(RatioSust2.ratio)
-    if ratio_2_val is None or ratio_2_val == (pension_segundo_pilar / salario_mensual * 100 if salario_mensual else 0):
-        ratio_sust_2 = ratio_2_val if ratio_2_val is not None else (pension_segundo_pilar / salario_mensual * 100 if salario_mensual else 0)
-    else:
-        ratio_sust_2 = (pension_segundo_pilar / salario_mensual * 100) if salario_mensual else 0
+    ratio_sust_2 = safe_float(RatioSust2.ratio) if RatioSust2.ratio is not None else (pension_segundo_pilar / salario_mensual * 100 if salario_mensual else 0)
 
     # PRINTS para debug (puedes quitarlos en producción)
     print(f"salario_mensual: {salario_mensual}")
@@ -191,7 +183,7 @@ def results_pilar2() -> rx.Component:
                     ),
                     rx.hstack(
                         rx.heading("Salario anual:", size="4", color="black"),
-                        rx.text(f"{salario_actual:.2f} €/año", color="black"),
+                        rx.text(f"{(salario_mensual * 12):.2f} €/año", color="black"),
                         spacing="1",
                         width="100%",
                     ),

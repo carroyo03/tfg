@@ -22,3 +22,9 @@ class GlobalState(rx.State):
                 return round(value.to(float), 2)
         else:
             raise ValueError("El pilar debe ser 'primer', 'segundo' o 'tercer'.")
+    
+    def set_form_data(self, n_pilar: str, form_data: dict):
+        if n_pilar in ("primer", "segundo", "tercer"):
+            setattr(self, f"form_data_{n_pilar}_pilar", form_data)
+        else:
+            raise ValueError("El pilar debe ser 'primer', 'segundo' o 'tercer'.")

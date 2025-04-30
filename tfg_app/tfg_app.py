@@ -5,7 +5,7 @@ from tfg_app.views.pilar1.pilar1form import form1
 from tfg_app.views.pilar2.pilar2form import form2
 from tfg_app.styles import colors
 from tfg_app.styles.fonts import Font
-from tfg_app.backend.main import calcular_pension_1p
+from tfg_app.backend.main import fastapi_app
 from tfg_app.views.pilar3.pilar3form import form3, Form3State
 from tfg_app.views.results.result import final_results
 from tfg_app.views.pilar1.pilar1results import results_pilar1
@@ -14,6 +14,7 @@ from tfg_app.styles.styles import Size as size
 from tfg_app.views.login.login_form import AppState,sign_in_v1
 from tfg_app.styles.styles import BASE_STYLE
 from tfg_app.backend.predictions.print_predictions import ResultState
+
 
 
 def loading():
@@ -393,112 +394,120 @@ def form_pilar2():
 
 @rx.page("/pilar2")
 def pilar2():
-    return rx.vstack(
+    return rx.cond(
+        AppState.signed_in | AppState.guest,
         rx.cond(
-            AppState.signed_in,
-            logout_button(),
-        ),
-        rx.box(
-            rx.heading(
-                "Cálculo de pensión pública y de empresa",
-                color="white",
-                font_family=Font.TITLE.value,
-                font_size=rx.breakpoints(initial="1.5em", sm="2em", md="2.5em"),  # Responsive font size
-                font_weight="bold",
-                text_align="center",
-                width="100%",
-                padding_top=["1.5rem", "2rem", "3rem"],
-            ),
-            width="100%",
-            position="sticky",
-            top="0",
-            z_index="1",
-            background_color="rgba(0, 51, 141, 0.9)",
-            backdrop_filter="blur(5px)",
-        ),
-        rx.box(
-            results_pilar2(),
-            width="100%",
-            max_width=["100%", "90%", "85%", "800px"],
-            margin="0 auto",
-            margin_top=["-2.3rem", "-3.3rem", "-4.3rem"],
-            margin_bottom="1.5rem",
-            padding_x=["0.5rem", "0.8rem", "1rem"],
-        ),
-        rx.mobile_only(
-            rx.box(
-                rx.center(
-                    rx.button(
-                        "Atrás",
-                        on_click=rx.redirect("/form2"),
+            rx.State.is_hydrated,
+            rx.vstack(
+                rx.cond(
+                    AppState.signed_in,
+                    logout_button(),
+                ),
+                rx.box(
+                    rx.heading(
+                        "Cálculo de pensión pública y de empresa",
                         color="white",
-                        background_color="transparent",
-                        border="1px solid",
-                        box_shadow="0 .25rem .375rem #0003",
-                        width=["40%", "30%", "20%"],
-                        height="auto",
-                        font_size=["0.9em", "1em", "1.1em"],
-                    ),
-                    rx.button(
-                        "Siguiente",
-                        on_click=rx.redirect("/form3"),
-                        background_color="white",
-                        color=colors.Color.BACKGROUND.value,
-                        border="1px solid",
-                        box_shadow="0 .25rem .375rem #0003",
-                        width=["40%", "30%", "20%"],
-                        height="auto",
-                        font_size=["0.9em", "1em", "1.1em"],
+                        font_family=Font.TITLE.value,
+                        font_size=rx.breakpoints(initial="1.5em", sm="2em", md="2.5em"),  # Responsive font size
+                        font_weight="bold",
+                        text_align="center",
+                        width="100%",
+                        padding_top=["1.5rem", "2rem", "3rem"],
                     ),
                     width="100%",
-                    spacing="2",
-                    align="center",
-                    justify="center",
+                    position="sticky",
+                    top="0",
+                    z_index="1",
+                    background_color="rgba(0, 51, 141, 0.9)",
+                    backdrop_filter="blur(5px)",
                 ),
-                position="sticky",
-                bottom="0",
+                rx.box(
+                    results_pilar2(),
+                    width="100%",
+                    max_width=["100%", "90%", "85%", "800px"],
+                    margin="0 auto",
+                    margin_top=["-2.3rem", "-3.3rem", "-4.3rem"],
+                    margin_bottom="1.5rem",
+                    padding_x=["0.5rem", "0.8rem", "1rem"],
+                ),
+                rx.mobile_only(
+                    rx.box(
+                        rx.center(
+                            rx.button(
+                                "Atrás",
+                                on_click=rx.redirect("/form2"),
+                                color="white",
+                                background_color="transparent",
+                                border="1px solid",
+                                box_shadow="0 .25rem .375rem #0003",
+                                width=["40%", "30%", "20%"],
+                                height="auto",
+                                font_size=["0.9em", "1em", "1.1em"],
+                            ),
+                            rx.button(
+                                "Siguiente",
+                                on_click=rx.redirect("/form3"),
+                                background_color="white",
+                                color=colors.Color.BACKGROUND.value,
+                                border="1px solid",
+                                box_shadow="0 .25rem .375rem #0003",
+                                width=["40%", "30%", "20%"],
+                                height="auto",
+                                font_size=["0.9em", "1em", "1.1em"],
+                            ),
+                            width="100%",
+                            spacing="2",
+                            align="center",
+                            justify="center",
+                        ),
+                        position="sticky",
+                        bottom="0",
+                        width="100%",
+                        background_color="rgba(0, 51, 141, 0.9)",
+                        padding_y="1rem",
+                        z_index="10",
+                    ),
+                ),
+                rx.tablet_and_desktop(
+                    rx.center(
+                        rx.button(
+                            "Atrás",
+                            on_click=rx.redirect("/form2"),
+                            color="white",
+                            background_color="transparent",
+                            border="1px solid",
+                            box_shadow="0 .25rem .375rem #0003",
+                            width=["40%", "30%", "20%"],
+                            height="auto",
+                            font_size=["0.9em", "1em", "1.1em"],
+                        ),
+                        rx.button(
+                            "Siguiente",
+                            on_click=rx.redirect("/form3"),
+                            background_color="white",
+                            color=colors.Color.BACKGROUND.value,
+                            border="1px solid",
+                            box_shadow="0 .25rem .375rem #0003",
+                            width=["40%", "30%", "20%"],
+                            height="auto",
+                            font_size=["0.9em", "1em", "1.1em"],
+                        ),
+                        width="100%",
+                        margin_top=["-5rem", "-6rem", "-7rem"],
+                        spacing="2",
+                        align="center",
+                        justify="center",
+                    ),
+                ),
                 width="100%",
-                background_color="rgba(0, 51, 141, 0.9)",
-                padding_y="1rem",
-                z_index="10",
+                min_height=["auto", "80vh", "100vh"],
+                spacing="0",
+                align_items="stretch",
+                background_color="#00338D",
             ),
+            loading(),
         ),
-        rx.tablet_and_desktop(
-            rx.center(
-                rx.button(
-                    "Atrás",
-                    on_click=rx.redirect("/form2"),
-                    color="white",
-                    background_color="transparent",
-                    border="1px solid",
-                    box_shadow="0 .25rem .375rem #0003",
-                    width=["40%", "30%", "20%"],
-                    height="auto",
-                    font_size=["0.9em", "1em", "1.1em"],
-                ),
-                rx.button(
-                    "Siguiente",
-                    on_click=rx.redirect("/form3"),
-                    background_color="white",
-                    color=colors.Color.BACKGROUND.value,
-                    border="1px solid",
-                    box_shadow="0 .25rem .375rem #0003",
-                    width=["40%", "30%", "20%"],
-                    height="auto",
-                    font_size=["0.9em", "1em", "1.1em"],
-                ),
-                width="100%",
-                margin_top=["-5rem", "-6rem", "-7rem"],
-                spacing="2",
-                align="center",
-                justify="center",
-            ),
-        ),
-        width="100%",
-        min_height=["auto", "80vh", "100vh"],
-        spacing="0",
-        align_items="stretch",
-        background_color="#00338D",
+    sign_in_v1()
     )
 
 
@@ -728,7 +737,7 @@ app.add_page(authorize)
 app.add_page(logout)
 #app.add_page(check_email)
 app.add_page(form_pilar1, on_load=AppState.check_session("/"))
-app.api.add_api_route("/calcular_pension/", calcular_pension_1p, methods=["POST"])
+app.api_transformer = fastapi_app
 app.add_page(pilar1,on_load=AppState.check_session("/pilar1"))
 app.add_page(form_pilar2,on_load=AppState.check_session("/form2"))
 app.add_page(pilar2,on_load=AppState.check_session("/pilar2"))

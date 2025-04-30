@@ -7,7 +7,9 @@ import reflex as rx
 import torch #type:ignore
 import torch.nn as nn #type:ignore
 from tfg_app.backend.predictions.neural_network import PensionPredictor, preprocess_input, get_recommendations #type:ignore
+from fastapi import FastAPI, Request
 
+fastapi_app = FastAPI()
 
 
 class FormData(BaseModel):
@@ -41,7 +43,10 @@ def calcular_edad(fecha_nacimiento):
 def annos_por_trabajar(edad_actual,edad_jubilacion_deseada):
     return int(edad_jubilacion_deseada - edad_actual)
 
-async def calcular_pension_1p(data: dict):
+@fastapi_app.post("/calcular_pension")
+async def calcular_pension_1p(request: Request):
+    
+    data = request
     # Accept dictionary input instead of FormData
     # Convert dictionary to FormData if needed
     if not isinstance(data, dict):
@@ -86,7 +91,7 @@ async def calcular_pension_1p(data: dict):
     
     print(f"Pensión primer pilar: {pension_primer_pilar}")
 
-    return round(pension_primer_pilar,2)
+    return round(pension_primer_pilar, 2)
 
 async def calcular_pension_2p(data: dict):
     # Convertir el diccionario a una instancia de FormData2
