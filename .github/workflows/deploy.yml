@@ -10,7 +10,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest # Use the latest Ubuntu runner
     steps:
-      - name: Deploy to Reflex Cloud
+      - name: Deploy to Reflex Cloud # Checkout code
         uses: reflex-dev/reflex-deploy-action@v1
         with:
           auth_token: ${{ secrets.REFLEX_AUTH_TOKEN }}
