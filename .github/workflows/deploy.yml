@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Use the latest Ubuntu runner
     steps:
       - name: Deploy to Reflex Cloud
         uses: reflex-dev/reflex-deploy-action@v1
