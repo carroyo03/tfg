@@ -10,7 +10,15 @@ jobs:
   deploy:
     runs-on: ubuntu-latest # Use the latest Ubuntu runner
     steps:
-      - name: Deploy to Reflex Cloud # Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Debug env file
+        run: |
+          echo "Contenido del archivo production.env:"
+          cat production.env
+
+      - name: Deploy to Reflex Cloud
         uses: reflex-dev/reflex-deploy-action@v1
         with:
           auth_token: ${{ secrets.REFLEX_AUTH_TOKEN }}
