@@ -10,18 +10,20 @@ jobs:
   deploy:
     runs-on: ubuntu-latest # Use the latest Ubuntu runner
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Debug env file
-        run: |
-          echo "Contenido del archivo production.env:"
-          cat production.env
 
       - name: Deploy to Reflex Cloud
         uses: reflex-dev/reflex-deploy-action@v1
+        env:
+          COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+          COGNITO_CLIENT_SECRET: ${{ secrets.COGNITO_CLIENT_SECRET }}
+          COGNITO_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}
+          COGNITO_LOGOUT_URI: ${{ secrets.COGNITO_LOGOUT_URI }}
+          COGNITO_REDIRECT_URI: ${{ secrets.COGNITO_REDIRECT_URI }}
+          COGNITO_REGION: ${{ secrets.COGNITO_REGION }}
+          COGNITO_RESPONSE_TYPE: ${{ secrets.COGNITO_RESPONSE_TYPE }}
+          COGNITO_SCOPE: ${{ secrets.COGNITO_SCOPE }}
+          COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
         with:
           auth_token: ${{ secrets.REFLEX_AUTH_TOKEN }}
           project_id: ${{ secrets.REFLEX_PROJECT_ID }}
-          extra_args: "--env production.env"
 
