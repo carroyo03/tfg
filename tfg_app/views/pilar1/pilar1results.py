@@ -106,11 +106,11 @@ def show_pension_salary_comparison(pension_primer_pilar:float, salario_actual:fl
 
 
 def results_pilar1(direction:str="") -> rx.Component:
-    pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
+    pension_primer_pilar = GlobalState.pension_primer_pilar.to(float) if GlobalState.pension_primer_pilar is not None else 0.0
     pension_1p_anual = pension_primer_pilar * 12
     form_data_1 = GlobalState.form_data_primer_pilar
 
-    salario_actual = form_data_1.salario_medio.to(float)
+    salario_actual = form_data_1.salario_medio.to(float) if form_data_1.salario_medio is not None else 0.0
     salario_mensual = salario_actual / 12
     ratio_sustitucion = RatioSust1.ratio
 
@@ -141,7 +141,10 @@ def results_pilar1(direction:str="") -> rx.Component:
         padding_bottom=rx.breakpoints(initial="1em", md="4em"),
     )
 
-    ratio_lte_100_component = rx.box(
+    ratio_lte_100_component = rx.cond(
+        any(x is None for x in [pension_primer_pilar, pension_1p_anual, salario_mensual, salario_actual]),
+        rx.text("Data not available", color="red", font_size="1.2em", text_align="center"),
+        rx.box(
         rx.vstack(
             rx.flex(
                 rx.vstack(
@@ -198,6 +201,7 @@ def results_pilar1(direction:str="") -> rx.Component:
         justify_content="center",
         margin_bottom="15%",
     )
+                                      )
 
     return rx.cond(
         ratio_sustitucion > 100,
