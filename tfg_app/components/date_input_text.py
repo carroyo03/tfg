@@ -19,7 +19,13 @@ class DateState(rx.State):
 
     @rx.var
     def invalid_value(self) -> bool:
-        return self.day == "" or self.month == "" or self.year == "" or datetime.datetime.strptime(self.date, "%d/%m/%Y") is None
+        if self.day == "" or self.month == "" or self.year == "":
+            return True
+        try:
+            datetime.datetime.strptime(self.date, "%d/%m/%Y")
+            return False
+        except (ValueError, TypeError):
+            return True
 
 
     def update_date(self):
