@@ -10,31 +10,31 @@ def elem_leyenda(color:str,text:str):
     )
 
 
-def leyenda1():
+def leyenda1(pension_is_gt_salary:bool=False):
     return rx.card(
                     rx.text("Leyenda:", color="black",font_size="1em", font_weight="bold", margin_bottom=".1em"),
                     elem_leyenda(legcolor.LEGEND_1.value,"Pensión pública"),
-                    elem_leyenda(legcolor.LEGEND_2.value,"Salario por cubrir"),
+                    elem_leyenda(legcolor.LEGEND_2.value,"Salario por cubrir" if not pension_is_gt_salary else 'Salario'),
                     width="100%",
                     margin_top=".01%"
                 )
-def leyenda2():
+def leyenda2(pension_is_gt_salary:bool=False):
     return rx.card(
                     rx.text("Leyenda:", color="black",font_size="1em", font_weight="bold", margin_bottom=".1em"),
                     elem_leyenda(legcolor.LEGEND_1.value,"Pensión pública"),
                     elem_leyenda(legcolor.LEGEND_1_1.value,"Pensión de empresa"),
-                    elem_leyenda(legcolor.LEGEND_2.value,"Salario por cubrir"),
+                    elem_leyenda(legcolor.LEGEND_2.value,"Salario por cubrir"  if not pension_is_gt_salary else 'Salario'),
                     width="100%",
                     margin_top=".01%"
                 )
 
-def leyenda3():
+def leyenda3(pension_is_gt_salary:bool=False):
     return rx.card(
                     rx.text("Leyenda:", color="black",font_size="1em", font_weight="bold", margin_bottom=".1em"),
                     elem_leyenda(legcolor.LEGEND_1.value,"Pensión pública"),
                     elem_leyenda(legcolor.LEGEND_1_1.value,"Pensión de empresa"),
                     elem_leyenda(legcolor.LEGEND_1_2.value,"Pensión privada"),
-                    elem_leyenda(legcolor.LEGEND_2.value,"Salario por cubrir"),
+                    elem_leyenda(legcolor.LEGEND_2.value,"Salario por cubrir"  if not pension_is_gt_salary else 'Salario'),
                     width="100%",
                     margin_top=".01%"
                 )

@@ -246,7 +246,7 @@ class FormState(rx.State):
                 return
 
             logging.info("Datos filtrados: %s", form_data)
-            pension = calcular_pension_1p(form_data)
+            pension = await calcular_pension_1p(form_data)
             self.form_data = form_data
             logging.info(f"Pensión calculada: {pension}")
             return pension
@@ -275,7 +275,7 @@ def form1():
             # Botones con position: sticky
             rx.stack(
                 rx.button(
-                        "Limpiar formulario",
+                        "Limpiar",
                         type="reset",
                         background_color=color.BACKGROUND.value,
                         color="white",

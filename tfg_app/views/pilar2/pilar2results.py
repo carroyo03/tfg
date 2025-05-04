@@ -1,4 +1,4 @@
-import reflex as rx
+import reflex as rx #type:ignore
 from tfg_app.components.leyenda import leyenda2
 from tfg_app.global_state import GlobalState
 from tfg_app.backend.pens import RatioSust1, RatioSust2
@@ -13,22 +13,16 @@ def redondear(numero):
     except Exception:
         return 0.0
 
-def safe_float(val, default=0.0):
-    try:
-        if val is None:
-            return default
-        return float(val)
-    except Exception:
-        return default
+
 
 def show_ratio_pie_chart2(ratio_sust_1, ratio_sust_2) -> rx.Component:
-    val1 = redondear(safe_float(ratio_sust_1))
-    val2 = redondear(safe_float(ratio_sust_2))
-    val3 = redondear(100 - val1 - val2)
+    val1 = ratio_sust_1
+    val2 = ratio_sust_2
+    val3 = 100 - val1 - val2
     data = [
-        {"name": "Pensión pública", "value": val1, "fill": "#00FF7F"},
-        {"name": "Pensión de empresa", "value": val2, "fill": "#FFA500"},
-        {"name": "Salario", "value": val3, "fill": "#D3D3D3"},
+        {"name": "Pensión pública", "value": round(val1,2), "fill": "#00FF7F"},
+        {"name": "Pensión de empresa", "value": round(val2,2), "fill": "#FFA500"},
+        {"name": "Salario", "value": round(val3,2), "fill": "#D3D3D3"},
     ]
     return rx.vstack(
         rx.box(
@@ -58,7 +52,7 @@ def show_ratio_pie_chart2(ratio_sust_1, ratio_sust_2) -> rx.Component:
                 height=225,
                 margin_top="-1em"
             ),
-            rx.text(f"{redondear(val1 + val2)}% de cobertura", color="black", font_size="1.5em", text_align="center", margin="-.5em .05em"),
+            rx.text(f"{(val1 + val2):.2f}% de cobertura", color="black", font_size="1.5em", text_align="center", margin="-.5em .05em"),
             border_radius="md",
             box_shadow="lg",
             background_color="white",
@@ -74,9 +68,9 @@ def show_ratio_pie_chart2(ratio_sust_1, ratio_sust_2) -> rx.Component:
     )
 
 def show_pension_salary_comparison2(pension_primer_pilar: float, pension_segundo_pilar: float, salario_actual: float) -> rx.Component:
-    v1 = safe_float(pension_primer_pilar)
-    v2 = safe_float(pension_segundo_pilar)
-    v3 = safe_float(salario_actual)
+    v1 = pension_primer_pilar
+    v2 = pension_segundo_pilar
+    v3 = salario_actual
     data = [
         {"name": "Comparación", "Pensión pública": v1, "Pensión de empresa": v2, "Salario": v3},
     ]
@@ -110,25 +104,39 @@ def show_pension_salary_comparison2(pension_primer_pilar: float, pension_segundo
     )
 
 def results_pilar2() -> rx.Component:
-    # Salario
-    salario_mensual = safe_float(FormState.form_data.get('salario_medio', 0)) / 12 if FormState.form_data.get('salario_medio') is not None else 0
+    # Obtener datos del estado global
+    global_state = GlobalState
+    
+    # Obtener datos del primer pilar
+    form_data_1 = global_state.form_data_primer_pilar
+    print(f"Form data 1: {form_data_1.to(dict)}")
+    
+    # Verificar que los datos existen
+    if form_data_1 is None | form_data_1["salario_medio"] is None | form_data_1['salario_medio'] == 0:
+        print("Error: No se encontraron datos del primer pilar o falta el salario medio")
+        salario_anual = 0.0
+    else:
+        print(f"Salario anual obtenido: {form_data_1.salario_medio}")
+    
+    salario_mensual = form_data_1.salario_medio.to(float) / 12
 
-    # 1er pilar
-    pension_primer_pilar = safe_float(GlobalState.pension_primer_pilar)
-    pension_1p_anual = redondear(pension_primer_pilar) * 12
 
-    ratio_sust_1 = safe_float(RatioSust1.ratio) if RatioSust1.ratio is not None else \
-        (pension_primer_pilar / salario_mensual * 100 if salario_mensual else 0)
+    pension_primer_pilar = global_state.pension_primer_pilar.to(float)
 
-    # 2o pilar
-    pension_segundo_pilar = safe_float(GlobalState.pension_segundo_pilar)
-    pension_2p_anual = redondear(pension_segundo_pilar) * 12
 
-    ratio_sust_2 = safe_float(RatioSust2.ratio) if RatioSust2.ratio is not None else (pension_segundo_pilar / salario_mensual * 100 if salario_mensual else 0)
 
+    ratio_sust_1 = pension_primer_pilar / salario_mensual * 100
+
+
+    pension_segundo_pilar = global_state.pension_segundo_pilar.to(float)
+
+
+
+    ratio_sust_2 = pension_segundo_pilar / salario_mensual * 100
+    
     # PRINTS para debug (puedes quitarlos en producción)
     print(f"salario_mensual: {salario_mensual}")
-    print(f"pension_mensual: {pension_primer_pilar + pension_segundo_pilar} €/mes")
+    print(f"pension_mensual: {(pension_primer_pilar + pension_segundo_pilar)} €/mes")
     print(f"Ratio sustitucion total: {ratio_sust_1} (Ratio 1er pilar) + {ratio_sust_2} (Ratio 2o pilar) = {ratio_sust_1 + ratio_sust_2} %")
 
     ratio_gt_100_component = rx.box(
@@ -138,7 +146,7 @@ def results_pilar2() -> rx.Component:
                    text_align="center",
                    width="90%"),
             show_pension_salary_comparison2(pension_primer_pilar, pension_segundo_pilar, salario_mensual),
-            leyenda2(),
+            leyenda2(pension_is_gt_salary=True),
             width="100%",
             spacing="5",
             align_items="center",
@@ -168,11 +176,11 @@ def results_pilar2() -> rx.Component:
                     ),
                     rx.hstack(
                         rx.heading("Pensión anual:", size="4", color="black"),
-                        rx.text(f"{(pension_1p_anual + pension_2p_anual):.2f} €/año", color="black"),
+                        rx.text(f"{(12*(pension_primer_pilar + pension_segundo_pilar)):.2f} €/año", color="black"),
                         spacing="1",
                         width="100%",
                     ),
-                    width="50%",
+                    width="100%",
                 ),
                 rx.vstack(
                     rx.hstack(
@@ -187,25 +195,24 @@ def results_pilar2() -> rx.Component:
                         spacing="1",
                         width="100%",
                     ),
-                    width="50%",
+                    width="100%",
                 ),
-                display="flex",
-                flex_direction=["column", "column", "row"],
-                justify="between",
+                direction=rx.breakpoints(initial="column", md="row"),
+                justify_content="space-around",
                 width="100%",
-                gap="4",
+                spacing='2',
             ),
             show_ratio_pie_chart2(ratio_sust_1, ratio_sust_2),
             leyenda2(),
             align_items="center",
             justify_content="center",
-            padding="2em",
+            padding=rx.breakpoints(initial="1em", sm="2em"),
             border_radius="md",
             box_shadow="lg",
             background_color="white",
-            width="90%",
+            width="100%",
             max_width="1200px",
-            margin="2em auto",
+            #margin="2em auto",
             spacing="4",
         ),
         width="100%",
@@ -214,7 +221,7 @@ def results_pilar2() -> rx.Component:
         margin_bottom="4em",
     )
 
-    ratio_sustitucion = safe_float(ratio_sust_1) + safe_float(ratio_sust_2)
+    ratio_sustitucion = ratio_sust_1 + ratio_sust_2
     return rx.cond(
         ratio_sustitucion > 100,
         ratio_gt_100_component,

@@ -154,7 +154,7 @@ def final_results() -> rx.Component:
                    text_align="center",
                    width="90%"),
             show_pension_salary_comparison3(pension_primer_pilar, pension_segundo_pilar, pension_tercer_pilar, salario_mensual),
-            leyenda3(),
+            leyenda3(pension_is_gt_salary=True),
             width="100%",
             spacing="5",
             align_items="center",
@@ -215,7 +215,7 @@ def final_results() -> rx.Component:
             leyenda3(),
             align_items="center",
             justify_content="center",
-            padding="2em",
+            padding="1.5em",
             border_radius="md",
             box_shadow="lg",
             background_color="white",
@@ -227,7 +227,7 @@ def final_results() -> rx.Component:
         width="100%",
         display="flex",
         justify_content="center",
-        margin_bottom="4em",
+        margin_bottom=rx.breakpoints(initial='4em', sm='5em',md='6em',lg='7em'),
     )
 
     ratio_sustitucion = ratio_sust_1 + ratio_sust_2 + ratio_sust_3

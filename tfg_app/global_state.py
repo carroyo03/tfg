@@ -1,9 +1,12 @@
 import reflex as rx
 
 class GlobalState(rx.State):
-    pension_primer_pilar: float = 0
-    pension_segundo_pilar: float = 0
-    pension_tercer_pilar: float = 0
+    form_data_primer_pilar: dict = {}
+    form_data_segundo_pilar: dict = {}
+    form_data_tercer_pilar: dict = {}
+    pension_primer_pilar: float = 0.0
+    pension_segundo_pilar: float = 0.0
+    pension_tercer_pilar: float = 0.0
 
     def set_pension(self, n_pilar: str, pension: float):
         if n_pilar in ("primer", "segundo", "tercer"):

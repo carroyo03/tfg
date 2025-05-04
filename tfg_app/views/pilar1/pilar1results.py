@@ -1,4 +1,4 @@
-import reflex as rx
+import reflex as rx #type:ignore
 
 
 from tfg_app.components.leyenda import leyenda1
@@ -105,11 +105,13 @@ def show_pension_salary_comparison(pension_primer_pilar:float, salario_actual:fl
 
 
 
-def results_pilar1() -> rx.Component:
-    pension_primer_pilar = GlobalState.pension_primer_pilar
+def results_pilar1(direction:str="") -> rx.Component:
+    pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
     pension_1p_anual = pension_primer_pilar * 12
-    salario_actual = FormState.salario_medio
-    salario_mensual = redondear(salario_actual / 12)
+    form_data_1 = GlobalState.form_data_primer_pilar
+
+    salario_actual = form_data_1.salario_medio.to(float)
+    salario_mensual = salario_actual / 12
     ratio_sustitucion = RatioSust1.ratio
 
     ratio_gt_100_component = rx.box(
@@ -121,7 +123,7 @@ def results_pilar1() -> rx.Component:
                 width=["100%", "90%"],  # Responsive width
             ),
             show_pension_salary_comparison(pension_primer_pilar, salario_mensual),
-            leyenda1(),
+            leyenda1(pension_is_gt_salary=True),
             width="100%",
             spacing="5",
             align_items="center",
@@ -172,7 +174,7 @@ def results_pilar1() -> rx.Component:
                     ),
                     width="100%",
                 ),
-                direction=rx.breakpoints(initial="column", md="row"),  # Responsive direction
+                direction=rx.breakpoints(initial="column", md="row") if direction == "" else direction,  # Responsive direction
                 justify_content="space-around",
                 width="100%",
                 spacing="2",
@@ -186,9 +188,9 @@ def results_pilar1() -> rx.Component:
             border_radius="md",
             box_shadow="lg",
             background_color="white",
-            width=rx.breakpoints(initial="100%", sm="90%", lg="80%"),
+            width='100%',
             max_width="1200px",
-            margin=rx.breakpoints(initial="1em auto", sm="2em auto"),
+            #margin=rx.breakpoints(initial="1em auto", sm="2em auto"),
             spacing="4",
         ),
         width="100%",

@@ -88,11 +88,11 @@ class Form3State(rx.State):
 def form3():
     return rx.form(
         rx.vstack(
-            input_text("Aportación anual al plan privado de pensiones (€)","aportacion_empleado_3p", Employee3PState,"number"),
+            input_text("Aportación anual (€)","aportacion_empleado_3p", Employee3PState,"number"),
             rentabilidad_estimada(3),
             rx.hstack(
                 rx.button(
-                    "Limpiar formulario",
+                    'Limpiar',
                     type="button",
                     on_click=Form3State.clear_form,
                     color="white",
@@ -118,14 +118,15 @@ def form3():
             ),
             width="100%",
             spacing="5",
-            padding=["1em", "1.5em", "2em"],
+            padding=[".2em", ".3em", ".5em"],
             max_width="100%",
             font_weight='bold'
         ),
         on_submit=Form3State.handle_submit,
         value=Form3State.stored_form_data,
-        margin_top=size.DEFAULT.value,
         align="center",
+        width='100%',
+        justify='center'
     )
 
 

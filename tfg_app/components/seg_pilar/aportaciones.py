@@ -7,7 +7,7 @@ class Company2PState(rx.State):
     value : float = 0
 
     def set_value(self,value):
-        self.value = float(value)
+        self.value = float(value) if value != '' else 0
 
     @rx.event
     async def reset_values(self):
