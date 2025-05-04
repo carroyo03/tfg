@@ -22,12 +22,28 @@ class FormState(rx.State):
 
     def update_salario_mensual(self):
         print(f"Updating average salary to {self.form_data.get('salario_medio')} or {self.form_data['salario_medio']}")
-        self.salario_medio = float(self.form_data.get("salario_medio"))
-        self.form_data["salario_medio"] = self.salario_medio
-        print(f"Current average salary: {self.salario_medio}")
-        self.salario_mensual = self.salario_medio / 12
-        self.form_data["salario_mensual"] = self.salario_mensual
-        print(f"Monthly average salary updated: {self.salario_mensual}")
+        # Asegurarse de que salario_medio existe y es un número válido
+        if 'salario_medio' in self.form_data and self.form_data['salario_medio'] is not None:
+            try:
+                self.salario_medio = float(self.form_data.get("salario_medio", 0))
+                self.form_data["salario_medio"] = self.salario_medio
+                print(f"Current average salary: {self.salario_medio}")
+                self.salario_mensual = self.salario_medio / 12
+                self.form_data["salario_mensual"] = self.salario_mensual
+                print(f"Monthly average salary updated: {self.salario_mensual}")
+            except (ValueError, TypeError) as e:
+                raise Exception(f"Error al convertir salario_medio: {e}")
+                """self.salario_medio = 0.0
+                self.salario_mensual = 0.0
+                self.form_data["salario_medio"] = 0.0
+                self.form_data["salario_mensual"] = 0.0"""
+        else:
+            raise Exception("salario_medio no está definido en form_data")
+            """self.salario_medio = 0.0
+            self.salario_mensual = 0.0
+            self.form_data["salario_medio"] = 0.0
+            self.form_data["salario_mensual"] = 0.0
+            """
 
     
     @rx.var
@@ -145,13 +161,18 @@ class FormState(rx.State):
             self.update_salario_mensual()
     
             pension = await self.send_data_to_backend(self.form_data)
-            ratio_state = await self.get_state(RatioSust1)
-            ratio_state.calcular_ratio(salario=self.salario_mensual, pension=pension)
-            print(f"1st ratio: {ratio_state.ratio}")
-            state = await self.get_state(GlobalState)
-            state.set_form_data("primer", self.form_data)
-            state.set_pension("primer",pension)
-            return rx.redirect("/pilar1")
+            
+            # Verificar que pension y salario_mensual son valores válidos
+            if pension is not None and self.salario_mensual > 0:
+                ratio_state = await self.get_state(RatioSust1)
+                ratio_state.calcular_ratio(salario=self.salario_mensual, pension=pension)
+                print(f"1st ratio: {ratio_state.ratio}")
+                state = await self.get_state(GlobalState)
+                state.set_form_data("primer", self.form_data)
+                state.set_pension("primer", pension)
+                return rx.redirect("/pilar1")
+            else:
+                raise ValueError("Pensión o salario mensual inválidos")
         except Exception as e:
             logging.error(f"Error en handle_submit: {e}")
             return rx.window_alert("Error al procesar el formulario")
