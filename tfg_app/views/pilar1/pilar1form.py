@@ -161,7 +161,7 @@ class FormState(rx.State):
             self.update_salario_mensual()
     
             pension = await self.send_data_to_backend(self.form_data)
-            self.salario_mensual = form_data['salario_mensual'] if self.salario_mensual == 0 else self.salario_mensual
+            self.salario_mensual = form_data['salario_medio'] / 12 if self.salario_mensual == 0 else self.salario_mensual
             
             # Verificar que pension y salario_mensual son valores válidos
             if pension is not None and self.salario_mensual > 0:
