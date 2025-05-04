@@ -106,6 +106,22 @@ def show_pension_salary_comparison(pension_primer_pilar:float, salario_actual:fl
 
 
 def results_pilar1(direction:str="") -> rx.Component:
+    
+    # Dictionary to check required attributes and their values
+    vars_to_check = [
+        (GlobalState, "pension_primer_pilar"),
+        (GlobalState, "form_data_primer_pilar"),
+        (GlobalState.form_data_primer_pilar, "salario_medio"),
+        (RatioSust1, "ratio")
+    ]
+    
+    # Check if any required attribute is missing or None
+    conditions = [
+        not hasattr(obj, attr) or getattr(obj, attr) is None 
+        for obj, attr in vars_to_check
+    ]
+    if any(conditions):
+        return rx.text('Datos no disponibles', color='red', font_size='1.2em', text_align='center')
     pension_primer_pilar = GlobalState.pension_primer_pilar.to(float) if GlobalState.pension_primer_pilar is not None else 0.0
     pension_1p_anual = pension_primer_pilar * 12
     form_data_1 = GlobalState.form_data_primer_pilar
@@ -141,10 +157,7 @@ def results_pilar1(direction:str="") -> rx.Component:
         padding_bottom=rx.breakpoints(initial="1em", md="4em"),
     )
 
-    ratio_lte_100_component = rx.cond(
-        any(x is None for x in [pension_primer_pilar, pension_1p_anual, salario_mensual, salario_actual]),
-        rx.text("Data not available", color="red", font_size="1.2em", text_align="center"),
-        rx.box(
+    ratio_lte_100_component = rx.box(
         rx.vstack(
             rx.flex(
                 rx.vstack(
@@ -201,7 +214,7 @@ def results_pilar1(direction:str="") -> rx.Component:
         justify_content="center",
         margin_bottom="15%",
     )
-                                      )
+                                      
 
     return rx.cond(
         ratio_sustitucion > 100,
