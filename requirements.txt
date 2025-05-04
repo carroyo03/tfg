@@ -15,4 +15,3 @@ pandas
 pydantic
 ecbdata
 numpy
-reflex==0.7.9
