@@ -28,6 +28,11 @@ class GlobalState(rx.State):
     
     def set_form_data(self, n_pilar: str, form_data: dict):
         if n_pilar in ("primer", "segundo", "tercer"):
-            setattr(self, f"form_data_{n_pilar}_pilar", form_data)
+            setattr(self, f"form_data_{n_pilar}_pilar", form_data.copy())
         else:
             raise ValueError("El pilar debe ser 'primer', 'segundo' o 'tercer'.")
+
+    @rx.var
+    def salario_mensual(self) -> float:
+        salario_anual = self.form_data_primer_pilar.get('salario_medio')
+        return salario_anual / 12 if salario_anual else 0.0

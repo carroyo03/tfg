@@ -14,9 +14,16 @@ class RatioSust1(rx.State):
     ratio:float = 0.0
     @rx.event
     def calcular_ratio(self, salario:float, pension:float):
+        salario_valido = salario if isinstance(salario,(int,float)) else 0.0
+        pension_valida = pension if isinstance(pension, (int,float)) else 0.0
         print(f"Salario: {salario}, Pension: {pension}")
-        self.ratio = float(pension / salario) * 100
+        self.ratio = (pension_valida / salario_valido) * 100 if salario_valido != 0 else 0.0
         print(f"Ratio {self.type}: {self.ratio}")
+        
+    @rx.var
+    def ratio_formateado(self) -> str:
+        ratio = self.ratio if self.ratio is not None else 0.0
+        return f"{ratio:.2f}%".replace('.', ',')
 
 
 class RatioSust2(rx.State):
