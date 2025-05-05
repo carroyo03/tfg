@@ -124,32 +124,25 @@ def final_results() -> rx.Component:
     salario_mensual = redondear(salario_actual/12)
 
     # 1er pilar
-    pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
-    pension_1p_anual = redondear(pension_primer_pilar) * 12
-    if RatioSust1.ratio.to(float) is None | RatioSust1.ratio.to(float) == (pension_primer_pilar / salario_mensual * 100):
-        ratio_sust_1 = RatioSust1.ratio.to(float)
-    else:
-        ratio_sust_1 = (pension_primer_pilar / salario_mensual * 100)
+    pension_primer_pilar = GlobalState.pension_primer_pilar
+    pension_1p_anual = GlobalState.pension_anual_primer
+    ratio_sust_1 = GlobalState.ratio_sustitucion_primer
 
     # 2o pilar
-    pension_segundo_pilar = GlobalState.pension_segundo_pilar.to(float)
-    pension_2p_anual = redondear(pension_segundo_pilar) * 12
-    if RatioSust2.ratio.to(float) is None | RatioSust2.ratio.to(float) == (pension_segundo_pilar / salario_mensual * 100):
-        ratio_sust_2 = RatioSust2.ratio.to(float)
-    else:
-        ratio_sust_2 = (pension_segundo_pilar / salario_mensual * 100)
+    pension_segundo_pilar = GlobalState.pension_segundo_pilar
+    pension_2p_anual = GlobalState.pension_anual_segundo
+    ratio_sust_2 = GlobalState.ratio_sustitucion_segundo
     
     # 3er pilar
     pension_tercer_pilar = GlobalState.pension_tercer_pilar.to(float)
     pension_3p_anual = redondear(pension_tercer_pilar) * 12
-    if RatioSust3.ratio.to(float) is None | RatioSust3.ratio.to(float) == (pension_tercer_pilar / salario_mensual * 100):
-        ratio_sust_3 = RatioSust3.ratio.to(float)
-    else:
-        ratio_sust_3 = (pension_tercer_pilar / salario_mensual * 100)
+    ratio_sust_3 = GlobalState.ratio_sustitucion_tercer
+    
+    ratio_total = GlobalState.ratio_sustitucion_total
     
     ratio_gt_100_component = rx.box(
         rx.vstack(
-            rx.text("Tu pensión es superior al 100% de tu salario medio.",
+            rx.text(f"Tu pensión es {ratio_total.to(rx.Var[float])- 100} % superior al salario.",
                    color="black",
                    text_align="center",
                    width="90%"),
@@ -230,10 +223,9 @@ def final_results() -> rx.Component:
         margin_bottom=rx.breakpoints(initial='4em', sm='5em',md='6em',lg='7em'),
     )
 
-    ratio_sustitucion = ratio_sust_1 + ratio_sust_2 + ratio_sust_3
     
     return rx.cond(
-        ratio_sustitucion > 100,
+        ratio_total > 100,
         ratio_gt_100_component,
         ratio_lte_100_component
     )

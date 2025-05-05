@@ -35,10 +35,9 @@ class Form3State(rx.State):
             self.form_data.update(form_data)
 
             pension = await self.send_data_to_backend(form_data)
-            ratio_state = await self.get_state(RatioSust3)
-            ratio_state.calcular_ratio(salario=self.form_data['prev_form']['prev_form']['salario_medio'], pension=pension)
             global_state.set_form_data('tercer',self.form_data)
             global_state.set_pension("tercer",pension)
+            print(f"3rd ratio: {global_state.ratio_sustitucion_tercer}")
             return rx.redirect("/results")
         except Exception as e:
             logging.error(f"Error en handle_submit: {e}")

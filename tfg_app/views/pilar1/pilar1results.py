@@ -87,10 +87,10 @@ def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
     )
 
 
-def show_pension_salary_comparison(pension_primer_pilar:float, salario_actual:float) -> rx.Component:
+def show_pension_salary_comparison(pension_primer_pilar:float, salario_anual) -> rx.Component:
 
     data = [
-        {"name": "Comparación", "Pensión pública": pension_primer_pilar, "Salario": salario_actual},
+        {"name": "Comparación", "Pensión pública": pension_primer_pilar, "Salario": salario_anual},
     ]
     return rx.recharts.bar_chart(
         rx.recharts.cartesian_grid(),
@@ -118,40 +118,19 @@ def show_pension_salary_comparison(pension_primer_pilar:float, salario_actual:fl
 
 
 def results_pilar1(direction:str="") -> rx.Component:
-    if not (
-        GlobalState.pension_primer_pilar is not None and
-        GlobalState.form_data_primer_pilar is not None and
-        GlobalState.form_data_primer_pilar["salario_medio"] is not None and
-        RatioSust1.ratio is not None
+    if (
+        GlobalState.pension_primer_pilar is None or
+        GlobalState.form_data_primer_pilar is None or
+        GlobalState.form_data_primer_pilar.get("salario_medio") is None
     ):
         return rx.text('Datos no disponibles', color='red', font_size='1.2em', text_align='center')
 
-    # Asignación segura de valores
-    try:
-        pension_primer_pilar = float(GlobalState.pension_primer_pilar)
-    except (TypeError, ValueError):
-        pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
+    pension_primer_pilar = GlobalState.pension_primer_pilar
+    salario_anual = GlobalState.salario_anual
+    salario_mensual = GlobalState.salario_mensual
+    pension_1p_anual = GlobalState.pension_anual_primer
+    ratio_sustitucion = GlobalState.ratio_sustitucion_primer
 
-    try:
-        salario_actual = float(GlobalState.form_data_primer_pilar.get("salario_medio", 0.0))
-    except (TypeError, ValueError, AttributeError):
-        # Intenta acceder como diccionario si el método get falla
-        try:
-            salario_actual = float(GlobalState.form_data_primer_pilar["salario_medio"])
-        except (TypeError, ValueError, KeyError):
-            form_data = GlobalState.form_data_primer_pilar
-            salario_actual = form_data.salario_medio.to(float)
-
-    salario_mensual = salario_actual / 12
-    pension_1p_anual = pension_primer_pilar * 12
-
-    try:
-        ratio_sustitucion = float(RatioSust1.ratio)
-    except (TypeError, ValueError):
-        try:
-            ratio_sustitucion = (pension_primer_pilar / salario_mensual * 100)
-        except (TypeError, ValueError):
-            ratio_sustitucion = 0.0
 
     ratio_gt_100_component = rx.box(
         rx.vstack(
@@ -161,7 +140,7 @@ def results_pilar1(direction:str="") -> rx.Component:
                 text_align="center",
                 width=["100%", "90%"],  # Responsive width
             ),
-            show_pension_salary_comparison(pension_primer_pilar, salario_mensual),
+            show_pension_salary_comparison(pension_primer_pilar, salario_anual),
             leyenda1(pension_is_gt_salary=True),
             width="100%",
             spacing="5",
@@ -207,7 +186,7 @@ def results_pilar1(direction:str="") -> rx.Component:
                     ),
                     rx.hstack(
                         rx.heading("Salario anual:", size="4", color="black"),
-                        rx.text(f"{salario_actual:.2f} €/ año", color="black"),
+                        rx.text(f"{salario_anual:.2f} €/ año", color="black"),
                         spacing="1",
                         width="100%",
                     ),

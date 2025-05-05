@@ -165,12 +165,10 @@ class FormState(rx.State):
             
             # Verificar que pension y salario_mensual son valores válidos
             if pension is not None and self.salario_mensual > 0:
-                ratio_state = await self.get_state(RatioSust1)
-                ratio_state.calcular_ratio(salario=self.salario_mensual, pension=pension)
-                print(f"1st ratio: {ratio_state.ratio}")
                 state = await self.get_state(GlobalState)
                 state.set_form_data("primer", self.form_data)
                 state.set_pension("primer", pension)
+                print(f"1st ratio: {state.ratio_sustitucion_primer:.2f}")
                 return rx.redirect("/pilar1")
             else:
                 raise ValueError("Pensión o salario mensual inválidos")

@@ -79,8 +79,6 @@ class Form2State(rx.State):
                 logging.error(f"Pensión calculada inválida: {pension}")
                 return rx.window_alert("Error al calcular la pensión. Por favor, revise los datos ingresados.")
             
-            # Calcular el ratio de sustitución
-            ratio_state = await self.get_state(RatioSust2)
             
             # Asegurarse de que salario_medio es un número
             salario_medio = float(prev_form_data.get('salario_medio', 0))
@@ -88,12 +86,12 @@ class Form2State(rx.State):
                 logging.error(f"Salario medio inválido: {salario_medio}")
                 return rx.window_alert("Error: Salario medio inválido. Por favor, revise los datos ingresados.")
             
-            # Calcular el ratio
-            ratio_state.calcular_ratio(salario=salario_medio / 12, pension=pension)
             
             # Guardar los datos en el estado global
             global_state.set_form_data("segundo", self.form_data)
             global_state.set_pension("segundo", pension)
+            
+            print(f"2nd ratio: {global_state.ratio_sustitucion_segundo}")
             
             # Redirigir a la página de resultados
             return rx.redirect("/pilar2")
@@ -149,16 +147,10 @@ class Form2State(rx.State):
             pension = await calcular_pension_2p(form_data)
             self.form_data = form_data
             
-            # Asegurarse de que salario_medio es un número
-            salario_medio = float(form_data['prev_form']['salario_medio'])
-            
-            ratio_state = await self.get_state(RatioSust2)
-            ratio_state.calcular_ratio(salario=salario_medio/12, pension=pension)
-            print(f"2st ratio: {ratio_state.ratio}")
-            
             state = await self.get_state(GlobalState)
             state.set_form_data("segundo", self.form_data)
             state.set_pension("segundo", pension)
+            print(f"2st ratio: {state.ratio_sustitucion_segundo}")
             return pension
         except Exception as e:
             logging.error(f"Error al enviar datos al backend: {e}")
