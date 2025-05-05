@@ -103,7 +103,7 @@ def show_pension_salary_comparison2(pension_primer_pilar: float, pension_segundo
         height=300,
     )
 
-def results_pilar2() -> rx.Component:
+def results_pilar2(direction:str=None) -> rx.Component:
     # Obtener datos del estado global
     global_state = GlobalState
     
@@ -197,7 +197,7 @@ def results_pilar2() -> rx.Component:
                     ),
                     width="100%",
                 ),
-                direction=rx.breakpoints(initial="column", md="row"),
+                direction=rx.breakpoints(initial="column", md="row") if direction == "" else direction,
                 justify_content="space-around",
                 width="100%",
                 spacing='2',

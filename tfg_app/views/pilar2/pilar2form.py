@@ -166,19 +166,25 @@ class Form2State(rx.State):
 
     
 
-def form2():
+def form2(is_mobile:bool=False):
+    if not is_mobile:
+        width_button_var='50%'
+        padding_value='0'
+    else:
+        width_button_var='100%'
+        padding_value=["1em", "1.5em", "2em"]
     return rx.form(
         rx.vstack(
             input_text("Aportación anual de la empresa al PPE (%)","aportacion_empresa", Company2PState,"number"),
             aportar(f"¿Quieres aportar un 2% a tu plan de pensiones de la empresa?"),
             rentabilidad_estimada(2),
-            rx.hstack(
+            rx.stack(
                 rx.button(
                     "Limpiar",
                     type="button",
                     on_click=Form2State.clear_form,
                     color="white",
-                    width="50%",
+                    width=width_button_var,
                     border="1px solid",
                     box_shadow="0 .25rem .375rem #0003",
                     background_color=color.BACKGROUND.value,
@@ -188,25 +194,27 @@ def form2():
                         type="submit",
                         background_color="white",
                         color=color.BACKGROUND.value,
-                        width="50%",
+                        width=width_button_var,
                         border="1px solid",
                         box_shadow="0 .25rem .375rem #0003",
                         _hover={"bg": color.SECONDARY.value, "color": "white"}
                 ),
                 
                 width="100%",
-                spacing="4"
+                spacing="4",
+                direction=rx.breakpoints(initial='column', sm='row')
                 
             ),
             width="100%",
             spacing="5",
-            #padding=["1em", "1.5em", "2em"],
+            padding=padding_value,
             max_width="100%",
             font_weight='bold',
-            justify="center"
+            justify='center'
         ),
         on_submit=Form2State.handle_submit,
         value=Form2State.stored_form_data,
         width="100%",
         height="auto",
+        margin='0 auto'
     )

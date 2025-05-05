@@ -22,8 +22,19 @@ def redondear(numero):
 
 
 def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
-    
-    safe_ratio = max(min(float(ratio_sustitucion or 0), 100), 0)
+    if type(ratio_sustitucion) != float:
+        try:
+            ratio_sustitucion = float(ratio_sustitucion)
+        except (TypeError, ValueError):
+            try:
+                ratio_sustitucion = ratio_sustitucion.to(float)
+            except (TypeError, ValueError):
+                ratio_sustitucion = 0.0
+    try:
+        safe_ratio = max(min(float(ratio_sustitucion), 100), 0)
+    except (TypeError, ValueError):
+        rx.console_log("Error obtaining ratio data, defaulting to original value")
+        safe_ratio = ratio_sustitucion
     safe_salary_ratio = 100 - safe_ratio
     # Prepara los datos del gráfico
     data = [
@@ -59,7 +70,7 @@ def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
                 height=225,
                 margin_top="-1em"
             ),
-            rx.text(f"{redondear(ratio_sustitucion)}% de cobertura", color="black", font_size="1.5em", text_align="center",margin_top="-.5em"),
+            rx.text(f"{redondear(safe_ratio)}% de cobertura", color="black", font_size="1.5em", text_align="center",margin_top="-.5em"),
             border_radius="md",
             box_shadow="lg",
             background_color="white",
@@ -108,31 +119,39 @@ def show_pension_salary_comparison(pension_primer_pilar:float, salario_actual:fl
 
 def results_pilar1(direction:str="") -> rx.Component:
     if not (
-        hasattr(GlobalState, "pension_primer_pilar") and GlobalState.pension_primer_pilar is not None and
-        hasattr(GlobalState, "form_data_primer_pilar") and GlobalState.form_data_primer_pilar is not None and
-        hasattr(GlobalState.form_data_primer_pilar, "salario_medio") and GlobalState.form_data_primer_pilar.salario_medio is not None and
-        hasattr(RatioSust1, "ratio") and RatioSust1.ratio is not None
+        GlobalState.pension_primer_pilar is not None and
+        GlobalState.form_data_primer_pilar is not None and
+        GlobalState.form_data_primer_pilar["salario_medio"] is not None and
+        RatioSust1.ratio is not None
     ):
         return rx.text('Datos no disponibles', color='red', font_size='1.2em', text_align='center')
 
     # Asignación segura de valores
     try:
-        pension_primer_pilar = float(getattr(GlobalState, "pension_primer_pilar", 0.0))
+        pension_primer_pilar = float(GlobalState.pension_primer_pilar)
     except (TypeError, ValueError):
-        pension_primer_pilar = 0.0
+        pension_primer_pilar = GlobalState.pension_primer_pilar.to(float)
 
     try:
-        salario_actual = float(getattr(GlobalState.form_data_primer_pilar, "salario_medio", 0.0))
+        salario_actual = float(GlobalState.form_data_primer_pilar.get("salario_medio", 0.0))
     except (TypeError, ValueError, AttributeError):
-        salario_actual = 0.0
+        # Intenta acceder como diccionario si el método get falla
+        try:
+            salario_actual = float(GlobalState.form_data_primer_pilar["salario_medio"])
+        except (TypeError, ValueError, KeyError):
+            form_data = GlobalState.form_data_primer_pilar
+            salario_actual = form_data.salario_medio.to(float)
 
-    salario_mensual = salario_actual / 12 if salario_actual > 0 else 0.0
+    salario_mensual = salario_actual / 12
     pension_1p_anual = pension_primer_pilar * 12
 
     try:
-        ratio_sustitucion = float(getattr(RatioSust1, "ratio", 0.0))
+        ratio_sustitucion = float(RatioSust1.ratio)
     except (TypeError, ValueError):
-        ratio_sustitucion = (pension_primer_pilar / salario_mensual * 100) if salario_mensual > 0 else 0.0
+        try:
+            ratio_sustitucion = (pension_primer_pilar / salario_mensual * 100)
+        except (TypeError, ValueError):
+            ratio_sustitucion = 0.0
 
     ratio_gt_100_component = rx.box(
         rx.vstack(

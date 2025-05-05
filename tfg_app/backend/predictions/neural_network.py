@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from tfg_app.backend.pens import estimar_tiempo_cotizado
+import numpy as np
 
 
 import datetime
@@ -40,35 +41,32 @@ def preprocess_input(data: dict) -> torch.Tensor | None:
             fecha_nacimiento = datetime.datetime.strptime(fecha_nacimiento_str, "%d/%m/%Y").date()
         except ValueError:
             print(f"Formato inválido para fecha_nacimiento: {fecha_nacimiento_str}")
-            return None
+            fecha_nacimiento = datetime.date(np.random.randint(1960,1999),1,1)
     elif isinstance(fecha_nacimiento_str, datetime.date):
         fecha_nacimiento = fecha_nacimiento_str
     else:
         print("fecha_nacimiento no es una cadena ni un objeto date")
-        return None
+        fecha_nacimiento = datetime.date(np.random.randint(1960,1999),1,1)
 
     # Manejar n_hijos como cadena o entero
-    n_hijos = base_data.get('n_hijos', 0)
+    n_hijos = base_data.get('n_hijos', '0')
     if isinstance(n_hijos, str):
-        if n_hijos.lower() == 'none':
-            n_hijos = 0
-        else:
-            try:
-                n_hijos = int(n_hijos)
-            except ValueError:
-                n_hijos = 0
+        if n_hijos not in ['1','2','3','4+'] or n_hijos is None or n_hijos == '':
+            n_hijos = '0'
+    elif isinstance(n_hijos,int):
+        n_hijos = str(n_hijos)
 
     try:
         features = [
-            float(base_data.get('salario_medio', 0)) / 100000,
+            float(base_data.get('salario_medio', 30000)) / 100000,
             float(base_data.get('edad_jubilacion_deseada', 65)) / 100,
             estimar_tiempo_cotizado(
                 fecha_nacimiento,
                 base_data.get('edad_inicio_trabajo', 22),
                 base_data.get('edad_jubilacion_deseada', 65)
             ) / 50,
-            1.0 if str(base_data.get('gender')).lower().startswith('h') else 0.0,
-            float(n_hijos) / 5,
+            1.0 if str(base_data.get('gender','Hombre')).lower().startswith('h') else 0.0,
+            (float(n_hijos) if n_hijos != '4+' else 5)/ 5,
             float(base_data.get('n_lagunas', 0)) / 10,
             float(data2.get('aportacion_empresa', 0)) / 10,
             float(data3.get('aportacion_empleado_3p', 0)) / 10000,

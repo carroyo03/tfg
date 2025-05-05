@@ -23,7 +23,7 @@ class SliderState(rx.State):
 def slider(min_value: int, max_value: int, name:str) -> rx.Component:
     # Trigger the event asynchronously without blocking component rendering.
     return rx.vstack(
-        rx.heading(SliderState.value, font_size=size.SMALL.value, color="white"),
+        rx.heading(SliderState.value, font_size='1rem', color="white"),
         rx.slider(
             default_value=round((min_value + max_value) / 2),
             min=min_value,
@@ -37,7 +37,7 @@ def slider(min_value: int, max_value: int, name:str) -> rx.Component:
 
 def rentabilidad_estimada(num_pilar:int) -> rx.Component:
     return rx.vstack(
-        rx.heading("Rentabilidad estimada (%)", color="white", font_size=size.SMALL.value),
+        rx.heading("Rentabilidad estimada (%)", color="white", font_size='1rem'),
         slider(1, 9,f"rentabilidad_{num_pilar}"),
         width="100%",
     )

@@ -31,13 +31,13 @@ class Employee2PState(rx.State):
 
 def aportar(text:str) -> rx.Component:
     return rx.vstack(
-        rx.hstack(
+        rx.stack(
             rx.text(text),
             rx.radio(
                 ["Sí", "No"], 
                 value=Employee2PState.value, 
                 on_change=Employee2PState.set_value,
-                direction="row", 
+                direction=rx.breakpoints(initial='row', sm= 'column'), 
                 name="quiere_aportar",
                 margin_left="2em"
             ),

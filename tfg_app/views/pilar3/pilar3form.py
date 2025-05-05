@@ -85,18 +85,24 @@ class Form3State(rx.State):
 
 
 
-def form3():
+def form3(is_mobile:bool=False):
+    if not is_mobile:
+        width_button_var='50%'
+        padding_value='0'
+    else:
+        width_button_var='100%'
+        padding_value=["1em", "1.5em", "2em"]
     return rx.form(
         rx.vstack(
             input_text("Aportación anual (€)","aportacion_empleado_3p", Employee3PState,"number"),
             rentabilidad_estimada(3),
-            rx.hstack(
+            rx.stack(
                 rx.button(
                     'Limpiar',
                     type="button",
                     on_click=Form3State.clear_form,
                     color="white",
-                    width="50%",
+                    width=width_button_var,
                     border="1px solid",
                     box_shadow="0 .25rem .375rem #0003",
                     background_color=color.BACKGROUND.value,
@@ -106,27 +112,29 @@ def form3():
                         type="submit",
                         background_color="white",
                         color=color.BACKGROUND.value,
-                        width="50%",
+                        width=width_button_var,
                         border="1px solid",
                         box_shadow="0 .25rem .375rem #0003",
                         _hover={"bg": color.SECONDARY.value, "color": "white"}
                 ),
                 
                 width="100%",
-                spacing="4"
+                spacing="4",
+                direction=rx.breakpoints(initial='column', sm='row')
                 
             ),
             width="100%",
             spacing="5",
-            padding=[".2em", ".3em", ".5em"],
+            padding=padding_value,
             max_width="100%",
-            font_weight='bold'
+            font_weight='bold',
+            justify='center'
         ),
         on_submit=Form3State.handle_submit,
         value=Form3State.stored_form_data,
-        align="center",
-        width='100%',
-        justify='center'
+        width="100%",
+        height="auto",
+        margin='0 auto'
     )
 
 

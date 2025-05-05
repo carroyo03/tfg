@@ -78,7 +78,7 @@ def show_ratio_pie_chart(ratio_sust_1,ratio_sust_2,ratio_sust_3) -> rx.Component
 def show_pension_salary_comparison3(pension_primer_pilar:float, pension_segundo_pilar:float,pension_tercer_pilar:float,salario_actual:float) -> rx.Component:
 
     data = [
-        {"name": "Comparación", "Pensión pública": pension_primer_pilar, "Pensión de empresa": pension_segundo_pilar, "Salario": salario_actual},
+        {"name": "Comparación", "Pensión pública": pension_primer_pilar, "Pensión de empresa": pension_segundo_pilar, "Pensión privada": pension_tercer_pilar,"Salario": salario_actual},
     ]
     return rx.recharts.bar_chart(
         rx.recharts.cartesian_grid(),
@@ -168,7 +168,7 @@ def final_results() -> rx.Component:
         width="100%",
         display="flex",
         justify_content="center",
-        padding_top="8em",
+        padding_top="2em",
         padding_bottom="4em"
     )
 

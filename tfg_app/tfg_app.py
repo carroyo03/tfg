@@ -244,7 +244,7 @@ def form_pilar2():
             rx.State.is_hydrated,
             rx.vstack(
                 rx.mobile_only(
-                    rx.hstack(
+                    rx.vstack(
                         rx.button(
                             rx.hstack(
                                 rx.icon("arrow-left", color="white", size=16),
@@ -269,10 +269,10 @@ def form_pilar2():
                             rx.vstack(
                                 rx.box(
                                     rx.heading(
-                                        "Simulador de pensiones: Pensión de empresa",
+                                        "Pensión de empresa",
                                         color="white",
                                         font_family=Font.TITLE.value,
-                                        font_size=rx.breakpoints(initial="1.2em", sm="1.5em", md="1.8em"),
+                                        font_size=rx.breakpoints(initial="1.5em", sm="1.8em", md="2.2em"),
                                         font_weight="bold",
                                         margin_top=size.SMALL.value,
                                         margin_bottom=size.SMALL.value,
@@ -284,12 +284,13 @@ def form_pilar2():
                                     margin_top="1em",
                                     justify="center"
                                 ),
-                                form2(),
+                                form2(is_mobile=True),
                                 overflow="hidden",
                                 align="end",
                                 padding=["0.5em", "0.8em", "1em"],
                                 height="auto",
                                 width="100%",
+                                justify='end'
                             ),
                             width=["100%", "90%", "50%"],
                             max_width=["100%", "90%", "80%", "70%"],
@@ -299,7 +300,6 @@ def form_pilar2():
                             justify_content="center",
                         ),
                         rx.cond(AppState.signed_in, logout_button()),
-                        align_items="center",
                     ),
                 ),
                 rx.tablet_and_desktop(
@@ -326,7 +326,7 @@ def form_pilar2():
                         rx.center(
                             rx.vstack(
                                 rx.heading(
-                                    "Simulador de pensiones: Pensión de empresa",
+                                    "Pensión de empresa",
                                     color="white",
                                     font_family=Font.TITLE.value,
                                     font_size=rx.breakpoints(initial="1.2em", sm="1.5em", md="1.8em"),
@@ -516,13 +516,14 @@ def form_pilar3():
             rx.State.is_hydrated,
             rx.vstack(
                 rx.mobile_only(
-                    rx.hstack(
+                    rx.vstack(
                         rx.button(
                             rx.hstack(
                                 rx.icon('arrow-left', color='white', size=16),
-                                spacing='2'
+                                "Atrás",
+                                spacing='2',
                             ),
-                            on_click=rx.redirect('/pilar2'),
+                            on_click=rx.redirect("/pilar2"),
                             color="white",
                             background_color="transparent",
                             border="1px solid",
@@ -540,24 +541,25 @@ def form_pilar3():
                             rx.vstack(
                                 rx.box(
                                     rx.heading(
-                                        "Simulador de pensiones: Pensión privada",
-                                        color='white',
+                                        "Pensión privada",
+                                        color="white",
                                         font_family=Font.TITLE.value,
-                                        font_size=rx.breakpoints(initial="1.2em", sm="1.5em", md="1.8em"),
+                                        font_size=rx.breakpoints(initial="1.5em", sm="1.8em", md="2.2em"),
                                         font_weight="bold",
                                         margin_top=size.SMALL.value,
                                         margin_bottom=size.SMALL.value,
                                         text_align="center",
                                     ),
-                                    responsive_results_accordion("Resultado hasta ahora", results_component=results_pilar2(), is_mobile=True),
-                                    width='100%',
-                                    padding_x='.5rem',
-                                    margin_top='1em'
+                                    responsive_results_accordion("Resultados calculados hasta ahora", results_component=results_pilar2(direction='row'), is_mobile=True),
+                                    width="100%",
+                                    padding_x="0.5rem",
+                                    margin_top="1em",
+                                    justify="center"
                                 ),
-                                form3(),
+                                form3(is_mobile=True),
                                 overflow='hidden',
                                 align='end',
-                                padding=rx.breakpoints(initial='.5em', sm='.8em', md='1em'),
+                                padding=['0.5em','0.8em', '1em'],
                                 height='auto',
                                 width='100%'
                             ),
@@ -569,7 +571,7 @@ def form_pilar3():
                             justify_content="center",
                         ),
                         rx.cond(AppState.signed_in, logout_button()),
-                        align_items='center'
+                        justify='center'
                     )
                 ),
                 rx.tablet_and_desktop(
@@ -596,7 +598,7 @@ def form_pilar3():
                         rx.center(
                             rx.vstack(
                                 rx.heading(
-                                    "Simulador de pensiones: Pensión privada",
+                                    "Pensión privada",
                                     color="white",
                                     font_family=Font.TITLE.value,
                                     font_size=rx.breakpoints(initial="1.2em", sm="1.5em", md="1.8em"),
@@ -677,7 +679,7 @@ def result():
                         text_align="center",
                         width="100%",
                         padding_top=["1.5rem", "2rem", "3rem"],
-                        margin_bottom=rx.breakpoints(initial='2rem', sm='3rem', md='5rem')
+                        margin_bottom=rx.breakpoints(initial='1.5em', sm='2em', md='3em')
                     ),
                     width="100%",
                     position="sticky",
@@ -693,7 +695,7 @@ def result():
                         max_width=["100%", "90%", "85%", "800px"],
                         margin="0 auto",
                         margin_top=["-2.3rem", "-3.3rem", "-4.3rem"],
-                        margin_bottom="4rem",
+                        margin_bottom='4rem',
                         padding_x=["0.5rem", "0.8rem", "1rem"],
                     ),
                 ),
@@ -733,6 +735,7 @@ def result():
                         background_color="rgba(0, 51, 141, 0.9)",
                         padding_y="1rem",
                         z_index="10",
+                        margin_top='-10rem'
                     ),
                 ),
                 rx.tablet_and_desktop(
