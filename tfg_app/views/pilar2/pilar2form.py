@@ -8,6 +8,7 @@ from tfg_app.components.input_text import input_text
 from tfg_app.global_state import GlobalState
 from tfg_app.components.seg_pilar.aportaciones import Company2PState
 import datetime
+from tfg_app.backend.main import calcular_pension_2p
 
 
 
@@ -118,7 +119,6 @@ class Form2State(rx.State):
         yield Company2PState
 
     async def send_data_to_backend(self, form_data_prev: dict):
-        from tfg_app.backend.main import calcular_pension_2p
         try:
             """
             df_users = pd.read_csv('usuarios.csv', encoding='unicode_escape', sep=';')
