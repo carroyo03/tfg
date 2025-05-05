@@ -7,6 +7,7 @@ def info_button(info:str,color:str):
                 height=16,
                 overflow="visible",
                 color=color),
-        content=info,
+        content = info,
+        style={"white-space": "pre-wrap"},
     )
    

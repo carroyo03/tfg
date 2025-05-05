@@ -1,6 +1,6 @@
 import reflex as rx #type:ignore
 from tfg_app.backend.pens import RatioSust2
-from tfg_app.components.slider import SliderState, rentabilidad_estimada
+from tfg_app.components.slider import SliderState, tipo_riesgo_pension
 from tfg_app.styles.colors import Color as color
 from tfg_app.components.seg_pilar.aportaciones import Employee2PState, aportar
 from tfg_app.views.pilar1.pilar1results import FormState
@@ -92,7 +92,6 @@ class Form2State(rx.State):
             global_state.set_form_data("segundo", self.form_data)
             global_state.set_pension("segundo", pension)
             
-            print(f"2nd ratio: {global_state.ratio_sustitucion_segundo}")
             
             # Redirigir a la página de resultados
             return rx.redirect("/pilar2")
@@ -150,7 +149,6 @@ class Form2State(rx.State):
             state = await self.get_state(GlobalState)
             state.set_form_data("segundo", self.form_data)
             state.set_pension("segundo", pension)
-            print(f"2st ratio: {state.ratio_sustitucion_segundo}")
             return pension
         except Exception as e:
             logging.error(f"Error al enviar datos al backend: {e}")
@@ -160,16 +158,28 @@ class Form2State(rx.State):
 
 def form2(is_mobile:bool=False):
     if not is_mobile:
-        width_button_var='50%'
+        width_button_var='47%'
         padding_value='0'
     else:
         width_button_var='100%'
         padding_value=["1em", "1.5em", "2em"]
     return rx.form(
         rx.vstack(
-            input_text("Aportación anual de la empresa al PPE (%)","aportacion_empresa", Company2PState,"number"),
+            input_text(
+                title="Aportación anual de la empresa al PPE (%)",
+                name="aportacion_empresa", 
+                state=Company2PState,
+                type_="number",
+                has_info_button=True,
+                info=(
+                "La aportación anual de la empresa a tu plan de pensiones se suma a tus propias aportaciones y a las posibles rentabilidades del plan.\n"  
+                "Cuanto mayor sea la aportación de la empresa, más rápido crecerá tu plan. "
+                "Consulta con Recursos Humanos sobre la política de aportaciones de tu empresa."
+                ),
+                color_info_button="white"
+                ),
             aportar(f"¿Quieres aportar un 2% a tu plan de pensiones de la empresa?"),
-            rentabilidad_estimada(2),
+            tipo_riesgo_pension(2),
             rx.stack(
                 rx.button(
                     "Limpiar",

@@ -13,6 +13,17 @@ class Company2PState(rx.State):
     async def reset_values(self):
         self.value = 0
 
+    @rx.var
+    def empty_value(self) -> bool:
+        return self.value is None
+    
+    @rx.var
+    def invalid_value(self) -> bool:
+        if not self.empty_value:
+            v = int(self.value)
+            return v < 0 or v > 20
+        return False
+
 
 
 class Employee2PState(rx.State):

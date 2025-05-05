@@ -28,7 +28,7 @@ def show_ratio_pie_chart2(ratio_sust_1, ratio_sust_2) -> rx.Component:
         rx.box(
             rx.hstack(
                 rx.heading("Ratio de Sustitución", size="4", color="black", aria_label="Ratio de Sustitución"),
-                info_button(color="silver", info="El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión."),
+                info_button(color="black", info="El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión."),
                 spacing="2",
                 align="center"
             ),
@@ -67,10 +67,10 @@ def show_ratio_pie_chart2(ratio_sust_1, ratio_sust_2) -> rx.Component:
         padding="1em 0em",
     )
 
-def show_pension_salary_comparison2(pension_primer_pilar: float, pension_segundo_pilar: float, salario_actual: float) -> rx.Component:
+def show_pension_salary_comparison2(pension_primer_pilar: float, pension_segundo_pilar: float, salario_mensual: float) -> rx.Component:
     v1 = pension_primer_pilar
     v2 = pension_segundo_pilar
-    v3 = salario_actual
+    v3 = salario_mensual
     data = [
         {"name": "Comparación", "Pensión pública": v1, "Pensión de empresa": v2, "Salario": v3},
     ]
@@ -111,14 +111,10 @@ def results_pilar2(direction:str=None) -> rx.Component:
     form_data_1 = global_state.form_data_primer_pilar
     print(f"Form data 1: {form_data_1.to(dict)}")
     
-    # Verificar que los datos existen
-    if form_data_1 is None | form_data_1["salario_medio"] is None | form_data_1['salario_medio'] == 0:
-        print("Error: No se encontraron datos del primer pilar o falta el salario medio")
-        salario_anual = 0.0
-    else:
-        print(f"Salario anual obtenido: {form_data_1.salario_medio}")
     
-    salario_mensual = form_data_1.salario_medio.to(float) / 12
+    salario_mensual = global_state.salario_mensual_neto_pilar2
+
+    salario_anual = salario_mensual * 12
 
 
     pension_primer_pilar = global_state.pension_primer_pilar.to(float)
@@ -141,7 +137,7 @@ def results_pilar2(direction:str=None) -> rx.Component:
 
     ratio_gt_100_component = rx.box(
         rx.vstack(
-            rx.text("El ratio de sustitución es superior al 100%. Esto significa que tu pensión pública es mayor que tu salario medio.",
+            rx.text(f"Tu pensión total sería {(ratio_sust_1.to(rx.Var[float]) + ratio_sust_1.to(rx.Var[float]) - 100):.2f}% mayor que el salario, teniendo en cuenta tus contribuciones al plan.",
                    color="black",
                    text_align="center",
                    width="90%"),
@@ -160,8 +156,7 @@ def results_pilar2(direction:str=None) -> rx.Component:
         width="100%",
         display="flex",
         justify_content="center",
-        padding_top="8em",
-        padding_bottom="4em"
+        padding_bottom="1em"
     )
 
     ratio_lte_100_component = rx.box(
@@ -191,7 +186,7 @@ def results_pilar2(direction:str=None) -> rx.Component:
                     ),
                     rx.hstack(
                         rx.heading("Salario anual:", size="4", color="black"),
-                        rx.text(f"{(salario_mensual * 12):.2f} €/año", color="black"),
+                        rx.text(f"{(salario_anual):.2f} €/año", color="black"),
                         spacing="1",
                         width="100%",
                     ),
@@ -219,6 +214,7 @@ def results_pilar2(direction:str=None) -> rx.Component:
         display="flex",
         justify_content="center",
         margin_bottom="4em",
+        margin_top="3em"
     )
 
     ratio_sustitucion = ratio_sust_1 + ratio_sust_2

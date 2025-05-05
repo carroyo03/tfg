@@ -39,9 +39,7 @@ class AgeState(rx.State):
                 v = int(self.value)
                 # Debug the validation
                 print(f"Validating retirement age: {v}")
-                # Check if the age is within a reasonable range for retirement
-                # In Spain, typical retirement ages are between 60-70
-                return v < 60 or v > 75
+                return v < 64 or v > 75
             except ValueError:
                 print(f"Invalid retirement age format: {self.value}")
                 return True
@@ -82,7 +80,7 @@ class AvgSalaryState(rx.State):
         print("Restableciendo salario medio")
         self.set_value("")
 
-def input_text(title: str, name:str, state:rx.State, type_: str,has_info_button:bool=False, info:str="", color_info_button:str="") -> rx.Component:
+def input_text(title: str, name:str, state:rx.State, type_: str,has_info_button:bool=False, info:str ="", color_info_button:str="") -> rx.Component:
     return rx.vstack(
         rx.form.field(
             rx.cond(

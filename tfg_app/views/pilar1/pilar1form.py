@@ -193,7 +193,6 @@ class FormState(rx.State):
                 state = await self.get_state(GlobalState)
                 state.set_form_data("primer", self.form_data)
                 state.set_pension("primer", pension)
-                print(f"1st ratio: {state.ratio_sustitucion_primer:.2f}")
                 return rx.redirect("/pilar1")
             else:
                 raise ValueError("Pensión o salario mensual inválidos")
@@ -327,8 +326,24 @@ def form1():
                 color_info_button="white",
             ),
             children(),
-            input_text("Edad a la que empezaste a cotizar", "edad_inicio_trabajo", StartAgeState, "number"),
-            input_text("Edad deseada de jubilación", "edad_jubilacion", AgeState, "number"),
+            input_text(
+                title="Edad a la que empezaste a cotizar", 
+                name="edad_inicio_trabajo", 
+                state=StartAgeState, 
+                type_="number",
+                has_info_button=True,
+                info="Edad mínima permitida: 16 años",
+                color_info_button="white"
+            ),
+            input_text(
+                title="Edad deseada de jubilación", 
+                name="edad_jubilacion", 
+                state=AgeState, 
+                type_ = "number",
+                has_info_button=True,
+                info="Edad mínima permitida para cobrar pensión pública: 64 años",
+                color_info_button='white'
+            ),
             tipo_regimen(),
             # Botones con position: sticky
             rx.stack(

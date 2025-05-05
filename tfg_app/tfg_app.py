@@ -338,13 +338,6 @@ def form_pilar2():
                                 ),
                                 rx.hstack(
                                     rx.box(
-                                        form2(),
-                                        width=["45%", "40%", "35%"],
-                                        # Responsive width that decreases as screen size increases
-                                        min_width="300px",  # Ensure form has minimum width
-                                        margin_right="3rem",  # Space between form and results
-                                    ),
-                                    rx.box(
                                         responsive_results_accordion(title="Resultados de la pensión pública", results_component=results_pilar1(), is_mobile=False),
                                         width='100%',
                                         min_width="450px",
@@ -352,6 +345,12 @@ def form_pilar2():
                                         align="flex-start",
                                         justify="center",
                                         height="auto",
+                                    ),
+                                    rx.box(
+                                        form2(),
+                                        width="100%",
+                                        # Responsive width that decreases as screen size increases
+                                        min_width="300px",  # Ensure form has minimum width
                                     ),
                                     width="100%",
                                     max_width="100%",
@@ -409,7 +408,7 @@ def pilar2():
                         text_align="center",
                         width="100%",
                         padding_top=["1.5rem", "2rem", "3rem"],
-                        margin_bottom=rx.breakpoints(initial='1.5em', sm='2em', md='3em')
+                        margin_bottom='4rem'
                     ),
                     width="100%",
                     position="sticky",
@@ -610,13 +609,6 @@ def form_pilar3():
                                 ),
                                 rx.hstack(
                                     rx.box(
-                                        form3(),
-                                        width=["45%", "40%", "35%"],
-                                        # Responsive width that decreases as screen size increases
-                                        min_width="300px",  # Ensure form has minimum width
-                                        margin_right="3rem",  # Space between form and results
-                                    ),
-                                    rx.box(
                                         responsive_results_accordion(title='Resultados hasta ahora', results_component=results_pilar2(), is_mobile=False),
                                         width=["50%", "55%", "60%"],
                                         min_width="450px",
@@ -624,6 +616,12 @@ def form_pilar3():
                                         align="flex-start",
                                         justify="end",
                                         height="auto",
+                                    ),
+                                    rx.box(
+                                        form3(),
+                                        width='100%',
+                                        # Responsive width that decreases as screen size increases
+                                        min_width="300px",  # Ensure form has minimum width
                                     ),
                                     width="100%",
                                     max_width="100%",
@@ -679,7 +677,7 @@ def result():
                         text_align="center",
                         width="100%",
                         padding_top=["1.5rem", "2rem", "3rem"],
-                        margin_bottom=rx.breakpoints(initial='1.5em', sm='2em', md='3em')
+                        margin_bottom='4rem'
                     ),
                     width="100%",
                     position="sticky",

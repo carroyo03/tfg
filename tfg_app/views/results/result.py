@@ -1,3 +1,4 @@
+from ast import Try
 import reflex as rx
 
 
@@ -35,7 +36,7 @@ def show_ratio_pie_chart(ratio_sust_1,ratio_sust_2,ratio_sust_3) -> rx.Component
         rx.box(
             rx.hstack(
                 rx.heading("Ratio de Sustitución", size="4", color="black", aria_label="Ratio de Sustitución"),
-                info_button(color="silver",info="El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión."),
+                info_button(color="black",info="El ratio de sustitución es el porcentaje de tu salario medio que representa la pensión."),
                 spacing="2",
                 align="center"
             ),
@@ -120,29 +121,42 @@ def show_pension_salary_comparison3(pension_primer_pilar:float, pension_segundo_
 def final_results() -> rx.Component:
 
     # Salario
-    salario_actual = FormState.salario_medio
-    salario_mensual = redondear(salario_actual/12)
+    salario_mensual = GlobalState.salario_mensual_neto_pilar3
+    salario_actual = salario_mensual * 12
 
     # 1er pilar
     pension_primer_pilar = GlobalState.pension_primer_pilar
     pension_1p_anual = GlobalState.pension_anual_primer
-    ratio_sust_1 = GlobalState.ratio_sustitucion_primer
+    try:
+        ratio_sust_1 = pension_1p_anual / salario_actual * 100
+    except Exception:
+        ratio_sust_1 = 0
 
     # 2o pilar
     pension_segundo_pilar = GlobalState.pension_segundo_pilar
     pension_2p_anual = GlobalState.pension_anual_segundo
-    ratio_sust_2 = GlobalState.ratio_sustitucion_segundo
+    try:
+        ratio_sust_2 = pension_2p_anual / salario_actual * 100
+    except Exception:
+        ratio_sust_2 = 0
+
     
     # 3er pilar
     pension_tercer_pilar = GlobalState.pension_tercer_pilar.to(float)
     pension_3p_anual = redondear(pension_tercer_pilar) * 12
-    ratio_sust_3 = GlobalState.ratio_sustitucion_tercer
-    
-    ratio_total = GlobalState.ratio_sustitucion_total
+        
+    try:
+        ratio_sust_3 = pension_3p_anual / salario_actual * 100
+    except Exception:
+        ratio_sust_3 = 0
+    # total
+    pension_mensual_total = pension_primer_pilar + pension_segundo_pilar + pension_tercer_pilar
+    pension_anual_total = pension_1p_anual + pension_2p_anual + pension_3p_anual
+    ratio_total = ratio_sust_1 + ratio_sust_2 + ratio_sust_3
     
     ratio_gt_100_component = rx.box(
         rx.vstack(
-            rx.text(f"Tu pensión es {ratio_total.to(rx.Var[float])- 100} % superior al salario.",
+            rx.text(f"Tu pensión es {(ratio_total.to(rx.Var[float])- 100):.2f} % superior al salario neto, tras considerar las aportaciones al plan de empresa y privado.",
                    color="black",
                    text_align="center",
                    width="90%"),
@@ -161,7 +175,6 @@ def final_results() -> rx.Component:
         width="100%",
         display="flex",
         justify_content="center",
-        padding_top="2em",
         padding_bottom="4em"
     )
 
@@ -171,13 +184,13 @@ def final_results() -> rx.Component:
                 rx.vstack(
                     rx.hstack(
                         rx.heading("Pensión mensual:", size="4", color="black"),
-                        rx.text(f"{redondear(pension_primer_pilar + pension_segundo_pilar + pension_tercer_pilar)} € / mes", color="black"),
+                        rx.text(f"{redondear(pension_mensual_total)} € / mes", color="black"),
                         spacing="1",
                         width="100%",
                     ),
                     rx.hstack(
                         rx.heading("Pensión anual:", size="4", color="black"),
-                        rx.text(f"{redondear(pension_1p_anual + pension_2p_anual + pension_3p_anual)} € / año", color="black"),
+                        rx.text(f"{redondear(pension_anual_total)} € / año", color="black"),
                         spacing="1",
                         width="100%",
                     ),

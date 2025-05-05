@@ -103,7 +103,7 @@ async def calcular_pension_2p(data: dict):
         aportacion_empleador=form_data.aportacion_empresa,
         edad_jubilacion=form_data.prev_form.edad_jubilacion_deseada,
         periodo_aportacion_annos=annos_por_trabajar(edad_actual, form_data.prev_form.edad_jubilacion_deseada),
-        rentabilidad_anual_esperada=form_data.rentabilidad_2/100  # ¡habrá que cambiar esto
+        rentabilidad_anual_esperada=form_data.rentabilidad_2/100
     )
     return round(pension_segundo_pilar, 2)
 
@@ -116,7 +116,7 @@ async def calcular_pension_3p(data:dict):
     pension_tercer_pilar = calcular_pension_tercer_pilar(
         aportacion_periodica=form_data.aportacion_empleado_3p,
         edad_jubilacion=first_form_data.edad_jubilacion_deseada,
-        rentabilidad_anual_esperada=form_data.rentabilidad_3/100,  #Cambiar esto
+        rentabilidad_anual_esperada=form_data.rentabilidad_3/100,
         periodo_aportacion_annos=annos_por_trabajar(edad_actual, first_form_data.edad_jubilacion_deseada)
     )
 

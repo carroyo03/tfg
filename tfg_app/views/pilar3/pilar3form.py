@@ -1,6 +1,6 @@
 import reflex as rx
 from tfg_app.backend.pens import RatioSust3
-from tfg_app.components.slider import rentabilidad_estimada
+from tfg_app.components.slider import tipo_riesgo_pension
 from tfg_app.styles.colors import Color as color
 from tfg_app.styles.styles import Size as size
 from tfg_app.components.input_text import input_text
@@ -37,7 +37,6 @@ class Form3State(rx.State):
             pension = await self.send_data_to_backend(form_data)
             global_state.set_form_data('tercer',self.form_data)
             global_state.set_pension("tercer",pension)
-            print(f"3rd ratio: {global_state.ratio_sustitucion_tercer}")
             return rx.redirect("/results")
         except Exception as e:
             logging.error(f"Error en handle_submit: {e}")
@@ -91,10 +90,23 @@ def form3(is_mobile:bool=False):
     else:
         width_button_var='100%'
         padding_value=["1em", "1.5em", "2em"]
+    info_content= (
+        "Es el monto en euros que decides aportar cada año a tu pensión privada.\n\n" 
+        "Cuanto más aportes, mayor será tu pensión futura, pero asegúrate de que se ajuste a tu presupuesto.\n\n" 
+        "Por ejemplo, una aportación de 1000 € al año puede crecer con el tiempo según el riesgo de inversión que elijas."
+    )
     return rx.form(
         rx.vstack(
-            input_text("Aportación anual (€)","aportacion_empleado_3p", Employee3PState,"number"),
-            rentabilidad_estimada(3),
+            input_text(
+                title = "Aportación anual (€)",
+                name= "aportacion_empleado_3p", 
+                state= Employee3PState,
+                type_="number",
+                has_info_button=True,
+                info=info_content,
+                color_info_button="white"
+            ),
+            tipo_riesgo_pension(3),
             rx.stack(
                 rx.button(
                     'Limpiar',

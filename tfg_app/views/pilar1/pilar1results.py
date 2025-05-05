@@ -87,10 +87,10 @@ def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
     )
 
 
-def show_pension_salary_comparison(pension_primer_pilar:float, salario_anual) -> rx.Component:
+def show_pension_salary_comparison(pension_primer_pilar:float, salario_mensual) -> rx.Component:
 
     data = [
-        {"name": "Comparación", "Pensión pública": pension_primer_pilar, "Salario": salario_anual},
+        {"name": "Comparación", "Pensión pública": pension_primer_pilar, "Salario": salario_mensual},
     ]
     return rx.recharts.bar_chart(
         rx.recharts.cartesian_grid(),
@@ -126,10 +126,12 @@ def results_pilar1(direction:str="") -> rx.Component:
         return rx.text('Datos no disponibles', color='red', font_size='1.2em', text_align='center')
 
     pension_primer_pilar = GlobalState.pension_primer_pilar
+    print(f"Pension primer GS{pension_primer_pilar.to(rx.Var[float])}")
     salario_anual = GlobalState.salario_anual
     salario_mensual = GlobalState.salario_mensual
+    print(f"Salario GS{salario_mensual.to(rx.Var[float])}")
     pension_1p_anual = GlobalState.pension_anual_primer
-    ratio_sustitucion = GlobalState.ratio_sustitucion_primer
+    ratio_sustitucion = pension_primer_pilar / salario_mensual * 100
 
 
     ratio_gt_100_component = rx.box(
@@ -140,7 +142,7 @@ def results_pilar1(direction:str="") -> rx.Component:
                 text_align="center",
                 width=["100%", "90%"],  # Responsive width
             ),
-            show_pension_salary_comparison(pension_primer_pilar, salario_anual),
+            show_pension_salary_comparison(pension_primer_pilar, salario_mensual),
             leyenda1(pension_is_gt_salary=True),
             width="100%",
             spacing="5",
