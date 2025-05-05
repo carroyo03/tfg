@@ -7,6 +7,7 @@ from tfg_app.components.gender import gender, GenderState
 from tfg_app.global_state import GlobalState
 from tfg_app.components.children import children, RadioGroupState, ChildrenNumberState
 from tfg_app.components.tipo_regimen import tipo_regimen, RadioGroup1State, TypeRegState, LagsCotState
+from tfg_app.backend.main import calcular_pension_1p
 import pandas as pd #type: ignore
 import datetime
 import logging
@@ -21,6 +22,10 @@ class FormState(rx.State):
     salario_mensual: float = 0.0
 
     def update_salario_mensual(self):
+        """
+        The function `update_salario_mensual` updates the monthly salary based on the average salary
+        provided in the form data.
+        """
         print(f"Updating average salary to {self.form_data.get('salario_medio')} or {self.form_data['salario_medio']}")
         # Asegurarse de que salario_medio existe y es un número válido
         if 'salario_medio' in self.form_data and self.form_data['salario_medio'] is not None:
@@ -48,12 +53,20 @@ class FormState(rx.State):
     
     @rx.var
     def stored_form_data(self) -> dict:
-        """Una computed var que maneja los datos del formulario."""
+        """
+        The function `stored_form_data` returns the form data stored in a dictionary.
+        :return: A dictionary containing the form data is being returned.
+        """
         return self.form_data
 
     @rx.var
     async def invalid_form_data(self) -> bool:
-        """Returns True if the form has invalid or empty required fields."""
+        """
+        This function checks for invalid or empty required fields in a form and returns True if any
+        issues are found.
+        :return: The function `invalid_form_data` returns a boolean value. It returns `True` if the form
+        has invalid or empty required fields, and `False` if the form is valid.
+        """
         try:
             # Debug output
             print("Checking form validation...")
@@ -145,6 +158,18 @@ class FormState(rx.State):
     
     @rx.event
     async def handle_submit(self, form_data: dict):
+        """
+        The function `handle_submit` processes form data, updates salary information, sends data to a
+        backend, and handles errors appropriately.
+        
+        :param form_data: The `form_data` parameter in the `handle_submit` function is a dictionary
+        containing data submitted from a form. The function processes this data, manipulates it, and
+        sends it to a backend service. Here are some key operations performed on the `form_data`
+        dictionary in the function:
+        :type form_data: dict
+        :return: The code snippet is returning a window alert message "Error al procesar el formulario"
+        in case of an exception occurring during the form submission handling process.
+        """
         try:
             print("Handling form submission...")
             # Need to await the async computed variable
@@ -178,6 +203,12 @@ class FormState(rx.State):
 
     @rx.event
     async def clear_form(self):
+        """
+        The `clear_form` function in Python clears form data and resets various states before forcing a
+        frontend update by reloading the page.
+        :return: The code is returning a call to a JavaScript function that forces the frontend to
+        reload the page by calling `window.location.reload();`.
+        """
 
         self.is_loading = True
 
@@ -203,6 +234,10 @@ class FormState(rx.State):
         """
 
     def default_fields(self):
+        """
+        The function `default_fields` yields a series of state objects representing default fields for a
+        form.
+        """
         yield DateState
         yield GenderState
         yield RadioGroupState
@@ -215,27 +250,22 @@ class FormState(rx.State):
         yield AvgSalaryState
 
     async def send_data_to_backend(self, form_data: dict):
-        from tfg_app.backend.main import calcular_pension_1p
+        """
+        This Python async function processes form data, filters it into a DataFrame, calculates a
+        pension using the filtered data, and logs relevant information.
+        
+        :param form_data: The code you provided is an asynchronous function that sends data to a backend
+        for pension calculation. It takes a dictionary `form_data` as input, processes the data, and
+        then calls the `calcular_pension_1p` function from the backend to calculate the pension based on
+        the provided data
+        :type form_data: dict
+        :return: The function `send_data_to_backend` is returning the calculated pension amount after
+        processing the form data and sending it to the backend for calculation.
+        """
         try:
-            """
-            df_users = pd.read_csv('usuarios.csv', encoding='unicode_escape', sep=';')
-            df_users['fecha_nacimiento'] = pd.to_datetime(df_users['fecha_nacimiento'], format='%d-%m-%Y')
-            logging.info("DataFrame cargado: %s", df_users)
- """
+
             logging.info("Valores de form_data: %s", form_data)
 
-            """
-            df = df_users[
-                (df_users['fecha_nacimiento'] == datetime.datetime.strptime(form_data['fecha_nacimiento'], "%d/%m/%Y")) &
-                (df_users['genero'] == form_data['gender']) &
-                (
-                    (df_users['tiene_hijos'] == 'No') |
-                    (df_users['n_hijos'] == int(form_data['n_hijos'])) |
-                    ((df_users['n_hijos'] >= 4) & (form_data['n_hijos'] == '4+'))
-                ) &
-                (df_users['edad_jubilacion_deseada'] == int(form_data['edad_jubilacion']))
-            ]
-            """
 
             df= pd.DataFrame()
             df["fecha_nacimiento"] = [datetime.datetime.strptime(form_data['fecha_nacimiento'], "%d/%m/%Y")]
@@ -275,6 +305,14 @@ class FormState(rx.State):
             raise e
 
 def form1():
+    """Creates a form with various input fields and buttons, styled using reactive
+    programming in Python.
+
+    Returns:A form component with various input fields, buttons, and styling properties. The form
+    includes fields for date of birth, gender, average salary, age started working, desired retirement
+    age, type of regime, and buttons for clearing the form and submitting it. The form has responsive
+    design properties and validation for form data.
+    """
     return rx.form(
         rx.vstack(
             date_picker("Fecha de nacimiento"),
