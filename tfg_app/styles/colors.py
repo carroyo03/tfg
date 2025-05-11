@@ -16,3 +16,4 @@ class LegendColor(enum):
     LEGEND_2 = "#D3D3D3"
     LEGEND_1_1= "#FFA500"
     LEGEND_1_2= "#00D0FF"
+    LEGEND_3 = 'navy'

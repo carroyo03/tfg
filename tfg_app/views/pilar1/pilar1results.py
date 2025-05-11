@@ -90,20 +90,16 @@ def show_ratio_pie_chart(ratio_sustitucion) -> rx.Component:
 def show_pension_salary_comparison(pension_primer_pilar:float, salario_mensual) -> rx.Component:
 
     data = [
-        {"name": "Comparación", "Pensión pública": pension_primer_pilar, "Salario": salario_mensual},
+        {"name": "Pensión pública", "valor": pension_primer_pilar, "fill": legcolor.LEGEND_3.value},
+        {"name":"Salario", "valor": salario_mensual, "fill": legcolor.LEGEND_2.value},
     ]
     return rx.recharts.bar_chart(
         rx.recharts.cartesian_grid(),
         rx.recharts.bar(
-            data_key="Pensión pública",
-            stroke=legcolor.LEGEND_1.value,
-            fill=legcolor.LEGEND_1.value,
+            data_key="valor",
+            stroke="fill",
+            fill="fill",
 
-        ),
-        rx.recharts.bar(
-            data_key="Salario",
-            stroke=legcolor.LEGEND_2.value,
-            fill=legcolor.LEGEND_2.value,
         ),
         rx.recharts.x_axis(
             data_key="name",

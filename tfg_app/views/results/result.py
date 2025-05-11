@@ -22,6 +22,36 @@ import math
 def redondear(numero):
     return math.ceil(numero*100)/100
 
+TOOLTIP_PROPS = {
+    "separator": "",
+    "cursor": False,
+    "is_animation_active": False,
+    "label_style": {"fontWeight": "500"},
+    "item_style": {
+        "color": "currentColor",
+        "display": "flex",
+        "paddingBottom": "0px",
+        "justifyContent": "space-between",
+        "textTransform": "capitalize",
+    },
+    "content_style": {
+        "borderRadius": "5px",
+        "boxShadow": "0px 24px 12px 0px light-dark(rgba(28, 32, 36, 0.02), rgba(0, 0, 0, 0.00)), 0px 8px 8px 0px light-dark(rgba(28, 32, 36, 0.02), rgba(0, 0, 0, 0.00)), 0px 2px 6px 0px light-dark(rgba(28, 32, 36, 0.02), rgba(0, 0, 0, 0.00))",
+        "fontFamily": "var(--font-instrument-sans)",
+        "fontSize": "0.875rem",
+        "lineHeight": "1.25rem",
+        "fontWeight": "500",
+        "letterSpacing": "-0.01rem",
+        "minWidth": "8rem",
+        "width": "200px",
+        "padding": "0.375rem 0.625rem",
+        "position": "relative",
+        "background": rx.color("gray", 1),
+        "borderColor": rx.color("gray", 4),
+    },
+}
+
+
 
 def show_ratio_pie_chart(ratio_sust_1,ratio_sust_2,ratio_sust_3) -> rx.Component:
     # Prepara los datos del gráfico
@@ -77,43 +107,33 @@ def show_ratio_pie_chart(ratio_sust_1,ratio_sust_2,ratio_sust_3) -> rx.Component
     )
 
 def show_pension_salary_comparison3(pension_primer_pilar:float, pension_segundo_pilar:float,pension_tercer_pilar:float,salario_actual:float) -> rx.Component:
-
+    v1 = pension_primer_pilar
+    v2 = pension_segundo_pilar
+    v3 = pension_tercer_pilar
+    v4 = salario_actual
     data = [
-        {"name": "Comparación", "Pensión pública": pension_primer_pilar, "Pensión de empresa": pension_segundo_pilar, "Pensión privada": pension_tercer_pilar,"Salario": salario_actual},
+        {"name": "Pensión pública", "valor": v1, "fill": legcolor.LEGEND_1.value},
+        {'name': "Pensión de empresa", "valor": v2, "fill": legcolor.LEGEND_1_1.value},
+        {'name': "Pensión privada", "valor": v3, "fill": legcolor.LEGEND_1_2.value},
+        {'name': 'Pensión total', 'valor': v1 + v2 + v3, "fill": legcolor.LEGEND_3.value},
+        {'name': 'Salario', "valor": round(v4, 2), 'fill': legcolor.LEGEND_2.value},  # Data for the salary bar group
     ]
     return rx.recharts.bar_chart(
         rx.recharts.cartesian_grid(),
         rx.recharts.bar(
-            data_key="Pensión pública",
-            stroke=legcolor.LEGEND_1.value,
-            fill=legcolor.LEGEND_1.value,
-            stack_id="pension"
-        ),
-        rx.recharts.bar(
-            data_key="Pensión de empresa",
-            stroke=legcolor.LEGEND_1_1.value,
-            fill=legcolor.LEGEND_1_1.value,
-            stack_id="pension"
-        ),
-        rx.recharts.bar(
-            data_key="Pensión privada",
-            stroke=legcolor.LEGEND_1_2.value,
-            fill=legcolor.LEGEND_1_2.value,
-            stack_id="pension"
-        ),
-        rx.recharts.bar(
-            data_key="Salario",
-            stroke=legcolor.LEGEND_2.value,
-            fill=legcolor.LEGEND_2.value,
+            data_key="valor",
+            fill="fill",
+            stroke='fill'
         ),
         rx.recharts.x_axis(
             data_key="name",
+            hide = True
         ),
         rx.recharts.y_axis(),
-        rx.recharts.graphing_tooltip(),
+        rx.recharts.graphing_tooltip(**TOOLTIP_PROPS),
         data=data,
-        width="100%",
-        height=300,
+        width=700,
+        height=500,
     )
 
 

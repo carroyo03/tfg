@@ -1,6 +1,5 @@
 import datetime
 import logging
-from typing import override
 import warnings
 
 import pandas as pd #type:ignore

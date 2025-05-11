@@ -13,6 +13,34 @@ def redondear(numero):
     except Exception:
         return 0.0
 
+TOOLTIP_PROPS = {
+    "separator": "",
+    "cursor": False,
+    "is_animation_active": False,
+    "label_style": {"fontWeight": "500"},
+    "item_style": {
+        "color": "currentColor",
+        "display": "flex",
+        "paddingBottom": "0px",
+        "justifyContent": "space-between",
+        "textTransform": "capitalize",
+    },
+    "content_style": {
+        "borderRadius": "5px",
+        "boxShadow": "0px 24px 12px 0px light-dark(rgba(28, 32, 36, 0.02), rgba(0, 0, 0, 0.00)), 0px 8px 8px 0px light-dark(rgba(28, 32, 36, 0.02), rgba(0, 0, 0, 0.00)), 0px 2px 6px 0px light-dark(rgba(28, 32, 36, 0.02), rgba(0, 0, 0, 0.00))",
+        "fontFamily": "var(--font-instrument-sans)",
+        "fontSize": "0.875rem",
+        "lineHeight": "1.25rem",
+        "fontWeight": "500",
+        "letterSpacing": "-0.01rem",
+        "minWidth": "8rem",
+        "width": "200px",
+        "padding": "0.375rem 0.625rem",
+        "position": "relative",
+        "background": rx.color("gray", 1),
+        "borderColor": rx.color("gray", 4),
+    },
+}
 
 
 def show_ratio_pie_chart2(ratio_sust_1, ratio_sust_2) -> rx.Component:
@@ -47,7 +75,7 @@ def show_ratio_pie_chart2(ratio_sust_1, ratio_sust_2) -> rx.Component:
                 rx.recharts.pie(
                     outer_radius="50%",
                 ),
-                rx.recharts.graphing_tooltip(),
+                rx.recharts.graphing_tooltip(**TOOLTIP_PROPS),
                 width="100%",
                 height=225,
                 margin_top="-1em"
@@ -72,34 +100,26 @@ def show_pension_salary_comparison2(pension_primer_pilar: float, pension_segundo
     v2 = pension_segundo_pilar
     v3 = salario_mensual
     data = [
-        {"name": "Comparación", "Pensión pública": v1, "Pensión de empresa": v2, "Salario": v3},
+        {"name": "Pensión pública", "valor": v1, "fill": legcolor.LEGEND_1.value},
+        {'name':"Pensión de empresa", "valor": v2, "fill": legcolor.LEGEND_1_1.value},
+        {'name':'Pensión total', 'valor': v1 + v2, "fill": legcolor.LEGEND_3.value},
+        {'name': 'Salario',"valor": round(v3,2), 'fill': legcolor.LEGEND_2.value}, # Data for the salary bar group
     ]
     return rx.recharts.bar_chart(
         rx.recharts.cartesian_grid(),
         rx.recharts.bar(
-            data_key="Pensión pública",
-            stroke=legcolor.LEGEND_1.value,
-            fill=legcolor.LEGEND_1.value,
-            stack_id="pension"
-        ),
-        rx.recharts.bar(
-            data_key="Pensión de empresa",
-            stroke=legcolor.LEGEND_1_1.value,
-            fill=legcolor.LEGEND_1_1.value,
-            stack_id="pension"
-        ),
-        rx.recharts.bar(
-            data_key="Salario",
-            stroke=legcolor.LEGEND_2.value,
-            fill=legcolor.LEGEND_2.value,
+            data_key="valor",
+            fill="fill",
+            stroke='fill'
         ),
         rx.recharts.x_axis(
             data_key="name",
+            hide = True
         ),
         rx.recharts.y_axis(),
-        rx.recharts.graphing_tooltip(),
+        rx.recharts.graphing_tooltip(**TOOLTIP_PROPS),
         data=data,
-        width="100%",
+        width='100%',
         height=300,
     )
 
@@ -137,14 +157,15 @@ def results_pilar2(direction:str=None) -> rx.Component:
 
     ratio_gt_100_component = rx.box(
         rx.vstack(
-            rx.text(f"Tu pensión total sería {(ratio_sust_1.to(rx.Var[float]) + ratio_sust_1.to(rx.Var[float]) - 100):.2f}% mayor que el salario, teniendo en cuenta tus contribuciones al plan.",
+            rx.text(f"Tu pensión total sería {(ratio_sust_1.to(rx.Var[float]) + ratio_sust_2.to(rx.Var[float]) - 100):.2f}% mayor que el salario, teniendo en cuenta tus contribuciones al plan.",
                    color="black",
                    text_align="center",
                    width="90%"),
             show_pension_salary_comparison2(pension_primer_pilar, pension_segundo_pilar, salario_mensual),
             leyenda2(pension_is_gt_salary=True),
             width="100%",
-            spacing="5",
+            height="auto",
+            spacing="1",
             align_items="center",
             justify="center",
             padding="2em",
