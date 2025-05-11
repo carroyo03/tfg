@@ -10,9 +10,6 @@ env:
   COGNITO_RESPONSE_TYPE: ${{ secrets.COGNITO_RESPONSE_TYPE }}
   COGNITO_SCOPE: ${{ secrets.COGNITO_SCOPE }}
   COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
-with:
-  auth_token: ${{ secrets.REFLEX_AUTH_TOKEN }}
-  project_id: ${{ secrets.REFLEX_PROJECT_ID }}
 jobs:
   test:
     runs-on: ubuntu-latest
