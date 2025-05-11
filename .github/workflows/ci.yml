@@ -1,5 +1,18 @@
 name: CI
 on: [push]
+env:
+  COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+  COGNITO_CLIENT_SECRET: ${{ secrets.COGNITO_CLIENT_SECRET }}
+  COGNITO_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}
+  COGNITO_LOGOUT_URI: ${{ secrets.COGNITO_LOGOUT_URI }}
+  COGNITO_REDIRECT_URI: ${{ secrets.COGNITO_REDIRECT_URI }}
+  COGNITO_REGION: ${{ secrets.COGNITO_REGION }}
+  COGNITO_RESPONSE_TYPE: ${{ secrets.COGNITO_RESPONSE_TYPE }}
+  COGNITO_SCOPE: ${{ secrets.COGNITO_SCOPE }}
+  COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+with:
+  auth_token: ${{ secrets.REFLEX_AUTH_TOKEN }}
+  project_id: ${{ secrets.REFLEX_PROJECT_ID }}
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -11,16 +24,3 @@ jobs:
       - run: pip install uv
       - run: python -m uv pip install -r requirements.txt
       - run: python -m unittest discover tfg_app/tests
-        env:
-          COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
-          COGNITO_CLIENT_SECRET: ${{ secrets.COGNITO_CLIENT_SECRET }}
-          COGNITO_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}
-          COGNITO_LOGOUT_URI: ${{ secrets.COGNITO_LOGOUT_URI }}
-          COGNITO_REDIRECT_URI: ${{ secrets.COGNITO_REDIRECT_URI }}
-          COGNITO_REGION: ${{ secrets.COGNITO_REGION }}
-          COGNITO_RESPONSE_TYPE: ${{ secrets.COGNITO_RESPONSE_TYPE }}
-          COGNITO_SCOPE: ${{ secrets.COGNITO_SCOPE }}
-          COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
-        with:
-          auth_token: ${{ secrets.REFLEX_AUTH_TOKEN }}
-          project_id: ${{ secrets.REFLEX_PROJECT_ID }}
