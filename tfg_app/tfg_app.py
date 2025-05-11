@@ -13,7 +13,6 @@ from tfg_app.views.pilar2.pilar2results import results_pilar2
 from tfg_app.styles.styles import Size as size
 from tfg_app.views.login.login_form import AppState, sign_in_v1
 from tfg_app.styles.styles import BASE_STYLE
-from tfg_app.backend.predictions.print_predictions import ResultState
 from tfg_app.components.accordion import responsive_results_accordion
 
 
@@ -663,9 +662,29 @@ def result():
         rx.cond(
             rx.State.is_hydrated,
             rx.vstack(
+                rx.hstack(
                 rx.cond(
                     AppState.signed_in,
                     logout_button(),
+                ),
+                rx.button(
+                    rx.hstack(
+                        rx.icon('arrow-left', color='white', size=16),
+                        'Atrás',
+                        spacing='2'
+                    ),
+                    on_click=rx.redirect("/form3"),
+                    color='white',
+                    background_color='transparent',
+                    border='1px solid',
+                    box_shadow="0 .25rem .375rem #0003",
+                    width="auto",
+                    height="auto",
+                    position="relative",
+                    top="1rem",
+                    left="1rem",
+                    font_size=["0.9em", "1em", "1.1em"],
+                    _hover={"bg": colors.Color.SECONDARY.value, "color": "white"},
                 ),
                 rx.box(
                     rx.heading(
@@ -686,6 +705,7 @@ def result():
                     #background_color="rgba(0, 51, 141, 0.9)",
                     #backdrop_filter="blur(5px)",
                 ),
+                ),
                 rx.box(
                     rx.box(
                         final_results(),
@@ -695,76 +715,6 @@ def result():
                         margin_top=["-2.3rem", "-3.3rem", "-4.3rem"],
                         margin_bottom='4rem',
                         padding_x=["0.5rem", "0.8rem", "1rem"],
-                    ),
-                ),
-                rx.mobile_only(
-                    rx.box(
-                        rx.center(
-                            rx.button(
-                                "Atrás",
-                                on_click=rx.redirect("/form3"),
-                                color="white",
-                                background_color="transparent",
-                                border="1px solid",
-                                box_shadow="0 .25rem .375rem #0003",
-                                width=["40%", "30%", "20%"],
-                                height="auto",
-                                font_size=["0.9em", "1em", "1.1em"],
-                            ),
-                            rx.button(
-                                "Imprimir informe",
-                                background_color="white",
-                                color=colors.Color.BACKGROUND.value,
-                                border="1px solid",
-                                box_shadow="0 .25rem .375rem #0003",
-                                width=["40%", "30%", "20%"],
-                                height="auto",
-                                font_size=["0.9em", "1em", "1.1em"],
-                                on_click=ResultState.generate_pdf(Form3State.form_data),
-                            ),
-                            width="100%",
-                            spacing="2",
-                            align="center",
-                            justify="center",
-                        ),
-                        position="sticky",
-                        bottom="0",
-                        width="100%",
-                        background_color="rgba(0, 51, 141, 0.9)",
-                        padding_y="1rem",
-                        z_index="10",
-                        margin_top='-10rem'
-                    ),
-                ),
-                rx.tablet_and_desktop(
-                    rx.center(
-                        rx.button(
-                            "Atrás",
-                            on_click=rx.redirect("/form3"),
-                            color="white",
-                            background_color="transparent",
-                            border="1px solid",
-                            box_shadow="0 .25rem .375rem #0003",
-                            width=["40%", "30%", "20%"],
-                            height="auto",
-                            font_size=["0.9em", "1em", "1.1em"],
-                        ),
-                        rx.button(
-                            "Imprimir informe",
-                            background_color="white",
-                            color=colors.Color.BACKGROUND.value,
-                            border="1px solid",
-                            box_shadow="0 .25rem .375rem #0003",
-                            width=["40%", "30%", "20%"],
-                            height="auto",
-                            font_size=["0.9em", "1em", "1.1em"],
-                            on_click=ResultState.generate_pdf(Form3State.form_data),
-                        ),
-                        width="100%",
-                        margin_top=["-6rem", "-7rem", "-8rem"],
-                        spacing="2",
-                        align="center",
-                        justify="center",
                     ),
                 ),
                 width="100%",

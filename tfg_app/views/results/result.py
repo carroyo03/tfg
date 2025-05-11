@@ -112,10 +112,10 @@ def show_pension_salary_comparison3(pension_primer_pilar:float, pension_segundo_
     v3 = pension_tercer_pilar
     v4 = salario_actual
     data = [
-        {"name": "Pensión pública", "valor": v1, "fill": legcolor.LEGEND_1.value},
-        {'name': "Pensión de empresa", "valor": v2, "fill": legcolor.LEGEND_1_1.value},
-        {'name': "Pensión privada", "valor": v3, "fill": legcolor.LEGEND_1_2.value},
-        {'name': 'Pensión total', 'valor': v1 + v2 + v3, "fill": legcolor.LEGEND_3.value},
+        {"name": "Pensión pública", "valor": round(v1,2), "fill": legcolor.LEGEND_1.value},
+        {'name': "Pensión de empresa", "valor": round(v2,2), "fill": legcolor.LEGEND_1_1.value},
+        {'name': "Pensión privada", "valor": round(v3,2), "fill": legcolor.LEGEND_1_2.value},
+        {'name': 'Pensión total', 'valor': round(v1 + v2 + v3,2), "fill": legcolor.LEGEND_3.value},
         {'name': 'Salario', "valor": round(v4, 2), 'fill': legcolor.LEGEND_2.value},  # Data for the salary bar group
     ]
     return rx.recharts.bar_chart(
@@ -132,8 +132,8 @@ def show_pension_salary_comparison3(pension_primer_pilar:float, pension_segundo_
         rx.recharts.y_axis(),
         rx.recharts.graphing_tooltip(**TOOLTIP_PROPS),
         data=data,
-        width=700,
-        height=500,
+        width='100%',
+        height=300,
     )
 
 

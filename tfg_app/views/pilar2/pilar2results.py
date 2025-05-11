@@ -100,9 +100,9 @@ def show_pension_salary_comparison2(pension_primer_pilar: float, pension_segundo
     v2 = pension_segundo_pilar
     v3 = salario_mensual
     data = [
-        {"name": "Pensión pública", "valor": v1, "fill": legcolor.LEGEND_1.value},
-        {'name':"Pensión de empresa", "valor": v2, "fill": legcolor.LEGEND_1_1.value},
-        {'name':'Pensión total', 'valor': v1 + v2, "fill": legcolor.LEGEND_3.value},
+        {"name": "Pensión pública", "valor": round(v1,2), "fill": legcolor.LEGEND_1.value},
+        {'name':"Pensión de empresa", "valor": round(v2,2), "fill": legcolor.LEGEND_1_1.value},
+        {'name':'Pensión total', 'valor': round(v1 + v2,2), "fill": legcolor.LEGEND_3.value},
         {'name': 'Salario',"valor": round(v3,2), 'fill': legcolor.LEGEND_2.value}, # Data for the salary bar group
     ]
     return rx.recharts.bar_chart(

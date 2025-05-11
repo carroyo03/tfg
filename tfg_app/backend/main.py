@@ -6,7 +6,6 @@ import datetime
 import reflex as rx
 import torch #type:ignore
 import torch.nn as nn #type:ignore
-from tfg_app.backend.predictions.neural_network import PensionPredictor, preprocess_input, get_recommendations #type:ignore
 from fastapi import FastAPI, Request
 
 fastapi_app = FastAPI()
@@ -122,24 +121,3 @@ async def calcular_pension_3p(data:dict):
 
     return round(pension_tercer_pilar, 2)
 
-# ... (el resto del archivo main.py sigue igual)
-
-async def get_pension_recommendations(data: dict):
-    try:
-        print(f"Datos recibidos en get_pension_recommendations: {data}")  # Log para depurar
-        model = PensionPredictor(input_size=10, hidden_size=64, output_size=4)
-        model.load_state_dict(torch.load("pension_model.pth"))
-        model.eval()
-        with torch.no_grad():
-            inputs = preprocess_input(data)
-            if inputs is None:
-                print("preprocess_input devolvió None. Verifica los datos de entrada.")
-                return [("No se pudieron generar recomendaciones debido a datos inválidos", 0.0)]
-            print(f"Inputs generados: {inputs}")  # Log para depurar
-            scores = model(inputs)
-            print(f"Scores generados: {scores}")  # Log para depurar
-            recommendations = get_recommendations(scores)
-            return recommendations
-    except Exception as e:
-        print(f"Error al generar recomendaciones: {e}")
-        return [("Error al generar recomendaciones", 0.0)]
