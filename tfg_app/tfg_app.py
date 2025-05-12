@@ -178,7 +178,7 @@ def pilar1():
                         width=rx.breakpoints(initial="80%", sm="70%", md="60%"),
                         height="auto",
                         font_size=["0.9em", "1em", "1.1em"],  # Responsive font size
-                        margin_bottom="5%"
+                        margin_bottom="5%",
                     ),
                     width="100%",
                     spacing="2",
@@ -686,7 +686,7 @@ def result():
                     font_size=["0.9em", "1em", "1.1em"],
                     _hover={"bg": colors.Color.SECONDARY.value, "color": "white"},
                 ),
-                rx.box(
+                rx.center(
                     rx.heading(
                         "Resultados",
                         color="white",
@@ -696,12 +696,13 @@ def result():
                         text_align="center",
                         width="100%",
                         padding_top=["1.5rem", "2rem", "3rem"],
-                        margin_bottom='4rem'
+                        margin_bottom='4rem',
                     ),
                     width="100%",
                     position="sticky",
                     top="0",
                     z_index="1",
+
                     #background_color="rgba(0, 51, 141, 0.9)",
                     #backdrop_filter="blur(5px)",
                 ),

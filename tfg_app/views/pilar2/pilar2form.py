@@ -29,6 +29,23 @@ class Form2State(rx.State):
         """Una computed var que maneja los datos del formulario."""
         return self.form_data
 
+    @rx.var
+    async def invalid_form_data(self) -> bool:
+        try:
+            company_2p_state = await self.get_state(Company2PState)
+            if company_2p_state.empty_value or company_2p_state.invalid_value:
+                return True
+
+            employee_2p_state = await self.get_state(Employee2PState)
+            if not employee_2p_state.value.lower().startswith('s') and employee_2p_state.value.lower() != 'no':
+                return True
+            return False
+        except Exception as e:
+            logging.error(f"Error in form_data: {e}")
+            return True
+
+
+
 
     @rx.event
     async def handle_submit(self, form_data: dict):
@@ -199,7 +216,8 @@ def form2(is_mobile:bool=False):
                         width=width_button_var,
                         border="1px solid",
                         box_shadow="0 .25rem .375rem #0003",
-                        _hover={"bg": color.SECONDARY.value, "color": "white"}
+                        _hover={"bg": color.SECONDARY.value, "color": "white"},
+                        disabled=Form2State.is_loading | Form2State.invalid_form_data,
                 ),
                 
                 width="100%",

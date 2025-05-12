@@ -22,6 +22,17 @@ class Form3State(rx.State):
         """Una computed var que maneja los datos del formulario."""
         return self.form_data
 
+    @rx.var
+    async def invalid_form_data(self) -> bool:
+        try:
+            employee_3p_state = await self.get_state(Employee3PState)
+            if employee_3p_state.empty_value or employee_3p_state.invalid_value:
+                return True
+            return False
+        except Exception as e:
+            logging.error(f"Error in form_data: {e}")
+            return True
+
     @rx.event
     async def handle_submit(self, form_data: dict):
         try:
@@ -126,7 +137,8 @@ def form3(is_mobile:bool=False):
                         width=width_button_var,
                         border="1px solid",
                         box_shadow="0 .25rem .375rem #0003",
-                        _hover={"bg": color.SECONDARY.value, "color": "white"}
+                        _hover={"bg": color.SECONDARY.value, "color": "white"},
+                        disabled=Form3State.is_loading | Form3State.invalid_form_data,
                 ),
                 
                 width="100%",
