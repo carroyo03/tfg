@@ -1,7 +1,7 @@
 from ast import Try
 import reflex as rx
 
-from tfg_app.backend.cache import CacheState
+
 from tfg_app.components.leyenda import leyenda3
 from tfg_app.global_state import GlobalState
 from tfg_app.backend.pens import RatioSust1, RatioSust2, RatioSust3
@@ -133,29 +133,7 @@ def show_pension_salary_comparison3(pension_primer_pilar:float, pension_segundo_
 
 
 def final_results() -> rx.Component:
-    if AppState.signed_in is True and AppState.user_info.get('email'):
-        user_email = AppState.user_info.get('email')
-        cached_results = CacheState.get_cache_results(user_email)
 
-    else:
-        cached_results = CacheState.get_cache_results()
-    if cached_results:
-        print("Using cached results")
-        salario_mensual = cached_results['salario_mensual_neto_pilar3']
-        salario_anual = cached_results['salario_mensual_neto_pilar3'] * 12
-        pension_primer_pilar = cached_results['pension_primer_pilar']
-        pension_1p_anual = cached_results['pension_anual_primer']
-        ratio_sust_1 = cached_results['pension_anual_primer'] / salario_anual * 100
-        pension_segundo_pilar = cached_results['pension_segundo_pilar']
-        pension_2p_anual = cached_results['pension_anual_segundo']
-        ratio_sust_2 = cached_results['pension_anual_segundo'] / salario_anual * 100
-        pension_tercer_pilar = cached_results['pension_tercer_pilar'].to(float)
-        pension_3p_anual = redondear(pension_tercer_pilar) * 12
-        ratio_sust_3 = cached_results['pension_tercer_pilar'].to(float) / salario_anual * 100
-        pension_mensual_total = pension_primer_pilar + pension_segundo_pilar + pension_tercer_pilar
-        pension_anual_total = pension_1p_anual + pension_2p_anual + pension_3p_anual
-        ratio_total = ratio_sust_1 + ratio_sust_2 + ratio_sust_3
-    else:
         # Salario
         salario_mensual = GlobalState.salario_mensual_neto_pilar3
         salario_anual = salario_mensual * 12
@@ -189,25 +167,6 @@ def final_results() -> rx.Component:
         pension_mensual_total = pension_primer_pilar + pension_segundo_pilar + pension_tercer_pilar
         pension_anual_total = pension_1p_anual + pension_2p_anual + pension_3p_anual
         ratio_total = ratio_sust_1 + ratio_sust_2 + ratio_sust_3
-
-        results_to_cache = {
-            'salario_mensual_neto_pilar3': salario_mensual,
-            'salario_anual': salario_anual,
-            'pension_primer_pilar': pension_primer_pilar,
-            'pension_1p_anual': pension_1p_anual,
-            'pension_segundo_pilar': pension_segundo_pilar,
-            'pension_2p_anual': pension_2p_anual,
-            'pension_tercer_pilar': pension_tercer_pilar,
-            'pension_3p_anual': pension_3p_anual,
-            'pension_mensual_total': pension_mensual_total,
-            'pension_anual_total': pension_anual_total,
-            'ratio_sust_1': ratio_sust_1,
-            'ratio_sust_2': ratio_sust_2,
-            'ratio_sust_3': ratio_sust_3,
-            'ratio_total': ratio_total
-        }
-
-        CacheState.cache_results(results_to_cache)
 
 
 
