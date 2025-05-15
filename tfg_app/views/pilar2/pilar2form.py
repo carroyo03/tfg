@@ -93,7 +93,7 @@ class Form2State(rx.State):
             pension = await self.send_data_to_backend(self.form_data)
             
             # Verificar que se obtuvo un valor válido
-            if pension <= 0:
+            if pension < 0:
                 logging.error(f"Pensión calculada inválida: {pension}")
                 return rx.window_alert("Error al calcular la pensión. Por favor, revise los datos ingresados.")
             
