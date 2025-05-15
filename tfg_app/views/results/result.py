@@ -134,137 +134,42 @@ def show_pension_salary_comparison3(pension_primer_pilar:float, pension_segundo_
 
 def final_results() -> rx.Component:
 
-        # Salario
-        salario_mensual = GlobalState.salario_mensual_neto_pilar3
-        salario_anual = salario_mensual * 12
+    # Salario
+    salario_mensual = GlobalState.salario_mensual_neto_pilar3
+    salario_anual = salario_mensual * 12
 
-        # 1er pilar
-        pension_primer_pilar = GlobalState.pension_primer_pilar
-        pension_1p_anual = GlobalState.pension_anual_primer
-        try:
-            ratio_sust_1 = pension_1p_anual / salario_anual * 100
-        except Exception:
-            ratio_sust_1 = 0
+    # 1er pilar
+    pension_primer_pilar = GlobalState.pension_primer_pilar
+    pension_1p_anual = GlobalState.pension_anual_primer
+    try:
+        ratio_sust_1 = pension_1p_anual / salario_anual * 100
+    except Exception:
+        ratio_sust_1 = 0
 
-        # 2o pilar
-        pension_segundo_pilar = GlobalState.pension_segundo_pilar
-        pension_2p_anual = GlobalState.pension_anual_segundo
-        try:
-            ratio_sust_2 = pension_2p_anual / salario_anual * 100
-        except Exception:
-            ratio_sust_2 = 0
-
-
-        # 3er pilar
-        pension_tercer_pilar = GlobalState.pension_tercer_pilar.to(float)
-        pension_3p_anual = redondear(pension_tercer_pilar) * 12
-
-        try:
-            ratio_sust_3 = pension_3p_anual / salario_anual * 100
-        except Exception:
-            ratio_sust_3 = 0
-        # total
-        pension_mensual_total = pension_primer_pilar + pension_segundo_pilar + pension_tercer_pilar
-        pension_anual_total = pension_1p_anual + pension_2p_anual + pension_3p_anual
-        ratio_total = ratio_sust_1 + ratio_sust_2 + ratio_sust_3
+    # 2o pilar
+    pension_segundo_pilar = GlobalState.pension_segundo_pilar
+    pension_2p_anual = GlobalState.pension_anual_segundo
+    try:
+        ratio_sust_2 = pension_2p_anual / salario_anual * 100
+    except Exception:
+        ratio_sust_2 = 0
 
 
+    # 3er pilar
+    pension_tercer_pilar = GlobalState.pension_tercer_pilar.to(float)
+    pension_3p_anual = redondear(pension_tercer_pilar) * 12
 
-    ratio_gt_100_component = rx.box(
-        rx.vstack(
-            rx.text(f"Tu pensión es {(ratio_total.to(rx.Var[float])- 100):.2f} % superior al salario neto, tras considerar las aportaciones al plan de empresa y privado.",
-                   color="black",
-                   text_align="center",
-                   width="90%"),
-            show_pension_salary_comparison3(pension_primer_pilar, pension_segundo_pilar, pension_tercer_pilar, salario_mensual),
-            leyenda3(pension_is_gt_salary=True),
-            width="100%",
-            spacing="5",
-            align_items="center",
-            justify="center",
-            padding="2em",
-            background_color="white",
-            border_radius="md",
-            box_shadow="lg",
-            margin="2em auto",
-        ),
-        width="100%",
-        display="flex",
-        justify_content="center",
-        padding_bottom="4em"
-    )
-
-    ratio_lte_100_component = rx.box(
-        rx.vstack(
-            rx.flex(
-                rx.vstack(
-                    rx.hstack(
-                        rx.heading("Pensión mensual:", size="4", color="black"),
-                        rx.text(f"{redondear(pension_mensual_total)} € / mes", color="black"),
-                        spacing="1",
-                        width="100%",
-                    ),
-                    rx.hstack(
-                        rx.heading("Pensión anual:", size="4", color="black"),
-                        rx.text(f"{redondear(pension_anual_total)} € / año", color="black"),
-                        spacing="1",
-                        width="100%",
-                    ),
-                    width="50%",
-                ),
-                rx.vstack(
-                    rx.hstack(
-                        rx.heading("Salario mensual:", size="4", color="black"),
-                        rx.text(f"{redondear(salario_mensual):.2f} € / mes", color="black"),
-                        spacing="1",
-                        width="100%",
-                    ),
-                    rx.hstack(
-                        rx.heading("Salario anual:", size="4", color="black"),
-                        rx.text(f"{redondear(salario_anual):.2f} € / año", color="black"),
-                        spacing="1",
-                        width="100%",
-                    ),
-                    width="50%",
-                ),
-                display="flex",
-                flex_direction=["column", "row"],
-                justify="between",
-                width="100%",
-                gap="4",
-            ),
-            show_ratio_pie_chart(ratio_sust_1, ratio_sust_2,ratio_sust_3),
-            leyenda3(),
-            align_items="center",
-            justify_content="center",
-            padding="1.5em",
-            border_radius="md",
-            box_shadow="lg",
-            background_color="white",
-            width="90%",
-            max_width="1200px",
-            margin="2em auto",
-            spacing="4"
-        ),
-        width="100%",
-        display="flex",
-        justify_content="center",
-        margin_bottom=rx.breakpoints(initial='4em', sm='5em',md='6em',lg='7em'),
-    )
-
-
-    return rx.cond(
-        ratio_total > 100,
-        ratio_gt_100_component,
-        ratio_lte_100_component
-    )
+    try:
+        ratio_sust_3 = pension_3p_anual / salario_anual * 100
+    except Exception:
+        ratio_sust_3 = 0
     # total
     pension_mensual_total = pension_primer_pilar + pension_segundo_pilar + pension_tercer_pilar
     pension_anual_total = pension_1p_anual + pension_2p_anual + pension_3p_anual
     ratio_total = ratio_sust_1 + ratio_sust_2 + ratio_sust_3
 
 
-    
+
     ratio_gt_100_component = rx.box(
         rx.vstack(
             rx.text(f"Tu pensión es {(ratio_total.to(rx.Var[float])- 100):.2f} % superior al salario neto, tras considerar las aportaciones al plan de empresa y privado.",
@@ -347,7 +252,7 @@ def final_results() -> rx.Component:
         margin_bottom=rx.breakpoints(initial='4em', sm='5em',md='6em',lg='7em'),
     )
 
-    
+
     return rx.cond(
         ratio_total > 100,
         ratio_gt_100_component,
