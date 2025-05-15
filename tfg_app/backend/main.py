@@ -4,8 +4,6 @@ from tfg_app.backend.pens import calcular_base_reguladora, calcular_primer_pilar
 
 import datetime
 import reflex as rx
-import torch #type:ignore
-import torch.nn as nn #type:ignore
 from fastapi import FastAPI, Request
 
 fastapi_app = FastAPI()
