@@ -1,4 +1,3 @@
-# tests/test_simulator.py
 import unittest
 from tfg_app.backend.main import calcular_pension_1p, calcular_pension_2p, calcular_pension_3p
 import asyncio
