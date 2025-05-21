@@ -416,70 +416,49 @@ def obtener_esperanza_vida_jub(edad_jubilacion):
 def calcular_pension_segundo_pilar(aportacion_empleador, aportacion_empleado_voluntaria, salario_anual,
                                    periodo_aportacion_annos: int, edad_jubilacion, rentabilidad_anual_esperada):
     """
-    Calcula una estimación de la pensión mensual del SEGUNDO PILAR
-    (previsión social empresarial) separando la aportación del empleador y la aportación voluntaria del empleado,
-    considerando las aportaciones periódicas, la rentabilidad esperada, el factor actuarial (esperanza de vida)
-    y otros factores simplificados.
-
+    Calculates the monthly gross pension from the second pillar (company pensions).
     Args:
-        aportacion_empleador (float): Porcentaje del salario anual aportado periódicamente por el empleador (por ejemplo, 5%).
-        aportacion_empleado_voluntaria (float): Porcentaje del salario anual aportado voluntariamente por el empleado (e.g., 2.0 para 2%).
-        salario_anual (float): Salario anual del empleado.
-        periodo_aportacion_annos (int): Número de años durante los que se realizan las aportaciones.
-        rentabilidad_anual_esperada (float): Rentabilidad anual esperada de las inversiones (en decimal, e.g., 0.05 para 5%).
-        edad_jubilacion (int): Edad de jubilación deseada del empleado.
-    Returns:
-        float: Estimación muy simplificada de la pensión anual del segundo pilar.
-    """
+        aportacion_empleador (float): Employer contribution percentage.
+        aportacion_empleado_voluntaria (float): Employee voluntary contribution percentage.
+        salario_anual (float): Employee annual salary.
+        periodo_aportacion_annos (int): Number of contribution years.
+        edad_jubilacion (int): Employee desired retirement age.
+        rentabilidad_anual_esperada (float): Expected annual investment return (as decimal, e.g., 0.05 for 5%).
 
+    Returns:
+        float: Monthly gross pension from second pillar.
+    """
+    # Ensuring the annual return is a decimal
+    if rentabilidad_anual_esperada * 100 > 100:
+        rentabilidad_anual_esperada /= 100
     esperanza_vida_jubilacion = obtener_esperanza_vida_jub(edad_jubilacion)
     if esperanza_vida_jubilacion <= 0:
         return 0
-    print("Esperanza de vida de jubilación: ", esperanza_vida_jubilacion)
-    capital_acumulado = 0
-    for _ in range(int(periodo_aportacion_annos)):
-        aportacion_anual_empleador = salario_anual * (aportacion_empleador / 100)
-        aportacion_anual_empleado = salario_anual * (aportacion_empleado_voluntaria / 100)
-        aportacion_total_anual = aportacion_anual_empleador + aportacion_anual_empleado
-
-        capital_acumulado += aportacion_total_anual  # Realizar aportación total (empleador + empleado)
-        rendimiento = capital_acumulado * rentabilidad_anual_esperada  # Calcular rendimiento
-        capital_acumulado += rendimiento  # Añadir rendimiento al capital
-    print("Capital acumulado: ", capital_acumulado)
+    aportacion_total_anual = salario_anual * (aportacion_empleador + aportacion_empleado_voluntaria) / 100
+    capital_acumulado = aportacion_total_anual * ((1 + rentabilidad_anual_esperada) ** periodo_aportacion_annos - 1) / rentabilidad_anual_esperada
     pension_2p = capital_acumulado / esperanza_vida_jubilacion
-
     return pension_2p / 12
 
 
 def calcular_pension_tercer_pilar(aportacion_periodica, periodo_aportacion_annos, rentabilidad_anual_esperada,
                                   edad_jubilacion):
-    """Calcula una estimación MUY SIMPLIFICADA de la pensión anual del TERCER PILAR
-    (ahorro individual para la jubilación) considerando las aportaciones periódicas,
-    la rentabilidad esperada, el factor actuarial (esperanza de vida) y otros factores simplificados.
-
-    Esta función esta basada en meras aproximaciones, hay más variables en el cálculo real.
-
+    """
+    Calculates the gross monthly pension from the third pillar (private pension).
     Args:
-        aportacion_periodica (float): Cantidad aportada periódicamente (e.g., anual).
-        periodo_aportacion_annos (int): Número de años durante los que se realizan las aportaciones.
-        rentabilidad_anual_esperada (float): Rentabilidad anual esperada de las inversiones (en decimal, e.g., 0.05 para 5%).
-        edad_jubilacion (int): Edad de jubilación deseada del empleado.
+        aportacion_periodica (float): Annual contribution to the third pillar.
+        periodo_aportacion_annos (int): Number of years of contribution.
+        rentabilidad_anual_esperada (float): Expected annual return (as decimal, e.g. 0.05 for 5%).
+        edad_jubilacion (int): Desired retirement age.
         
     Returns:
-        float: Estimación MUY SIMPLIFICADA de la pensión anual del tercer pilar.
+        float: Gross monthly pension from third pillar.
     """
+    # Ensuring the expected annual return is in decimal format
+    if rentabilidad_anual_esperada * 100 > 100:
+        rentabilidad_anual_esperada /= 100
     esperanza_vida_jubilacion = obtener_esperanza_vida_jub(edad_jubilacion)
-    if esperanza_vida_jubilacion <= 0:
-        return 0
-
-    capital_acumulado = 0
-    for _ in range(int(periodo_aportacion_annos)):
-        capital_acumulado += aportacion_periodica  # Realizar aportación
-        rendimiento = capital_acumulado * rentabilidad_anual_esperada  # Calcular rendimiento
-        capital_acumulado += rendimiento  # Añadir rendimiento al capital
-
+    capital_acumulado = aportacion_periodica * ((1 + rentabilidad_anual_esperada) ** periodo_aportacion_annos - 1) / rentabilidad_anual_esperada
     pension_3p = capital_acumulado / esperanza_vida_jubilacion
-
     return pension_3p / 12
 
 
