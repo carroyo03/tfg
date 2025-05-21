@@ -143,18 +143,20 @@ def estimar_bases_cotizacion(salario_actual, annos_cotizados, num_pagas=14):
 
 
 def calcular_porcentaje_por_meses(meses_cotizados):
-    if meses_cotizados < 180:  # Menos de 15 años
+    if meses_cotizados < 180:
         return 0
-    elif meses_cotizados == 180:  # 15 años
+    elif meses_cotizados == 180:
         return 50
-    elif meses_cotizados <= 300:  # 15 a 25 años
+    elif meses_cotizados <= 229:  
         meses_adicionales = meses_cotizados - 180
-        return 50 + (meses_adicionales * 0.19)
-    elif meses_cotizados <= 438:  # 25 a 36.5 años
-        meses_adicionales = meses_cotizados - 300
-        return 50 + (120 * 0.19) + (meses_adicionales * 0.18)
+        return 50 + (meses_adicionales * 0.21)
+    elif meses_cotizados <= 438: 
+        tramo1 = 49 
+        tramo2 = meses_cotizados - 229
+        return 50 + (tramo1 * 0.21) + (tramo2 * 0.19)
     else:
         return 100
+
 
 
 def actualizar_base_por_ipc(base, ipc):
@@ -414,7 +416,7 @@ def obtener_esperanza_vida_jub(edad_jubilacion):
 def calcular_pension_segundo_pilar(aportacion_empleador, aportacion_empleado_voluntaria, salario_anual,
                                    periodo_aportacion_annos: int, edad_jubilacion, rentabilidad_anual_esperada):
     """
-    Calcula una estimación MUY SIMPLIFICADA de la pensión mensual del SEGUNDO PILAR
+    Calcula una estimación de la pensión mensual del SEGUNDO PILAR
     (previsión social empresarial) separando la aportación del empleador y la aportación voluntaria del empleado,
     considerando las aportaciones periódicas, la rentabilidad esperada, el factor actuarial (esperanza de vida)
     y otros factores simplificados.
