@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from tfg_app.views.login.login_form import AppState
 import reflex as rx
 
+
 class TestLoginForm(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         """Test environment setup."""
@@ -47,7 +48,7 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
 
         # Mock the create_authorization_url method to return the mock URL and state
         with patch("authlib.integrations.httpx_client.AsyncOAuth2Client.create_authorization_url",
-                  return_value=(mock_url, mock_state)):
+                   return_value=(mock_url, mock_state)):
             async def mock_sign_in():
                 """Sign in method to simulate the OAuth2 authorization flow.
                 This method is called when the user clicks the sign-in button.
@@ -60,7 +61,7 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
                 event_spec = MagicMock()
                 event_spec.args = (mock_url,)
                 return event_spec
-            
+
             # Mock the sign_in method to return the mock URL
             self.state.sign_in = AsyncMock(side_effect=mock_sign_in)
 
@@ -74,6 +75,7 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
     async def test_guest_session(self):
         """Check that guest_session sets the state correctly and redirects to the home page.
         """
+
         async def mock_guest_session():
             """Simulate a guest session by setting the state variables to their default values.
 
@@ -90,6 +92,7 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
             event_spec = MagicMock()
             event_spec.args = ("/",)
             return event_spec
+
         self.state.guest_session = AsyncMock(side_effect=mock_guest_session)
 
         # Call the guest_session method and check the results
@@ -105,11 +108,12 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
 
     async def test_handle_authorize_missing_code(self):
         """Check that handle_authorize redirects to /sign-in if the code is missing.
-           If the code is not missing, it checks if the state matches the expected state.       
+           If the code is not missing, it checks if the state matches the expected state.
         """
+
         async def mock_handle_authorize():
             """Simulate a handle_authorize method that checks for the presence of the code and state parameters.
-            If the code or state is missing, it redirects to the sign-in page. 
+            If the code or state is missing, it redirects to the sign-in page.
             If not, it simulates a successful authorization.
 
             Returns:
@@ -127,7 +131,7 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
             event_spec = MagicMock()
             event_spec.args = ("/sign-in",)
             return event_spec
-        
+
         # Mock the handle_authorize method to return the mock URL
         self.state.handle_authorize = AsyncMock(side_effect=mock_handle_authorize)
 
@@ -145,9 +149,10 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
         """Check that handle_authorize redirects to /sign-in if the state does not match.
            If the state matches, it simulates a successful authorization.
         """
+
         async def mock_handle_authorize():
             """Simulate a handle_authorize method that checks for the presence of the code and state parameters.
-            If the state does not match, it redirects to the sign-in page. 
+            If the state does not match, it redirects to the sign-in page.
             If not, it simulates a successful authorization.
 
 
@@ -166,7 +171,7 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
             event_spec = MagicMock()
             event_spec.args = ("/sign-in",)
             return event_spec
-        
+
         # Mock the handle_authorize method to return the mock URL
         self.state.handle_authorize = AsyncMock(side_effect=mock_handle_authorize)
 
@@ -209,7 +214,6 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
                 event_spec.args = ("/sign-in",)
                 return event_spec
 
-
             # Simulate the successful authorization process
             self.state.access_token = mock_token["access_token"]
             self.state.id_token = mock_token["id_token"]
@@ -221,7 +225,7 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
             event_spec = MagicMock()
             event_spec.args = ("/",)
             return event_spec
-        
+
         # Mock the handle_authorize method to return the mock URL
 
         self.state.handle_authorize = AsyncMock(side_effect=mock_handle_authorize)
@@ -230,17 +234,15 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
         self.state.oauth_state = "test_state"
         self.state.router.page.params = {"code": "test_code", "state": "test_state"}
 
-
         # Mock the token exchange and user info retrieval
         with patch("authlib.integrations.httpx_client.AsyncOAuth2Client.fetch_token",
-                  new=AsyncMock(return_value=mock_token)):
+                   new=AsyncMock(return_value=mock_token)):
             with patch("requests.get", return_value=MockResponse({
                 "keys": [{"kid": "test_kid"}]
             })):
                 # Mock the JWT decode function to return the mock user info
                 with patch("jwt.get_unverified_header", return_value={"kid": "test_kid"}):
                     with patch("jose.jwt.decode", return_value=mock_user_info):
-
                         # Call the handle_authorize method and check the results
                         redirect = await self.state.handle_authorize()
                         self.assertIsInstance(redirect, MagicMock)
@@ -262,6 +264,7 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
             f"client_id={self.state.COGNITO_CLIENT_ID}&"
             f"logout_uri={self.state.COGNITO_LOGOUT_URI}"
         )
+
         # Mock the logout method to return the expected URL
         async def mock_logout():
             self.state.signed_in = False
@@ -274,6 +277,7 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
             event_spec = MagicMock()
             event_spec.args = (expected_logout_url,)
             return event_spec
+
         self.state.logout = AsyncMock(side_effect=mock_logout)
 
         # Simulate a user being signed in
@@ -299,6 +303,7 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
         """Check that check_session does not redirect if the user is a guest.
         This test simulates a guest user and checks that the check_session method does not redirect.
         """
+
         async def mock_check_session(redirect_url: str = None):
             """Simulate a check_session method that checks if the user is a guest.
 
@@ -310,6 +315,7 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
             event_spec = MagicMock()
             event_spec.args = ("/sign-in",)
             return event_spec
+
         self.state.check_session = AsyncMock(side_effect=mock_check_session)
 
         self.state.guest = True
@@ -319,15 +325,17 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
     async def test_check_session_no_session(self):
         """Check that check_session redirects to /sign-in if there is no session.
         """
+
         async def mock_check_session(redirect_url: str = None):
             if self.state.guest:
                 return
             if not self.state.signed_in or not self.state.access_token or not self.state.id_token:
-                #Simulate rx.redirect with an EventSpec that contains the path as a string
+                # Simulate rx.redirect with an EventSpec that contains the path as a string
                 event_spec = MagicMock()
                 event_spec.args = ("/sign-in",)
                 return event_spec
             return
+
         self.state.check_session = AsyncMock(side_effect=mock_check_session)
 
         self.state.guest = False
@@ -336,14 +344,17 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(redirect, MagicMock)
         self.assertEqual(redirect.args[0], "/sign-in")
 
+
 class MockResponse:
     """Mock class for simulating HTTP responses.
     """
+
     def __init__(self, json_data):
         self.json_data = json_data
 
     def json(self):
         return self.json_data
+
 
 if __name__ == "__main__":
     unittest.main()
