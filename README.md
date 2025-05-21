@@ -6,7 +6,7 @@
 
 ## Description
 
-This project is a pension simulator developed as part of the Final Degree Project (TFG) in Computer Engineering. The web application allows users to estimate their future pensions by considering the three pillars of the Spanish system: public, employment, and private. Factors such as historical inflation (CPI), contribution gaps, and child-related supplements are taken into account to provide accurate and personalized calculations. The tool is designed to be intuitive, secure, and scalable, meeting usability and accessibility standards (WCAG 2.2).
+This project is a pension simulator developed as part of the Final Degree Project (TFG) in Computer Science. The web application allows users to estimate their future pensions by considering the three pillars of the Spanish system: public, employment, and private. Factors such as historical inflation (CPI), contribution gaps, and child-related supplements are taken into account to provide accurate and personalized calculations. The tool is designed to be intuitive, secure, and scalable, meeting usability and accessibility standards (WCAG 2.2).
 
 The simulator is deployed on Reflex Cloud and integrates with services like AWS Cognito for secure user authentication.
 
