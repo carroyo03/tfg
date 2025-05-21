@@ -65,8 +65,8 @@ DF_CPI = df_cpi.drop(columns=['TIME_PERIOD'], axis=1)[['YEAR', 'MONTH', 'OBS_VAL
                                                                                                   ascending=False).reset_index(
     drop=True)
 
-# Parámetros globales según la normativa de 2024
-COMPLEMENTO_MENSUAL_POR_HIJO = 36.52  # En euros, según normativa de 2024
+
+COMPLEMENTO_MENSUAL_POR_HIJO = 35.90  # En euros, según normativa de 2025
 MAX_HIJOS_APLICABLES = 4
 INCREMENTO_COMPLEMENTO = 1.10
 IPC_PROMEDIO_PRE_1996 = 2.5  # Asumimos un 2.5% de inflación anual antes de 1996
@@ -279,7 +279,7 @@ def calcular_base_reguladora_dual(bases_cotizacion):
     if len(bases_cotizacion) < 29 * 12:
         raise ValueError("No hay suficientes datos para calcular los 29 años de bases cotización.")
     base_25 = sum(bases_cotizacion[-25:]) / DIVISOR_BASE_REG
-    bases_mejoradas = sorted(bases_cotizacion[:-2], reverse=True)[:27]
+    bases_mejoradas = sorted(bases_cotizacion[:-2], reverse=True)[:324]
     base_29 = sum(bases_mejoradas) / DIVISOR_BASE_REG
     return max(base_25, base_29)
 
