@@ -159,7 +159,7 @@ class TestLoginForm(unittest.IsolatedAsyncioTestCase):
             if self.state.oauth_state != state:
                 self.state.signed_in = False
                 self.state.guest = False
-                # Simular rx.redirect con un EventSpec que contiene la URL como cadena
+                # Simulate rx.redirect with an EventSpec that contains the URL as a string
                 event_spec = MagicMock()
                 event_spec.args = ("/sign-in",)
                 return event_spec
