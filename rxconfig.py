@@ -1,6 +1,6 @@
 import reflex as rx
 from dotenv import load_dotenv
-from reflex_components_radix import RadixThemesPlugin
+from reflex_components_radix.plugin import RadixThemesPlugin
 import os
 load_dotenv()
 
