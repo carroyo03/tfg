@@ -84,7 +84,8 @@ class AppState(rx.State):
             raise ValueError(f"Environment variable {key} is not set.")
     
     print("Cognito variables loaded:")
-    print(f"{key}: {value}\n" for key, value in COGNITO_VARIABLES.items())
+    for key, value in COGNITO_VARIABLES.items():
+        print(f"{key}: {value}")
 
     @rx.event
     def sign_in(self):

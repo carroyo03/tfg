@@ -61,9 +61,8 @@ except Exception as e:
 df_cpi['YEAR'] = pd.to_datetime(df_cpi['TIME_PERIOD']).dt.year
 df_cpi['MONTH'] = pd.to_datetime(df_cpi['TIME_PERIOD']).dt.month
 
-DF_CPI = df_cpi.drop(columns=['TIME_PERIOD'], axis=1)[['YEAR', 'MONTH', 'OBS_VALUE']].sort_values(by='YEAR',
-                                                                                                  ascending=False).reset_index(
-    drop=True)
+DF_CPI = df_cpi.drop(columns=['TIME_PERIOD'])[['YEAR', 'MONTH', 'OBS_VALUE']].sort_values(by='YEAR',
+                                                                                  ascending=False).reset_index(drop=True)
 
 
 COMPLEMENTO_MENSUAL_POR_HIJO = 35.90  # En euros, según normativa de 2025
@@ -276,11 +275,32 @@ def calcular_bonificacion_demora(pension_base: float, meses_demora: int):
 
 
 def calcular_base_reguladora_dual(bases_cotizacion):
-    if len(bases_cotizacion) < 29 * 12:
-        raise ValueError("No hay suficientes datos para calcular los 29 años de bases cotización.")
-    base_25 = sum(bases_cotizacion[-25:]) / DIVISOR_BASE_REG
-    bases_mejoradas = sorted(bases_cotizacion[:-2], reverse=True)[:324]
+    # Calculate base using last 25 years and best 29 years (or fallback to available data)
+    months_25 = 25 * 12
+    months_29 = 29 * 12
+
+    total_months = len(bases_cotizacion)
+    if total_months == 0:
+        raise ValueError("No hay datos de bases de cotización disponibles.")
+
+    # Compute base_25 using up to the last `months_25` months available
+    take_25 = min(total_months, months_25)
+    base_25 = sum(bases_cotizacion[-take_25:]) / DIVISOR_BASE_REG
+
+    # Compute base_29 using the best available months up to `months_29`
+    take_29 = min(total_months, months_29)
+    # Select the highest `take_29` months from the available history
+    bases_mejoradas = sorted(bases_cotizacion, reverse=True)[:take_29]
     base_29 = sum(bases_mejoradas) / DIVISOR_BASE_REG
+
+    if total_months < months_29:
+        # Log a warning but don't crash: use the best of what we can compute
+        logger.warning(
+            "Datos de cotización insuficientes para 29 años (necesarios=%d, disponibles=%d). Usando datos disponibles.",
+            months_29,
+            total_months,
+        )
+
     return max(base_25, base_29)
 
 
